@@ -28,7 +28,7 @@ pipeline {
                         wget https://github.com/Percona-QA/package-testing/archive/master.zip
                         unzip master.zip
                         rm -f master.zip
-                        mv "package-testing-master" /package-testing
+                        mv "package-testing-master" package-testing
                         def PS_VERSION = sh(
                           script: """ 
                                  grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
