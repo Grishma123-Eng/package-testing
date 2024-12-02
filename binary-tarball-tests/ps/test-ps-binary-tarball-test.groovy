@@ -25,7 +25,7 @@ pipeline {
                     // Clone the repo and capture PS_VERSION and PS_REVISION
                     def versionData = sh(script: '''
                         git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                        cd package-testing/VERSIONS
+                        cd package-testing
                         PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
                         PS_REVISION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
                         echo "PS_VERSION: ${PS_VERSION}"
