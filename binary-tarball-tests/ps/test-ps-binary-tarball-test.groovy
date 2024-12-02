@@ -55,11 +55,11 @@ pipeline {
                 stage('Ubuntu Noble') {
                     agent {
                         label "min-noble-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
+                        steps {
+                            script {
+                                currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
+                            }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
                             MINIMAL=""
