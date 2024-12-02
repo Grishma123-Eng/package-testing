@@ -22,9 +22,6 @@ pipeline {
             trim: false
         )
     }
-    options {
-        withCredentials(moleculePdpsJenkinsCreds())
-    }
     stages {
         stage("SET PS_VERSION and PS_REVISION") {
             steps {
