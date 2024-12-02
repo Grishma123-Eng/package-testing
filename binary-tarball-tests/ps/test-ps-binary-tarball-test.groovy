@@ -6,16 +6,14 @@ pipeline {
         product_to_test = "${params.product_to_test}"
     }
     parameters {
-        booleanParam(
-            defaultValue: false,
-            name:'BUILD_TYPE_MINIMAL'
-            )
-    }
-    parameters {
         choice(
             choices: ['ps_80', 'ps_84', 'ps_lts_innovation', 'client_test'],
             description: 'Choose the product version to test',
             name: 'product_to_test'
+        )
+        booleanParam(
+            defaultValue: false,
+            name:'BUILD_TYPE_MINIMAL'
         )
         string(
             defaultValue: 'https://github.com/Grishma123-Eng/package-testing.git',
