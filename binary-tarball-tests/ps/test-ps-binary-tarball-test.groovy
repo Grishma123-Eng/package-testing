@@ -2,8 +2,10 @@ pipeline {
     agent {
         label 'docker'
     }
+    environment {
+        product_to_test = "${params.product_to_test}"
+    }
     parameters {
-        PRODUCT_TO_TEST = "${params.PRODUCT_TO_TEST}"
         booleanParam(
             defaultValue: false,
             name:'BUILD_TYPE_MINIMAL'
