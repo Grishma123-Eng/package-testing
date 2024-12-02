@@ -4,7 +4,6 @@ pipeline {
     }
     environment {
         PRODUCT_TO_TEST = "${params.PRODUCT_TO_TEST}"
-        booleanParam(defaultValue: false, name: 'BUILD_TYPE_MINIMAL')
         PS_VERSION = ''  // Declare PS_VERSION as an environment variable
         PS_REVISION = '' // Declare PS_REVISION as an environment variable
     }
@@ -13,6 +12,10 @@ pipeline {
             choices: ['ps_80', 'ps_84', 'ps_lts_innovation', 'client_test'],
             description: 'Choose the product version to test',
             name: 'product_to_test'
+        )
+        booleanParam(
+            defaultValue: false, 
+            name: 'BUILD_TYPE_MINIMAL'
         )
         string(
             defaultValue: 'https://github.com/Grishma123-Eng/package-testing.git',
