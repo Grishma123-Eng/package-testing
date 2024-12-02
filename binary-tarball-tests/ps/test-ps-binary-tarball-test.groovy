@@ -3,17 +3,16 @@ pipeline {
         label 'docker'
     }
     environment {
-        product_to_test = "${params.product_to_test}"
+        PRODUCT_TO_TEST = "${params.PRODUCT_TO_TEST}"
+        booleanParam(defaultValue: false, name: 'BUILD_TYPE_MINIMAL')
+        PS_VERSION = ''  // Declare PS_VERSION as an environment variable
+        PS_REVISION = '' // Declare PS_REVISION as an environment variable
     }
     parameters {
         choice(
             choices: ['ps_80', 'ps_84', 'ps_lts_innovation', 'client_test'],
             description: 'Choose the product version to test',
             name: 'product_to_test'
-        )
-        booleanParam(
-            defaultValue: false,
-            name:'BUILD_TYPE_MINIMAL'
         )
         string(
             defaultValue: 'https://github.com/Grishma123-Eng/package-testing.git',
@@ -37,21 +36,21 @@ pipeline {
 
                     # Get PS_VERSION from the VERSIONS file
                     PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
-                    echo "${PS_VERSION}"
+                    echo "PS_VERSION: ${PS_VERSION}"
 
                     # Get PS_REVISION from the VERSIONS file
                     PS_REVISION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
-                    echo "${PS_REVISION}"
+                    echo "PS_REVISION: ${PS_REVISION}"
                 '''
-                // Capture PS_VERSION and PS_REVISION into Groovy variables
+                // Capture PS_VERSION and PS_REVISION into Groovy environment variables
                 script {
                     // Extract PS_VERSION and PS_REVISION values after running the shell script
-                    PS_VERSION = sh(script: "echo ${PS_VERSION}", returnStdout: true).trim()
-                    PS_REVISION = sh(script: "echo ${PS_REVISION}", returnStdout: true).trim()
+                    env.PS_VERSION = sh(script: "echo ${PS_VERSION}", returnStdout: true).trim()
+                    env.PS_REVISION = sh(script: "echo ${PS_REVISION}", returnStdout: true).trim()
 
                     // Output to Jenkins console
-                    echo "PS_VERSION: ${PS_VERSION}"
-                    echo "PS_REVISION: ${PS_REVISION}"
+                    echo "PS_VERSION: ${env.PS_VERSION}"
+                    echo "PS_REVISION: ${env.PS_REVISION}"
                 }
             }
         }
@@ -63,7 +62,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -93,7 +92,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -123,7 +122,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -153,7 +152,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -183,7 +182,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -213,7 +212,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -243,7 +242,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
@@ -273,7 +272,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                         }
                         sh '''
                             echo ${BUILD_TYPE_MINIMAL}
