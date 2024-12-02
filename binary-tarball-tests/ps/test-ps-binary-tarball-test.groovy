@@ -19,32 +19,34 @@ pipeline {
         )
     }
     stages {
-                stage('SET PS_VERSION and PS_REVISION') {
+        stage('SET PS_VERSION and PS_REVISION') {
             steps {
                 script {
-                    sh '''
-                        rm -rf /package-testing
-                        rm -f master.zip
-                        wget https://github.com/Percona-QA/package-testing/archive/master.zip
-                        unzip master.zip
-                        rm -f master.zip
-                        mv "package-testing-master" package-testing
+                    currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
+                }
+                sh '''
+                    rm -rf /package-testing
+                    rm -f master.zip
+                    wget https://github.com/Percona-QA/package-testing/archive/master.zip
+                    unzip master.zip
+                    rm -f master.zip
+                    mv "package-testing-master" package-testing
                         
-                        def PS_VERSION = sh(
-                        script: """ grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
-                        returnStdout: true
-                        ).trim()
+                    def PS_VERSION = sh(
+                    script: """ grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                    returnStdout: true
+                    ).trim()
 
-                        def PS_REVISION = sh(
-                        script: """ grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
-                        returnStdout: true
-                        ).trim()
+                    def PS_REVISION = sh(
+                    script: """ grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                    returnStdout: true
+                    ).trim()
                         
-                        echo "PS_VERSION: ${PS_VERSION}"
-                        echo "PS_REVISION: ${PS_REVISION}"
+                    echo "PS_VERSION: ${PS_VERSION}"
+                    echo "PS_REVISION: ${PS_REVISION}"
                     '''
                     // Set the build display name
-                    currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
+                              //  currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                 }
             }
         }
