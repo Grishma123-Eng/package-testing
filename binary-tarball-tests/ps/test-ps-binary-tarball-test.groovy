@@ -29,17 +29,16 @@ pipeline {
                         unzip master.zip
                         rm -f master.zip
                         mv "package-testing-master" package-testing
+                        
                         def PS_VERSION = sh(
-                          script: """ 
-                                 grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
-                                 returnStdout: true
-                                 ).trim()
+                        script: """ grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                        returnStdout: true
+                        ).trim()
 
                         def PS_REVISION = sh(
-                        script: """ 
-                                 grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
-                                 returnStdout: true
-                                 ).trim()
+                        script: """ grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                        returnStdout: true
+                        ).trim()
                         
                         echo "PS_VERSION: ${PS_VERSION}"
                         echo "PS_REVISION: ${PS_REVISION}"
