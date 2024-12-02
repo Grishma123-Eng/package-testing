@@ -9,7 +9,7 @@ pipeline {
     }
     parameters {
         choice(
-            choices: ['ps_80', 'ps_84', 'ps_lts_innovation', 'client_test'],
+            choices: ['PS80', 'PS84', 'ps_lts_innovation', 'client_test'],
             description: 'Choose the product version to test',
             name: 'product_to_test'
         )
@@ -27,8 +27,8 @@ pipeline {
                         rm -rf package-testing
                         git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                         cd package-testing
-                        PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
-                        PS_REVISION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
+                        PS_VERSION=$(grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
+                        PS_REVISION=$(grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
                         echo "PS_VERSION: ${PS_VERSION}"
                         echo "PS_REVISION: ${PS_REVISION}"
                         echo PS_VERSION=${PS_VERSION}
