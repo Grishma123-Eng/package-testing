@@ -19,11 +19,12 @@ pipeline {
         )
     }
     stages {
-        stage('SET PS_VERSION and PS_REVISION') {
+                stage('SET PS_VERSION and PS_REVISION') {
             steps {
                 script {
-                    // Clone the repo and capture PS_VERSION and PS_REVISION
-                    def versionData = sh(script: '''
+                    // Remove any existing 'package-testing' directory to avoid clone issues
+                    sh '''
+                        rm -rf package-testing
                         git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                         cd package-testing
                         PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
@@ -32,9 +33,16 @@ pipeline {
                         echo "PS_REVISION: ${PS_REVISION}"
                         echo PS_VERSION=${PS_VERSION}
                         echo PS_REVISION=${PS_REVISION}
+                    '''
+                    
+                    // Capture the output from the shell script and set environment variables
+                    def versionData = sh(script: '''
+                        cd package-testing
+                        echo "PS_VERSION=${PS_VERSION}"
+                        echo "PS_REVISION=${PS_REVISION}"
                     ''', returnStdout: true).trim()
 
-                    // Capture the output and set them as environment variables
+                    // Split the version output and assign to Groovy environment variables
                     def versionOutput = versionData.split("\n")
                     env.PS_VERSION = versionOutput.find { it.startsWith('PS_VERSION') }.split('=')[1].trim()
                     env.PS_REVISION = versionOutput.find { it.startsWith('PS_REVISION') }.split('=')[1].trim()
