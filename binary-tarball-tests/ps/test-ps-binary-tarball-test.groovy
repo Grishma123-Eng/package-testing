@@ -17,43 +17,34 @@ pipeline {
             defaultValue: false, 
             name: 'BUILD_TYPE_MINIMAL'
         )
-        string(
-            defaultValue: 'https://github.com/Grishma123-Eng/package-testing.git',
-            description: 'Repo name',
-            name: 'git_repo',
-            trim: false
-        )
     }
     stages {
-        stage("SET PS_VERSION and PS_REVISION") {
+        stage('SET PS_VERSION and PS_REVISION') {
             steps {
                 script {
-                    // Set the display name of the build
-                    currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                }
-                // Shell script to clone the repo and get the PS_VERSION and PS_REVISION
-                sh '''
-                    # Clone the repository
-                    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                    cd package-testing/VERSIONS
+                    // Clone the repo and capture PS_VERSION and PS_REVISION
+                    def versionData = sh(script: '''
+                        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                        cd package-testing/VERSIONS
+                        PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
+                        PS_REVISION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
+                        echo "PS_VERSION: ${PS_VERSION}"
+                        echo "PS_REVISION: ${PS_REVISION}"
+                        echo PS_VERSION=${PS_VERSION}
+                        echo PS_REVISION=${PS_REVISION}
+                    ''', returnStdout: true).trim()
 
-                    # Get PS_VERSION from the VERSIONS file
-                    PS_VERSION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
-                    echo "PS_VERSION: ${PS_VERSION}"
+                    // Capture the output and set them as environment variables
+                    def versionOutput = versionData.split("\n")
+                    env.PS_VERSION = versionOutput.find { it.startsWith('PS_VERSION') }.split('=')[1].trim()
+                    env.PS_REVISION = versionOutput.find { it.startsWith('PS_REVISION') }.split('=')[1].trim()
 
-                    # Get PS_REVISION from the VERSIONS file
-                    PS_REVISION=$(grep ${PRODUCT_TO_TEST} VERSIONS | awk -F= '{print $2}' | sed 's/"//g')
-                    echo "PS_REVISION: ${PS_REVISION}"
-                '''
-                // Capture PS_VERSION and PS_REVISION into Groovy environment variables
-                script {
-                    // Extract PS_VERSION and PS_REVISION values after running the shell script
-                    env.PS_VERSION = sh(script: "echo ${PS_VERSION}", returnStdout: true).trim()
-                    env.PS_REVISION = sh(script: "echo ${PS_REVISION}", returnStdout: true).trim()
-
-                    // Output to Jenkins console
+                    // Output to Jenkins console for debugging
                     echo "PS_VERSION: ${env.PS_VERSION}"
                     echo "PS_REVISION: ${env.PS_REVISION}"
+                    
+                    // Set the build display name
+                    currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                 }
             }
         }
