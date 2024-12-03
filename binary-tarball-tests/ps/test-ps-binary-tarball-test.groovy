@@ -50,10 +50,10 @@ pipeline {
         stage('Set environmental variable'){
             steps{
                 script {
-                    env.PS_VERSION = "version"
+                    env.PS_VERSION = "${PS_VERSION}"
                     echo "Environment variable set: PS_VERSION=${env.PS_VERSION}"
 
-                    env.PS_REVISION="revision"
+                    env.PS_REVISION="${PS_REVISION}"
                     echo "Environment variable set: PS_VERSION=${env.PS_REVISION}"
                 }
             }
