@@ -22,9 +22,6 @@ pipeline {
         stage('SET PS_VERSION and PS_REVISION') {
             steps {
                 script {
-                    echo "PRODUCT_TO_TEST: ${PRODUCT_TO_TEST}"
-                    echo "PRODUCT_TO_TEST_VER: ${PRODUCT_TO_TEST}_VER"
-
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
