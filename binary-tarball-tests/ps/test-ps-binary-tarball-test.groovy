@@ -24,7 +24,7 @@ pipeline {
                 script {
                     echo "PRODUCT_TO_TEST: ${PRODUCT_TO_TEST}"
                     echo "PRODUCT_TO_TEST_VER: ${PRODUCT_TO_TEST}_VER"
-                    
+
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
@@ -35,17 +35,17 @@ pipeline {
                     '''
                     
                     def PS_VERSION = sh(
-                        script: '''grep ${env.PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                        script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                         returnStdout: true
                         ).trim()
 
                     def PS_REVISION = sh(
-                        script: ''' grep ${env.PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                        script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                         returnStdout: true
                         ).trim()
                 
-                    echo "PS_VERSION: ${env.PS_VERSION}"
-                    echo "PS_REVISION: ${env.PS_REVISION}"
+                    echo "${PS_VERSION}"
+                    echo "${PS_REVISION}"
                     
                 }
             }
