@@ -43,16 +43,17 @@ pipeline {
                 
                     echo "${PS_VERSION}"
                     echo "${PS_REVISION}"
-                    
-                    env.PS_VERSION = "${PS_VERSION}"
-                    echo "Environment variable set: MY_GLOBAL_VAR=${env.PS_VERSION}"
 
-                    env.PS_REVISION = "${PS_REVISION}"
-                    echo "Environment variable set: MY_GLOBAL_VAR=${env.PS_REVISION}"
+                    env.PS_VERSION = version
+                    env.PS_REVISION = revision
+
+                    echo "PS_VERSION set as: ${env.PS_VERSION}"
+                    echo "PS_REVISION set as: ${env.PS_REVISION}"
+                    
                 }
             }
         }
-        
+
         stage('Binary tarball test') {
             parallel {
                 stage('Ubuntu Noble') {
