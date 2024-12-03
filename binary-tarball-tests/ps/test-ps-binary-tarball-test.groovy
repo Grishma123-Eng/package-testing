@@ -92,7 +92,7 @@ pipeline {
                         junit 'package-testing/binary-tarball-tests/ps/report.xml'
                     }
                 }
-                /* stage('Ubuntu Jammy') {
+                stage('Ubuntu Jammy') {
                     agent {
                         label "min-jammy-x64"
                     }
@@ -301,7 +301,7 @@ pipeline {
                             '''
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         } 
-                    } */
+                    } 
                }
           }
      }
