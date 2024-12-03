@@ -11,7 +11,7 @@ pipeline {
         choice(
             choices: ['PS80', 'PS84', 'ps_lts_innovation', 'client_test'],
             description: 'Choose the product version to test',
-            name: 'product_to_test'
+            name: 'PRODUCT_TO_TEST'
         )
         booleanParam(
             defaultValue: false, 
@@ -33,15 +33,15 @@ pipeline {
                     }
 
                 def PS_VERSION = sh(
-                    script: """ grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                    script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                     returnStdout: true
                     ).trim()
 
                 def PS_REVISION = sh(
-                    script: """ grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print $2}' | sed 's/"//g' """,
+                    script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                     returnStdout: true
                     ).trim()
-
+                
                 echo "${PS_VERSION}"
                 echo "${PS_REVISION}"
                     
