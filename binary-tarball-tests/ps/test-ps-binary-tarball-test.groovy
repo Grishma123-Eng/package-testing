@@ -4,8 +4,8 @@ pipeline {
     }
     environment {
         PRODUCT_TO_TEST = "${params.PRODUCT_TO_TEST}"
-        PS_VERSION = ''  // Declare PS_VERSION as an environment variable
-        PS_REVISION = '' // Declare PS_REVISION as an environment variable
+        //PS_VERSION = ''  // Declare PS_VERSION as an environment variable
+        //PS_REVISION = '' // Declare PS_REVISION as an environment variable
     }
     parameters {
         choice(
@@ -44,16 +44,20 @@ pipeline {
                     echo "${PS_VERSION}"
                     echo "${PS_REVISION}"
 
-                    env.PS_VERSION = version
-                    env.PS_REVISION = revision
-
-                    echo "PS_VERSION set as: ${env.PS_VERSION}"
-                    echo "PS_REVISION set as: ${env.PS_REVISION}"
-                    
                 }
             }
         }
+        stage('Set environmental variable'){
+            steps{
+                script {
+                    env.PS_VERSION = "version"
+                    echo "Environment variable set: PS_VERSION=${env.PS_VERSION}"
 
+                    env.PS_REVISION="revision"
+                    echo "Environment variable set: PS_VERSION=${env.PS_REVISION}"
+                }
+            }
+        }
         stage('Binary tarball test') {
             parallel {
                 stage('Ubuntu Noble') {
