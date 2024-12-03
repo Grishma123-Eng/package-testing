@@ -9,7 +9,7 @@ pipeline {
     }
     parameters {
         choice(
-            choices: ['PS80', 'PS84', 'ps_lts_innovation', 'client_test'],
+            choices: ['PS80', 'PS84', 'PS_INN_LTS', 'client_test'],
             description: 'Choose the product version to test',
             name: 'PRODUCT_TO_TEST'
         )
