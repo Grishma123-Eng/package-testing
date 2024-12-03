@@ -31,30 +31,32 @@ pipeline {
                         mv "package-testing-master" package-testing
                     '''
                     
-                    def PS_VERSION = sh(
+                    def VERSION = sh(
                         script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                         returnStdout: true
                         ).trim()
 
-                    def PS_REVISION = sh(
+                    def REVISION = sh(
                         script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                         returnStdout: true
                         ).trim()
-                
-                    echo "${PS_VERSION}"
-                    echo "${PS_REVISION}"
+                    
+    
+                    env.PS_VERSION = VERSION
+                    env.PS_REVISION = REVISION
+
+                    echo "PS_VERSION fetched: ${env.PS_VERSION}"
+                    echo "PS_REVISION fetched: ${env.PS_REVISION}"
 
                 }
             }
         }
         stage('Set environmental variable'){
             steps{
-                script {
-                    env.PS_VERSION = "${PS_VERSION}"
-                    echo "Environment variable set: PS_VERSION=${env.PS_VERSION}"
-
-                    env.PS_REVISION="${PS_REVISION}"
-                    echo "Environment variable set: PS_VERSION=${env.PS_REVISION}"
+                 script {
+                    // Now, you can access these global environment variables
+                    echo "Using PS_VERSION: ${env.PS_VERSION}"
+                    echo "Using PS_REVISION: ${env.PS_REVISION}"
                 }
             }
         }
