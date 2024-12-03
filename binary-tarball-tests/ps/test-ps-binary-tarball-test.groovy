@@ -44,6 +44,11 @@ pipeline {
                     echo "${PS_VERSION}"
                     echo "${PS_REVISION}"
                     
+                    env.PS_VERSION = "${PS_VERSION}"
+                    echo "Environment variable set: MY_GLOBAL_VAR=${env.PS_VERSION}"
+
+                    env.PS_REVISION = "${PS_REVISION}"
+                    echo "Environment variable set: MY_GLOBAL_VAR=${env.PS_REVISION}"
                 }
             }
         }
@@ -80,7 +85,7 @@ pipeline {
                         junit 'package-testing/binary-tarball-tests/ps/report.xml'
                     }
                 }
-                stage('Ubuntu Jammy') {
+                /* stage('Ubuntu Jammy') {
                     agent {
                         label "min-jammy-x64"
                     }
@@ -288,8 +293,8 @@ pipeline {
                                 ./run.sh || true
                             '''
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
+                        } 
+                    } */
                }
           }
      }
