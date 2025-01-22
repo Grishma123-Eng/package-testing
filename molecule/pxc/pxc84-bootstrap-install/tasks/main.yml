@@ -181,7 +181,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-84
+      - percona-xtrabackup-pro-84
       - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
@@ -197,7 +197,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-84
+      - percona-xtrabackup-pro-84
       - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
@@ -214,7 +214,7 @@
       packages:
       - percona-xtradb-cluster-pro-full
       - percona-toolkit
-      - percona-xtrabackup-84
+      - percona-xtrabackup-pro-84
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
@@ -229,7 +229,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-84
+      - percona-xtrabackup-pro-84
     when: 
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
