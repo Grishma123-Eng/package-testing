@@ -181,7 +181,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
@@ -196,7 +195,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
@@ -211,7 +209,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-toolkit
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
