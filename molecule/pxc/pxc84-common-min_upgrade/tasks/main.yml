@@ -100,7 +100,8 @@
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
-  - name: install PXC 8 deb packages arm64 debian
+#---------------------------------------------------------non-pro
+  - name: install PXC 8 deb packages arm64 debian non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -112,11 +113,11 @@
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: install PXC 8 deb packages amd64
+      
+  - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -128,11 +129,11 @@
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install PXC 8 rpm packages amd64
+  - name: install PXC 8 rpm packages amd64 non pro
     yum:
       name: "{{ packages }}"
       state: latest
@@ -144,11 +145,11 @@
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install PXC 8 rpm packages arm OS
+  - name: install PXC 8 rpm packages arm OS non pro
     yum:
       name: "{{ packages }}"
       state: latest
@@ -159,9 +160,75 @@
     when: 
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
+#--------------------------------------------------------------------------------------------
+
+#----------------------------------pro
+  - name: install PXC 8 deb packages arm64 debian pro
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+      - percona-xtrabackup-84
+      - percona-toolkit
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      
+  - name: install PXC 8 deb packages amd64 pro
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+      - percona-xtrabackup-84
+      - percona-toolkit
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages amd64 pro
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+      - percona-toolkit
+      - percona-xtrabackup-84
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages arm OS pro
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+      - percona-xtrabackup-84
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#--------------------------------------------------------------------------------------------
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
