@@ -165,7 +165,6 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
 
-
 #----------------------------------pro
   - name: install PXC 8 deb packages arm64 debian pro
     apt:
@@ -174,7 +173,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-pro-84
       - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
@@ -190,7 +188,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-pro-84
       - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
@@ -207,7 +204,6 @@
       packages:
       - percona-xtradb-cluster-pro-full
       - percona-toolkit
-      - percona-xtrabackup-pro-84
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
@@ -222,7 +218,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-      - percona-xtrabackup-pro-84
     when: 
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
@@ -230,7 +225,6 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
-
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
