@@ -173,7 +173,7 @@
       update_cache: yes
     vars:
       packages:
-      - percona-xtradb-cluster-pro
+      - percona-xtradb-cluster-pro-full
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
@@ -187,7 +187,7 @@
       update_cache: yes
     vars:
       packages:
-      - percona-xtradb-cluster-pro
+      - percona-xtradb-cluster-pro-full
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
@@ -201,7 +201,7 @@
       state: latest
     vars:
       packages:
-      - percona-xtradb-cluster-pro
+      - percona-xtradb-cluster-pro-full
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
@@ -215,7 +215,7 @@
       state: latest
     vars:
       packages:
-      - percona-xtradb-cluster-pro
+      - percona-xtradb-cluster-pro-full
     when: 
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
@@ -223,8 +223,6 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
-
-
 
 
 
