@@ -287,7 +287,7 @@
     debug: var=pxc_version
 
   - name: check PXC 8.4 version Molecule
-    command: /package-testing/version_check.sh pxc84
+    command: /package-testing/version_check.sh pxc84pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Verify telemetry version and package installation
