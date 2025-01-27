@@ -263,7 +263,7 @@
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Molecule
-    command: /package-testing/package_check.sh pxc84pro
+    command: /package-testing/package_check.sh pxc84 pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins
