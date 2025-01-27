@@ -286,6 +286,20 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
+  - name: PRINT WSREP version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
+    register: wsrep_version
+  
+  - name: print WSREP version debug
+    debug: var=wsrep_version
+
+  - name: PRINT INNODB version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
+    register: innod_version
+
+  - name: print INNODB version debug  
+    debug: var=innod_version
+
   - name: check PXC 8.4 version Molecule
     command: /package-testing/version_check.sh pxc84pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
