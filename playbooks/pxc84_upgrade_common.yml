@@ -56,9 +56,9 @@
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "yes"
 
-#---------------------
+#---------------------Upgrade to NON PRO
 
-  - name: upgrade PXC 8.4 to new deb packages
+  - name: upgrade PXC 8.4 to new deb packages NON PRO
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -74,12 +74,14 @@
       - percona-xtradb-cluster-dbg
       - percona-xtradb-cluster-client
       - percona-xtradb-cluster
-    when: ansible_os_family == "Debian"
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade PXC 8.4 to new rpm packages
+  - name: upgrade PXC 8.4 to new rpm packages NON PRO
     yum:
       name: "{{ packages }}"
       state: latest
@@ -93,12 +95,63 @@
       - percona-xtradb-cluster-server
       - percona-xtradb-cluster-full
       - percona-xtradb-cluster-client
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona Server new rpm packages
+
+#-------------------------- UPGRADE TO PRO
+
+
+  - name: upgrade PXC 8.4 to new deb packages PRO
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+      - percona-xtradb-cluster-pro-test
+      - percona-xtradb-cluster-pro-source
+      - percona-xtradb-cluster-pro-server-debug
+      - percona-xtradb-cluster-pro-server
+      - percona-xtradb-cluster-pro-common
+      - percona-xtradb-cluster-pro-dbg
+      - percona-xtradb-cluster-pro-client
+      - percona-xtradb-cluster-pro
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade PXC 8.4 to new rpm packages PRO
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-shared
+      - percona-xtradb-cluster-pro-garbd
+      - percona-xtradb-cluster-pro-test
+      - percona-xtradb-cluster-pro-devel
+      - percona-xtradb-cluster-pro-debuginfo
+      - percona-xtradb-cluster-pro-server
+      - percona-xtradb-cluster-pro-full
+      - percona-xtradb-cluster-pro-client
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+
+  - name: install Percona Server new rpm packages SHARED COMPAT
     yum:
       name: "{{ packages }}"
       state: latest
