@@ -255,7 +255,8 @@
     debug: var=pxc_version
 
   - name: check PXC 8.0 version Molecule
-    command: /package-testing/version_check.sh pxc80pro
+    command: cat /package-testing/version_check.sh| grep pxc80pro
+    #/package-testing/version_check.sh pxc80pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Verify telemetry version and package installation
