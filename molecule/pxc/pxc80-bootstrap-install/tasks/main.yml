@@ -1,3 +1,4 @@
+
 ---
   - name: Fetch the vars from file for install
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
@@ -26,36 +27,37 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
 #-------------non pro
-  - name: include tasks for enabling test repo pxc 80 non pro
+  - name: include tasks for enabling test repo pxc80 non pro
     include_tasks: ../../../../tasks/enable_pxc80_testing_repo.yml
     when:
     - lookup('env', 'install_repo') == "testing" 
     - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo pxc 80 non pro
+  - name: include tasks for enabling main repo pxc80 non pro
     include_tasks: ../../../../tasks/enable_pxc80_main_repo.yml
     when: 
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo pxc 80 non pro
+  - name: include tasks for enabling experimental repo non pro
     include_tasks: ../../../../tasks/enable_pxc80_experimental_repo.yml
     when: 
     - lookup('env', 'install_repo') == "experimental"
     - lookup('env', 'pro') == "no"
 #-----------------pro
 
-  - name: include tasks for enabling test repo pxc 80 pro
+  - name: include tasks for enabling test repo pro pxc80
     include_tasks: ../../../../tasks/enable_pxc80_pro_repo_testing.yml
     when: 
     - lookup('env', 'install_repo') == "testing" 
     - lookup('env', 'pro') == "yes"
 
-  - name: include tasks for enabling main repo pxc 80 pro
+  - name: include tasks for enabling main repo pro pxc80
     include_tasks: ../../../../tasks/enable_pxc80_pro_repo_main.yml
     when: 
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "yes"
+
 #---------------------
 
   - name: install python3-libselinux 
@@ -76,7 +78,38 @@
       flush: yes
     when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
-  #---------------------------------------------------------non-pro
+  - name: Generate required locales
+    command: locale-gen "{{ item }}"
+    loop:
+      - en_US.UTF-8
+      - en_IN.utf8
+    args:
+      creates: "/usr/lib/locale/{{ item }}"
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
+
+  - name: Ensure /etc/default/locale file is updated
+    lineinfile:
+      path: /etc/default/locale
+      create: yes
+      line: "{{ item }}"
+    loop:
+      - 'LANG="en_US.UTF-8"'
+      - 'LC_ALL="en_US.UTF-8"'
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
+
+  - name: Create empty usr.sbin.mysqld.in file to avoid AppArmor error
+    file:
+      path: /etc/apparmor.d/local/usr.sbin.mysqld.in
+      state: touch
+      mode: '0644'
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
+#---------------------------------------------------------non-pro
   - name: install PXC 8 deb packages arm64 debian non pro
     apt:
       name: "{{ packages }}"
@@ -254,9 +287,22 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
+  - name: PRINT WSREP version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
+    register: wsrep_version
+  
+  - name: print WSREP version debug
+    debug: var=wsrep_version
+
+  - name: PRINT INNODB version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
+    register: innod_version
+
+  - name: print INNODB version debug  
+    debug: var=innod_version
+
   - name: check PXC 8.0 version Molecule
-    command: cat /package-testing/version_check.sh| grep pxc80pro
-    #/package-testing/version_check.sh pxc80pro
+    command: /package-testing/version_check.sh pxc80pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Verify telemetry version and package installation
