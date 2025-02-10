@@ -11,29 +11,19 @@
             instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
             skip_instances: false
       rescue:
-        - name: Handle missing molecule_instance_config file
+        - name: Populate instance config when file missing
           set_fact:
-            instance_conf: []
+            instance_conf: {}
             skip_instances: true
-
-    - name: Debug instance config if file missing
-      debug:
-        msg: "The molecule_instance_config file is missing. Skipping instance destruction."
-      when: skip_instances
-
-    - name: Check if instance config exists before proceeding
-      debug:
-        msg: "instance_conf is empty or the file was missing, skipping destruction."
-      when: instance_conf | length == 0
-
+            
     - name: Destroy molecule instance(s)
-      ec2:
+      ec2_instance:
         state: absent
         instance_ids: "{{ item.instance_id }}"
         region: "{{ item.region }}"
       register: server
       with_items: "{{ instance_conf }}"
-      when: instance_conf | length > 0 and not skip_instances
+      when: not skip_instances
       async: 7200
       poll: 0
 
@@ -44,9 +34,9 @@
       until: ec2_jobs.finished
       retries: 300
       with_items: "{{ server.results }}"
-      when: instance_conf | length > 0 and not skip_instances
+      when: not skip_instances
 
-    # Reset instance config
+    # Mandatory configuration for Molecule to function.
     - name: Populate instance config
       set_fact:
         instance_conf: {}
