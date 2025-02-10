@@ -10,11 +10,20 @@
           set_fact:
             instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
             skip_instances: false
+        - name: Debug instance config
+          debug:
+            var: instance_conf
       rescue:
-        - name: Populate instance config when file missing
+        - name:  Handle missing molecule_instance_config file
+          debug:
+            msg: "The molecule_instance_config file is missing. Skipping instance destruction."
           set_fact:
-            instance_conf: {}
+            instance_conf: []
             skip_instances: true
+    - name: Check if instance config exists before proceeding
+      debug:
+        msg: "instance_conf is empty or the file was missing, skipping destruction."
+      when: instance_conf | length == 0
 
     - name: Destroy molecule instance(s)
       ec2_instance:
