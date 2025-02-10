@@ -27,7 +27,7 @@
       when: instance_conf | length == 0
 
     - name: Destroy molecule instance(s)
-      ec2:
+      amazon.aws.ec2:
         state: absent
         instance_ids: "{{ item.instance_id }}"
         region: "{{ item.region }}"
