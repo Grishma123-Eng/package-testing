@@ -6,11 +6,11 @@ driver:
 platforms:
   - name: al2023-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image:  ami-093a4ad9a8cc370f4
-    vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.small
+    image:  ami-0005ee01bca55ab66
+    vpc_subnet_id: vpc-09d0442cdd2213754
+    instance_type: t2.medium
     ssh_user: ec2-user
-    root_device_name: /dev/sda1
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
