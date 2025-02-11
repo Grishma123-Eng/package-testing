@@ -37,9 +37,7 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - (ansible_os_family == "RedHat")
-    - or 
-    - (ansible_distribution == "Amazon" and ansible_distribution_version == "2023")
+    - ansible_os_family == "RedHat" or (ansible_distribution == "Amazon" and ansible_distribution_version == "2023")
 
 - name: enable the tools repo
   command: percona-release enable tools 
