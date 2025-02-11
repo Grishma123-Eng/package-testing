@@ -22,20 +22,20 @@
   - name: get list of enabled dnf modules on Amazon
     command: dnf module list --enabled
     register: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    when: ansible_distribution == "Amazon" 
 
   - name: list enabled dnf modules on Amazon 
     debug:
       var: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    when: ansible_distribution == "Amazon" 
 
   - name: Disable MySQL module on Amazon Linux 2023
     command: dnf module disable mysql -y
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    when: ansible_distribution == "Amazon" 
 
   - name: Disable MariaDB module on Amazon Linux 2023
     command: dnf module disable mariadb -y
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    when: ansible_distribution == "Amazon" 
 
   - name: install Percona Server pro packages AMAZON
     yum:
@@ -52,7 +52,7 @@
       - percona-server{{ pro_suf | default('') }}-debuginfo
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    when: ansible_distribution == "Amazon" 
     environment:
       PERCONA_TELEMETRY_URL:  "https://check-dev.percona.com/v1/telemetry/GenericReport"
 

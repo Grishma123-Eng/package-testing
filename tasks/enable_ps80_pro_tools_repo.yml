@@ -8,7 +8,7 @@
 
 - name: Install percona release Amazon
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: ansible_os_family == "Amazon" and ansible_distribution_version == "2023"
+  when: ansible_os_family == "Amazon" 
 
 - name: Install percona release RHEL
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
@@ -37,7 +37,7 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - ansible_os_family == "RedHat" or (ansible_distribution == "Amazon" and ansible_distribution_version == "2023")
+    - ansible_os_family == "RedHat" or (ansible_distribution == "Amazon")
 
 #- name: enable the tools repo
  # command: percona-release enable tools 
