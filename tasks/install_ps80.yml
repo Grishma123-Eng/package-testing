@@ -18,6 +18,33 @@
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+  
+  - name: Disable MySQL module on Amazon Linux 2023
+    command: dnf module disable mysql -y
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
+  - name: Disable MariaDB module on Amazon Linux 2023
+    command: dnf module disable mariadb -y
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
+  - name: install Percona Server pro packages AMAZON
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+    environment:
+      PERCONA_TELEMETRY_URL:  "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
@@ -57,6 +84,7 @@
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
+  
   - name: install Percona Server rpm packages RHEL7
     yum:
       name: "{{ packages }}"
@@ -75,6 +103,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
 
   - name: install Percona Server rpm packages RHEL8+
     yum:
