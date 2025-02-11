@@ -18,7 +18,17 @@
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-  
+
+  - name: get list of enabled dnf modules on Amazon
+    command: dnf module list --enabled
+    register: enabled_dnf_modules
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
+  - name: list enabled dnf modules on Amazon 
+    debug:
+      var: enabled_dnf_modules
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
   - name: Disable MySQL module on Amazon Linux 2023
     command: dnf module disable mysql -y
     when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
