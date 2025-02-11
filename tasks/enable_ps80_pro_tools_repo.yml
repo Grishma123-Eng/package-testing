@@ -39,13 +39,8 @@
   when:
     - ansible_os_family == "RedHat" or (ansible_distribution == "Amazon" and ansible_distribution_version == "2023")
 
-- name: enable the tools repo
-  command: percona-release enable tools 
-
-- name: Disable the tools repo for amazon
-  command: percona-release disable tools 
-  when:
-    - ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+#- name: enable the tools repo
+ # command: percona-release enable tools 
 
 
 
