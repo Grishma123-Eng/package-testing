@@ -6,11 +6,19 @@
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian"
 
+- name: Install percona release Amazon
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  when: ansible_distribution == "Amazon" and ansible_facts.packages['percona-release'] is not defined
 
 
 - name: Install percona release RHEL and Amazon
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: (ansible_os_family == "RedHat") or  (ansible_distribution == "Amazon")
+  when: (ansible_os_family == "RedHat") and ansible_facts.packages['percona-release'] is not defined
+
+- name: Import Percona GPG key
+  rpm_key:
+    key: https://repo.percona.com/percona-release.gpg
+  when: ansible_os_family == "RedHat"
 
 - name: add pro repository on debian
   template: src=../templates/pro_deb_repo_file_ps80.j2
