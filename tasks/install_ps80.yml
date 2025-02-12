@@ -19,43 +19,6 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: get list of enabled dnf modules on Amazon
-    command: dnf module list --enabled
-    register: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" 
-
-  - name: list enabled dnf modules on Amazon 
-    debug:
-      var: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" 
-
-  - name: Disable MySQL module on Amazon Linux 2023
-    command: dnf module disable mysql -y
-    when: ansible_distribution == "Amazon" 
-
-  - name: Disable MariaDB module on Amazon Linux 2023
-    command: dnf module disable mariadb -y
-    when: ansible_distribution == "Amazon" 
-
-  - name: install Percona Server pro packages AMAZON
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-    when: ansible_distribution == "Amazon" 
-    environment:
-      PERCONA_TELEMETRY_URL:  "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
     register: enabled_dnf_modules
@@ -94,6 +57,24 @@
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
+  - name: install Percona Server pro packages AMAZON
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when: ansible_distribution == "Amazon" 
+    environment:
+      PERCONA_TELEMETRY_URL:  "https://check-dev.percona.com/v1/telemetry/GenericReport"
   
   - name: install Percona Server rpm packages RHEL7
     yum:
