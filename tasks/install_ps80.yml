@@ -54,8 +54,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version == "9"
-      - ansible_distribution_major_version == "2023"
+      - (ansible_distribution_major_version == "9" or ansible_distribution_major_version == "2023")
       - ansible_architecture != "aarch64"
   
   - name: install Percona Server rpm packages RHEL7
