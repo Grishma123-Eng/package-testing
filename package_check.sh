@@ -63,6 +63,7 @@ elif [ $1 = "pxc80" ]; then
   version=${PXC80_VER}
   release=${PXC80_VER#*-}
   revision=${PXC80_REV}
+<<<<<<< HEAD
 elif [ $1 = "pxc80" ]; then
   if [ "$2" = "pro" ]; then
     version=${PXC80PRO_VER}
@@ -74,6 +75,20 @@ elif [ $1 = "pxc80" ]; then
     revision=${PXC80_REV}
   fi
 elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
+=======
+elif [ $1 = "pxc84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PXC84PRO_VER}
+    release=${PXC84PRO_VER#*-}
+    revision=${PXC84PRO_REV}
+  else
+    version=${PXC84_VER}
+    release=${PXC84_VER#*-}
+    revision=${PXC84_REV}
+  fi
+
+elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
+>>>>>>> dce09c4007f807da156f24dd8cc82c04f28a7684
   version=${PXC_INN_LTS_VER}
   release=${PXC_INN_LTS_VER#*-}
   revision=${PXC_INN_LTS_REV}

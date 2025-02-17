@@ -73,12 +73,21 @@ elif [ "$1" = "pxc84" ]; then
   revision=${PXC84_REV}
   innodb_ver=${PXC84_INNODB}
   wsrep=${PXC84_WSREP}
+<<<<<<< HEAD
 elif [ "$1" = "pxc80pro" ]; then
   version=${PXC80PRO_VER%-*}
   release=${PXC80PRO_VER#*-}
   revision=${PXC80PRO_REV}
   innodb_ver=${PXC80PRO_INNODB}
   wsrep=${PXC80PRO_WSREP}
+=======
+elif [ "$1" = "pxc84pro" ]; then
+  version=${PXC84PRO_VER%-*}
+  release=${PXC84PRO_VER#*-}
+  revision=${PXC84PRO_REV}
+  innodb_ver=${PXC84PRO_INNODB}
+  wsrep=${PXC84PRO_WSREP}
+>>>>>>> dce09c4007f807da156f24dd8cc82c04f28a7684
 elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER%-*}
   release=${PXC_INN_LTS_VER#*-}
