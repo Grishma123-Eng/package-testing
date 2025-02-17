@@ -76,6 +76,18 @@
    # environment:
     #  PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
+  - name: Display OS Family
+    debug:
+        msg: "OS Family: {{ ansible_os_family }}"
+
+  - name: Display OS Distribution
+    debug:
+        msg: "OS Family: {{ ansible_distribution }}"
+
+  - name: Display Distribution Major Version
+    debug:
+        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
+
   - name: install Percona Server rpm packages Amazon
     yum:
       name: "{{ packages }}"
@@ -95,19 +107,6 @@
         - ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  
-  - name: Display OS Family
-    debug:
-        msg: "OS Family: {{ ansible_os_family }}"
-
-  - name: Display OS Distribution
-    debug:
-        msg: "OS Family: {{ ansible_distribution }}"
-
-  - name: Display Distribution Major Version
-    debug:
-        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
 
 
   - name: install Percona Server rpm packages RHEL8+
