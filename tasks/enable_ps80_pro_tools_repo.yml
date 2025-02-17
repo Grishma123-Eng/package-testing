@@ -40,8 +40,10 @@
   when:
     - ansible_os_family == "RedHat"
 
-- name: enable the tools repo
-  command: percona-release enable-only tools
+#- name: enable the tools repo
+#  command: percona-release enable-only tools
+#  when:
+#     - ansible_os_family == "RedHat" and ansible_distribution =! "Amazon"
 
 - name: clean and update yum cache
   shell: |
