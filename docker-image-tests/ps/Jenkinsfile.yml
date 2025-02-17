@@ -8,7 +8,7 @@
         - git:
             url: https://github.com/Percona-QA/package-testing.git
             branches:
-            - 'master'
+            - 'pxc-final'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: docker-image-tests/ps/Jenkinsfile
