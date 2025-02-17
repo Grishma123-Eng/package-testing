@@ -47,7 +47,7 @@
       - ansible_distribution_major_version == "9"
       - ansible_architecture == "aarch64"
 
-  - name: Install libgflags-dev for rhel9 and amazon amd64
+  - name: Install libgflags-dev for rhel9
     yum:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
@@ -93,10 +93,21 @@
       - percona-server-rocksdb{{ pro_suf | default('') }}
     when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution == "Amazon"
-        - ansible_distribution_major_version == "2023"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  
+  - name: Display OS Family
+    debug:
+        msg: "OS Family: {{ ansible_os_family }}"
+
+  - name: Display OS Distribution
+    debug:
+        msg: "OS Family: {{ ansible_distribution }}"
+
+  - name: Display Distribution Major Version
+    debug:
+        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
 
 
   - name: install Percona Server rpm packages RHEL8+

@@ -1,20 +1,19 @@
 - name: include playbook for removing Percona repo
   include_tasks: remove_percona_repository.yml
 
+
 - name: Install percona release Debian
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian"
 
 #- name: Install percona release RHEL
-  #command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  #when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+#  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+#  when: ansible_os_family == "RedHat"
 
 - name: Install percona release Amazon
-  command: sudo dnf install https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm -y
-  when: ansible_os_family == "RedHat" 
-
-
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  when: ansible_os_family == "RedHat"
 
 - name: add pro repository on debian
   template: src=../templates/pro_deb_repo_file_ps80.j2
@@ -39,12 +38,10 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - ansible_os_family == "RedHat" 
+    - ansible_os_family == "RedHat"
 
-#- name: enable the tools repo
- # command: percona-release enable tools 
-
-
+- name: enable the tools repo
+  command: percona-release enable-only tools
 
 - name: clean and update yum cache
   shell: |
