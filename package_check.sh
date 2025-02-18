@@ -63,7 +63,6 @@ elif [ $1 = "pxc80" ]; then
   version=${PXC80_VER}
   release=${PXC80_VER#*-}
   revision=${PXC80_REV}
-<<<<<<< HEAD
 elif [ $1 = "pxc80" ]; then
   if [ "$2" = "pro" ]; then
     version=${PXC80PRO_VER}
@@ -75,7 +74,7 @@ elif [ $1 = "pxc80" ]; then
     revision=${PXC80_REV}
   fi
 elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
-=======
+
 elif [ $1 = "pxc84" ]; then
   if [ "$2" = "pro" ]; then
     version=${PXC84PRO_VER}
