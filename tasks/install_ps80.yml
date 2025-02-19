@@ -37,24 +37,6 @@
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: get list of enabled dnf modules on amazon
-    command: dnf module list --enabled
-    register: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" 
-    
-  - name: list enabled dnf modules on amazon
-    debug:
-      var: enabled_dnf_modules
-    when: ansible_distribution == "Amazon" 
-
-  - name: disable the mysql module on amazon
-    command: yum module disable mysql -y
-    when: ansible_distribution == "Amazon" 
-
-  - name: disable the mariadb module on amazon
-    command: yum module disable mariadb -y
-    when: ansible_distribution == "Amazon"
-
   - name: Install libgflags-dev for rhel9 aarm64
     yum:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
