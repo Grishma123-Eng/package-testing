@@ -57,42 +57,11 @@
       - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon")
       - ansible_architecture != "aarch64"
   
-  #- name: install Percona Server rpm packages RHEL7
-  #  yum:
-  #    name: "{{ packages }}"
-  #    state: latest
-   #   disablerepo: "epel"
-  #    update_cache: yes
-  #  vars:
-   #   packages:
-   #   - percona-server-server{{ pro_suf | default('') }}
-    #  - percona-mysql-router{{ pro_suf | default('') }}
-    #  - percona-server-client{{ pro_suf | default('') }}
-    #  - percona-server-test{{ pro_suf | default('') }}
-    #  - percona-server{{ pro_suf | default('') }}-debuginfo
-     ## - percona-server-devel{{ pro_suf | default('') }}
-    #  - percona-server-rocksdb{{ pro_suf | default('') }}
-   # when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
-   # environment:
-    #  PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: Display OS Family
-    debug:
-        msg: "OS Family: {{ ansible_os_family }}"
-
-  - name: Display OS Distribution
-    debug:
-        msg: "OS Family: {{ ansible_distribution }}"
-
-  - name: Display Distribution Major Version
-    debug:
-        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
-
   - name: install Percona Server rpm packages Amazon
     yum:
       name: "{{ packages }}"
       state: latest
-      #disablerepo: "epel"
+      disablerepo: "epel"
       update_cache: yes
     vars:
       packages:
@@ -108,6 +77,27 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
+
+  - name: install Percona Server rpm packages RHEL7
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+ 
 
   - name: install Percona Server rpm packages RHEL8+
     yum:
