@@ -17,12 +17,4 @@
     debug:
       var: installed_packages
     when: ansible_os_family == "RedHat"
-  - name: get list of installed packages on Amazon Linux 2023
-    shell: dnf list installed | grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
-    register: installed_packages
-    when: ansible_distribution == "Amazon"
-
-  - name: list installed packages on Amazon Linux 2023
-    debug:
-      var: installed_packages
-    when: ansible_distribution == "Amazon" 
+ 
