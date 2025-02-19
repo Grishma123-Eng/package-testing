@@ -29,6 +29,8 @@ if [ -f /etc/redhat-release ]; then
     OS="RedHat"
 elif [ -f /etc/debian_version ]; then
     OS="Debian"
+elif [ -f /etc/os-release ] && grep -q "Amazon Linux" /etc/os-release; then
+    OS="AmazonLinux"
 else
     echo "Unsupported OS."
     exit 1
