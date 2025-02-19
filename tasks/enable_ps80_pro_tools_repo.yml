@@ -40,10 +40,15 @@
   when:
     - ansible_os_family == "RedHat"
 
-#- name: enable the tools repo
-#  command: percona-release enable-only tools
-#  when:
-#     - ansible_os_family == "RedHat" and ansible_distribution =! "Amazon"
+- name: enable pro repo
+  command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=XvjPyxZc0rWyMVWyg30mdOAmC4twLWKj
+  when:
+    - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+
+- name: enable the tools repo
+  command: percona-release enable-only tools
+  when:
+     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: clean and update yum cache
   shell: |
