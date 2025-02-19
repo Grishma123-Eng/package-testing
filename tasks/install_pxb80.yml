@@ -35,15 +35,3 @@
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon" 
-
-  
-  - name: install Percona XtraBackup amazon packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-    when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon" 
