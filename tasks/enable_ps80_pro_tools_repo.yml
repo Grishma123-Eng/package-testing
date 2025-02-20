@@ -41,7 +41,7 @@
     - ansible_os_family == "RedHat"
 
 - name: enable pro repo
-  command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=XvjPyxZc0rWyMVWyg30mdOAmC4twLWKj
+  command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
   when:
     - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
