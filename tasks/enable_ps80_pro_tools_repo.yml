@@ -12,7 +12,7 @@
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: Install percona release Amazon
-  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/experimental/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
   when: ansible_os_family == "RedHat"
 
 - name: add pro repository on debian
@@ -44,12 +44,6 @@
   command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=XvjPyxZc0rWyMVWyg30mdOAmC4twLWKj
   when:
     - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-
-- name: install pxb80 release for amazon
-  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/experimental/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
-  when:
-   - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-
    
 - name: enable the tools repo
   command: percona-release enable-only tools
