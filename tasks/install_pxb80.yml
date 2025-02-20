@@ -22,4 +22,4 @@
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon" 
+    when: ansible_os_family == "RedHat" 
