@@ -148,21 +148,29 @@
     vars:
       repo_type: testing
       repo_name: pt
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: 
+    - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    - ansible_distribution != "Amazon"
+
 
   - name: include tasks for enabling "{{ repo_name }}" main repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_type: release
       repo_name: pt
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+    - lookup('env', 'install_repo') == "main"
+    - ansible_distribution != "Amazon"
 
   - name: include tasks for enabling  "{{ repo_name }}" experimental repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_type: experimental
       repo_name: pt
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - ansible_distribution != "Amazon"
+ 
 
   - name: include tasks for pt installation
     include_tasks: ../tasks/install_pt.yml
