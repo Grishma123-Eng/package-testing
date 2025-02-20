@@ -22,16 +22,4 @@
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon" 
+    when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon" 

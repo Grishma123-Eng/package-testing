@@ -45,6 +45,12 @@
   when:
     - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
+- name: enable pxb80 repo for amazon
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/experimental/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  when:
+   - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023
+
+   
 - name: enable the tools repo
   command: percona-release enable-only tools
   when:
