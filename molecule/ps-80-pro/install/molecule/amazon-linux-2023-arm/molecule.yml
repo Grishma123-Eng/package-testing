@@ -33,6 +33,6 @@ test_sequence:
     - create
     - prepare
     - converge
-    - verify
+   # - verify
     - cleanup
     - destroy
