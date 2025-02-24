@@ -26,12 +26,13 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: Run molecule --version and capture the output
+  - name: checking molecule version
     command: molecule --version
     register: molecule_version_output
-    changed_when: false  # Avoid marking the task as "changed"
+
+  - name: Display the molecule version
     debug:
-        msg: "Molecule version: {{ molecule_version_output.stdout }}"
+      msg: "Molecule version: {{ molecule_version_output.stdout }}"
 
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
