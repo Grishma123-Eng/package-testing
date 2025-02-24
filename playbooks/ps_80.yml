@@ -27,7 +27,7 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: checking molecule version
-    command: molecule --version
+    command: ansible --version
     register: molecule_version_output
 
   - name: Display the molecule version
