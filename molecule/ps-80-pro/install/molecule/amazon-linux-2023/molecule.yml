@@ -36,8 +36,3 @@ scenario:
     - verify
     - cleanup
     - destroy
-
-
-
-
-ami-0c7104b910fd5acb5
