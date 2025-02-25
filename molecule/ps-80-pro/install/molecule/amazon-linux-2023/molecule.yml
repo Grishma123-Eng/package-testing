@@ -27,7 +27,7 @@ scenario:
   name: amazon-linux-2023
 destroy_sequence:
     - destroy
-cleanup_sequence:
+clenup_sequence:
     - cleanup
 test_sequence:
     - create
