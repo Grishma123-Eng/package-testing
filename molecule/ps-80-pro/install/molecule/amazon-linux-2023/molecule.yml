@@ -1,4 +1,3 @@
-0d74b228c8db12dc9
 ---
 dependency:
   name: galaxy
@@ -30,6 +29,7 @@ destroy_sequence:
 clenup_sequence:
     - cleanup
 test_sequence:
+    - destroy
     - create
     - prepare
     - converge
