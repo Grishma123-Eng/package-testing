@@ -24,12 +24,12 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 scenario:
   name: amazon-linux-2023
-destroy_sequence:
-    - destroy
+#destroy_sequence:
+ #   - destroy
 clenup_sequence:
     - cleanup
 test_sequence:
-    - destroy
+    #- destroy
     - create
     - prepare
     - converge
