@@ -13,13 +13,15 @@
         exclusive: False
       when: ansible_distribution == "CentOS"
 
-    - name: Setup SSH keys for Oracle Linux or Amazon
+    - name: Setup SSH keys for Oracle Linux/Amazon/RHEL
       authorized_key:
         user: ec2-user
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "OracleLinux") or (ansible_distribution == "Amazon")
+      when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
+            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no") or
+            (ansible_distribution == "RedHat" and lookup('env', 'DESTROY_ENV') == "no")
 
     - name: Setup SSH keys Debian
       authorized_key:
