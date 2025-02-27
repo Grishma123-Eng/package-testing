@@ -40,10 +40,31 @@
   when:
     - ansible_os_family == "RedHat"
 
-- name: enable pro repo
-  command: sudo percona-release enable ps-80-pro release --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
-  when:
-    - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+- name: Add repository to DNF (Amazon Linux 2023)
+  command: "dnf config-manager --add-repo /etc/yum.repos.d/psmysql-pro.repo"
+  when: ansible_distribution == "Amazon"
+
+- name: Force DNF to refresh repositories
+  command: "dnf makecache"
+  when: ansible_distribution == "Amazon"
+
+- name: Enable the repository (Amazon Linux 2023)
+  command: "dnf config-manager --set-enabled ps-80-pro"
+  when: ansible_distribution == "Amazon"
+
+- name: Verify repository is enabled
+  command: "dnf repolist --all | grep ps"
+  register: repo_check
+  changed_when: false
+  when: ansible_distribution == "Amazon"
+
+- debug:
+   var: repo_check.stdout    
+
+#- name: enable pro repo
+#  command: sudo percona-release enable ps-80-pro release --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
+ # when:
+ #   - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
    
 - name: enable the tools repo
   command: percona-release enable-only tools
