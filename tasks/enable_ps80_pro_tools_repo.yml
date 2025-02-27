@@ -38,16 +38,12 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - ansible_os_family == "RedHat" or ansible_distribution == "Amazon"
+    - ansible_os_family == "RedHat"
 
-- name: Enable the repository (Amazon Linux 2023)
-  command: "dnf config-manager --set-enabled ps-80-pro"
-  when: ansible_distribution == "Amazon"
-
-#- name: enable pro repo
- # command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
- # when:
-  #  - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+- name: enable pro repo
+  command: sudo percona-release enable ps-80-pro release --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
+  when:
+    - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
    
 - name: enable the tools repo
   command: percona-release enable-only tools
