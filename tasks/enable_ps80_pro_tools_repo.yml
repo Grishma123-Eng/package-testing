@@ -44,16 +44,10 @@
   command: "dnf config-manager --set-enabled ps-80-pro"
   when: ansible_distribution == "Amazon"
 
-- name: Need to fail the task for debug
-  command: sudo wget https://abc/
-  register: wget_result
-  failed_when: wget_result.rc != 0  # Fail if return code is not 0
-  when: ansible_distribution == "Amazon"
-
-- name: enable pro repo
-  command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
-  when:
-    - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+#- name: enable pro repo
+ # command: sudo percona-release enable ps-80-pro testing --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
+ # when:
+  #  - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
    
 - name: enable the tools repo
   command: percona-release enable-only tools
