@@ -38,28 +38,40 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - ansible_os_family == "RedHat"
+    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
-- name: Add repository to DNF (Amazon Linux 2023)
-  command: "dnf config-manager --add-repo /etc/yum.repos.d/psmysql-pro.repo"
+- name: Get release version for Amazon Linux
+  shell: "source /etc/os-release && echo $VERSION_ID"
+  register: release_version
+  changed_when: false
   when: ansible_distribution == "Amazon"
 
-- name: Force DNF to refresh repositories
-  command: "dnf makecache"
+- name: Debug release version
+  debug:
+    msg: "Resolved releasever is: {{ release_version.stdout }}"
   when: ansible_distribution == "Amazon"
 
-- name: Enable the repository (Amazon Linux 2023)
-  command: "dnf config-manager --set-enabled ps-80-pro"
+- name: Add Pro Repository on Amazon Linux 2023
+  template: 
+    src: ../templates/pro_rpm_repo_file_ps80.j2
+    dest: /etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"  # Use extracted release version
   when: ansible_distribution == "Amazon"
 
-- name: Verify repository is enabled
-  command: "dnf repolist --all | grep ps"
-  register: repo_check
+- name: Verify repository file
+  command: cat /etc/yum.repos.d/psmysql-pro.repo
+  register: repo_content
   changed_when: false
   when: ansible_distribution == "Amazon"
 
 - debug:
-   var: repo_check.stdout    
+    var: repo_content.stdout
+  when: ansible_distribution == "Amazon"
+    
 
 #- name: enable pro repo
 #  command: sudo percona-release enable ps-80-pro release --user_name=chaos --repo_token=inn4xNfXNLRYeb74zYHc8gPmJMCNbRVr
