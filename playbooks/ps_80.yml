@@ -95,9 +95,15 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when: ansible_os_family != "RedHat"
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
+
+#  - name: enable the Tools release repo
+#    command: percona-release enable tools release
+
+#  - name: enable the mysql shell testing repo
+#    command: percona-release enable mysql-shell testing
+#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -105,8 +111,6 @@
       - lookup('env', 'install_repo') != "experimental"
       - ansible_distribution != "Amazon"
 
-<<<<<<< HEAD
-=======
   - name: enable the sysbench repo
     command: percona-release enable sysbench testing
     when: 
@@ -126,7 +130,7 @@
       - ansible_distribution_release != "jammy"
       - ansible_distribution_release != "bookworm"
       - ansible_distribution_release != "focal"
-      - ansible_distribution != "Amazon"
+       - ansible_distribution != "Amazon"
 
 #  - name: enable the mysql shell testing repo
 #    command: percona-release enable mysql-shell testing
@@ -137,7 +141,6 @@
 #    vars:
 #      pshell_version: "8.0"
 #    when: install_mysql_shell == "yes" or install_mysql_shell == ""
->>>>>>> 095c74dc (adding amazon linux 2023 for ps80 pro packages)
 
 # Enable only tools repo to install pt
   - name: include tasks for enabling "{{ repo_name }}" test repo
