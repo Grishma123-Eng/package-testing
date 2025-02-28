@@ -32,13 +32,31 @@ def set_pro_fips_vars():
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
     source_environment_file()
-    pro = True if os.getenv('PRO') == "yes" else False
+
+    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
+    pro = value in {"yes", "true", "1"}
+    
+    print(pro)  # True if value is "yes", "true", or "1", otherwise False
+
     fips_supported = True if os.getenv('PRO') == "yes" else False    
     #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
-    base_dir = '/usr/percona-server'
+
+
+    if (os.getenv('PRO')):
+      base_dir = '/usr/percona-server'
+      print(f"PRINTING THE PRO VALUE PRO: {pro}")
+    else:
+      base_dir = os.getenv('BASE_DIR')
+
+
+    if pro:
+      print(f"TRUE PRO VAR WORKING")
+    else:
+      print(f"FALSE PRO VAR NOT WORKING")
+
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
