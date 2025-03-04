@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: ol-9
+  name: al2023
 dependency:
   name: galaxy
 driver:
