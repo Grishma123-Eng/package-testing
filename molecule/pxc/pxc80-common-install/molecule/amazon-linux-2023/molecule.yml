@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: al2023
+  name: amazon-linux-2023
 dependency:
   name: galaxy
 driver:
