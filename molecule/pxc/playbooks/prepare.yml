@@ -82,7 +82,7 @@
 
     - name: setup epel release for amazon linux 2
       shell: amazon-linux-extras install epel -y
-      when: ansible_distribution == "Amazon"
+      when: ansible_distribution == "Amazon" and ansible_distribution_major_version != "2023"
 
     - name: Remove any line containing 'backports' in sources.list
       lineinfile:
@@ -175,7 +175,7 @@
       service:
         name: firewalld
         state: stopped
-      when: ansible_os_family == "RedHat"
+      when: ansible_os_family == "RedHat" and  ansible_distribution != "Amazon"
       #and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
 
     - name: Setup SSH keys for RedHat
