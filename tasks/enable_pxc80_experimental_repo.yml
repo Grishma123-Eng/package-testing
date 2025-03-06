@@ -14,6 +14,10 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
+  - name: Install percona release Amazon
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+    when: ansible_distribution == "Amazon"  
+
   - name: change the default repo to experimental
     command: percona-release enable-only pxc-80 experimental
 
