@@ -41,4 +41,4 @@
             - 'pxc-final'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: binary-tarball-tests/pxc/test-pxc-binary-tarball.groovy
+      script-path: binary-tarball-tests/pxc/test-pxc-binary-tarball-pro.groovy
