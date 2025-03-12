@@ -130,7 +130,7 @@ void run_test() {
   withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
-    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION} | awk -F'[.]' '{print $1 $2}')""
+    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION} | awk -F'[.]' '{print $1 $2}')"
     PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
