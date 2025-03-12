@@ -7,32 +7,35 @@ import os
 
 from settings import *
 
-# Ensure correct library paths for OpenSSL
-LIBRARY_PATHS = "/usr/lib64:/usr/lib:/usr/local/lib"
-os.environ["LD_LIBRARY_PATH"] = LIBRARY_PATHS + ":" + os.environ.get("LD_LIBRARY_PATH", "")
-
-def check_shared_library(binary_path):
-    """Check if all shared libraries are present for the given binary."""
-    try:
-        output = subprocess.check_output(f"ldd {binary_path}", shell=True, universal_newlines=True)
-        missing_libs = [line for line in output.split("\n") if "not found" in line]
-        
-        if missing_libs:
-            pytest.fail(f" Missing shared libraries for {binary_path}:\n" + "\n".join(missing_libs))
-    except subprocess.CalledProcessError:
-        pytest.fail(f" Failed to check shared libraries for {binary_path}")
-
 @pytest.fixture(scope='module')
 def mysql_server(request):
-    """Start MySQL server before running tests."""
-    mysql_server = mysql.MySQL(base_dir)
-    
-    # Validate required shared libraries for mysqld
-    check_shared_library(mysql_server.mysqld)
+    """ Start MySQL server before running tests """
 
+    mysqld_path = os.path.join(base_dir, "bin", "mysqld")
+
+    # Ensure mysqld binary exists
+    if not os.path.exists(mysqld_path):
+        pytest.fail(f" ERROR: mysqld binary not found at {mysqld_path}")
+
+    # Ensure mysqld is executable
+    if not os.access(mysqld_path, os.X_OK):
+        os.chmod(mysqld_path, 0o755)
+
+    # Ensure required shared libraries exist
+    try:
+        output = subprocess.check_output(f"ldd {mysqld_path}", shell=True, universal_newlines=True)
+        missing_libs = [line for line in output.split("\n") if "not found" in line]
+        if missing_libs:
+            pytest.fail(f" Missing shared libraries:\n" + "\n".join(missing_libs))
+    except subprocess.CalledProcessError:
+        pytest.fail(f" Failed to check shared libraries for {mysqld_path}")
+
+     # Start MySQL Server
+    mysql_server = mysql.MySQL(base_dir)
     mysql_server.start()
     yield mysql_server
     mysql_server.stop()
+
 
 
 def test_install_functions(mysql_server):
