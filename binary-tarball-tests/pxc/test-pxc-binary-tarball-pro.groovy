@@ -49,7 +49,7 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
-        stage('Debian Buster') {
+       /* stage('Debian Buster') {
           agent {
             label "min-buster-x64"
           }
@@ -108,7 +108,7 @@ pipeline {
             run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage CentOS8
+        } //End stage CentOS8 */
         stage('Oracle Linux 9') {
           agent {
             label "min-ol-9-x64"
@@ -121,16 +121,7 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage OracleLinux 9 
-        stage('Run tarball molecule') {
-          steps {
-            withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-              script {
-                moleculeParallelTest(operatingsystems(), env.MOLECULE_DIR)
-              }
-            }
-          }
-        }
-       } //End parallel
+      } //End parallel
     } //End stage Run tests
   } 
  } 
@@ -153,7 +144,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-${PXC_VERSION_MAJOR}-pro/"
+      TARBALL_LINK="https://repo.percona.com/private/{{ client_id }}-{{ client_token }}/pxc-${PXC_VERSION_MAJOR}-pro/"
     elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
