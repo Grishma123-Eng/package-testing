@@ -131,6 +131,7 @@ void run_test() {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
     PXC_VERSION_MAJOR="$(echo ${PXC_VERSION} | awk -F'[.]' '{print $1 $2}')"
+    PXC_VERSION_NAME="$(echo ${PXC_VERSION} | cut -d'-' -f1)"
     PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
@@ -151,7 +152,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/pxc-${PXC_VERSION_MAJOR}-pro/"
+      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/pxc-${PXC_VERSION_MAJOR}-pro/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION_NAME}"
     elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
