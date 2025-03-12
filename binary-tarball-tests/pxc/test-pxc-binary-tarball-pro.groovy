@@ -127,6 +127,7 @@ pipeline {
  } 
 
 void run_test() {
+  withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
     PXC_VERSION_MAJOR="$(echo ${PXC_VERSION}|cut -d'-' -f1)"
@@ -135,6 +136,12 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
+
+    client_id="${USERNAME}"
+    client_token="${PASSWORD}"
+
+    echo "Using Client ID: $client_id"
+
     if [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
@@ -144,7 +151,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://repo.percona.com/private/{{ client_id }}-{{ client_token }}/pxc-${PXC_VERSION_MAJOR}-pro/"
+      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/pxc-${PXC_VERSION_MAJOR}-pro/"
     elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
@@ -164,4 +171,5 @@ void run_test() {
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
   '''
+  }
 }
