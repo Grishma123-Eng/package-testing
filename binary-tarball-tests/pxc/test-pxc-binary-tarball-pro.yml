@@ -15,15 +15,15 @@
     parameters:
     - string:
         name: PXC_VERSION
-        default: "8.0.30-22.1"
+        default: "8.0.40-31.1"
         description: PXC full version
     - string:
         name: PXC_REVISION
-        default: "167c5ac"
+        default: "9cd31bf"
         description: PXC revision
     - string:
         name: WSREP_VERSION
-        default: "26.4.3"
+        default: "4.21"
         description: WSREP version
     - string:
         name: PXC57_PKG_VERSION
