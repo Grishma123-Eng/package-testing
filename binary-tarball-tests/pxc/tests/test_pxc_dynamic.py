@@ -2,50 +2,51 @@
 import pytest
 import subprocess
 import testinfra
-import mysql
 import os
+import re
 
 from settings import *
 
 @pytest.fixture(scope='module')
-def mysql_server(request):
-    """ Start MySQL server before running tests """
-
-    mysqld_path = os.path.join(base_dir, "bin", "mysqld")
-
-    # Ensure mysqld binary exists
-    if not os.path.exists(mysqld_path):
-        pytest.fail(f" ERROR: mysqld binary not found at {mysqld_path}")
-
-    # Ensure mysqld is executable
-    if not os.access(mysqld_path, os.X_OK):
-        os.chmod(mysqld_path, 0o755)
-
-    # Ensure required shared libraries exist
-    try:
-        output = subprocess.check_output(f"ldd {mysqld_path}", shell=True, universal_newlines=True)
-        missing_libs = [line for line in output.split("\n") if "not found" in line]
-        if missing_libs:
-            pytest.fail(f" Missing shared libraries:\n" + "\n".join(missing_libs))
-    except subprocess.CalledProcessError:
-        pytest.fail(f" Failed to check shared libraries for {mysqld_path}")
-
-     # Start MySQL Server
-    mysql_server = mysql.MySQL(base_dir)
+def mysql_server():
+    """Fixture to manage MySQL server instance."""
+    mysql_server = MySQL(base_dir)
     mysql_server.start()
     yield mysql_server
     mysql_server.stop()
 
+def test_executables_exist(host):
+    """Test if MySQL executables exist and have correct permissions."""
+    for executable in pxc_executables:
+        file_path = os.path.join(base_dir, executable)
+        file = host.file(file_path)
+        assert file.exists, f"{file_path} does not exist"
+        assert oct(file.mode) == '0o755', f"Incorrect permissions for {file_path}"
 
+def test_mysql_version(host):
+    """Verify MySQL version matches expected output."""
+    output = host.check_output(f"{base_dir}/bin/mysql --version")
+    if pxc_version_major in ['5.7', '5.6']:
+        expected_version = f"mysql  Ver 14.14 Distrib {pxc57_client_version}"
+        assert re.search(rf'{re.escape(expected_version)}', output), f"Unexpected version: {output}"
+    else:
+        expected = (
+            f"mysql  Ver {pxc_version} for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) "
+            f"{pxc_version_percona}, Revision {pxc_revision}, WSREP version {wsrep_version})"
+        )
+        assert expected in output, f"Version mismatch: expected '{expected}', got '{output}'"
 
 def test_install_functions(mysql_server):
+    """Test if PXC functions can be installed."""
     for function in pxc_functions:
-        mysql_server.install_function(function[0], function[1], function[2])
+        mysql_server.install_function(*function)
 
 def test_install_plugin(mysql_server):
+    """Test if PXC plugins can be installed."""
     for plugin in pxc_plugins:
-        mysql_server.install_plugin(plugin[0], plugin[1])
+        mysql_server.install_plugin(*plugin)
 
 def test_cluster_size(mysql_server):
+    """Check the cluster size is correct."""
     output = mysql_server.run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
-    assert output.split('\t')[1].strip() == "3"
+    assert output.split('\t')[1].strip() == "3", f"Unexpected cluster size: {output}"
