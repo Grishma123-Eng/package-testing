@@ -1,77 +1,94 @@
 #!/usr/bin/env bash
-set -euo pipefail  # Stop on first error, treat unset variables as errors
-
 export PATH=${HOME}/.local/bin:${PATH}
 
-# Ensure PXC_VERSION is set before using it
-if [[ -z "${PXC_VERSION:-}" ]]; then
-  echo "ERROR: PXC_VERSION environment variable is not set!"
-  echo "ℹ️  Example: export PXC_VERSION=\"8.0.17-8\""
-  exit 1
-fi
-
-PXC_MAJOR_VERSION="$(echo ${PXC_VERSION} | cut -d'.' -f1,2)"
+PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
 echo "Installing dependencies..."
-if [[ -f /etc/redhat-release ]]; then
-  sudo yum install -y libaio numactl openssl socat lsof libev perl-Data-Dumper
-
-  if grep -q "release 6" /etc/redhat-release; then
+if [ -f /etc/redhat-release ]; then
+  sudo yum install -y libaio numactl openssl-devel socat lsof
+  sudo yum install -y perl-Data-Dumper libev
+  if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
     sudo ../../centos6.sh
     sudo yum install -y rh-python36 rh-python36-python-pip
     source /opt/rh/rh-python36/enable
   else
     sudo yum install -y python3 python3-pip
   fi
-
-  if [[ "${PXC_MAJOR_VERSION}" == "5.7" ]]; then
+  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     sudo percona-release enable pxb-24 testing
     sudo yum install -y percona-xtrabackup-24
   fi
 else
-  sudo apt update -y
-  sudo apt install -y lsb-release || (echo " ERROR: lsb-release package is missing!" && exit 1)
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
-
-  if [[ "$(lsb_release -sc)" == "xenial" ]]; then
-    sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt update -y
-    sudo apt install -y python3.6
-    sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
+  UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl libssl-dev
+  if [[ $(lsb_release -sc) == 'xenial' ]]; then
+    DEBIAN_FRONTEND=noninteractive sudo add-apt-repository -y ppa:deadsnakes/ppa
+    DEBIAN_FRONTEND=noninteractive sudo apt update
+    DEBIAN_FRONTEND=noninteractive sudo apt -y install python3.6
+    sudo rm /usr/bin/python3 && sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
     wget -O get-pip.py "https://bootstrap.pypa.io/get-pip.py" && sudo python3 get-pip.py
+    sudo apt install -y libcurl4-openssl-dev
+  else
+    sudo apt install -y python3 python3-pip
   fi
-  if [[ "${PXC_MAJOR_VERSION}" == "5.7" ]]; then
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4 libssl3
+  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
     sudo percona-release enable pxb-24 testing
-    sudo apt update -y
-    sudo apt install -y percona-xtrabackup-24
+    sudo apt update
+    sudo apt-get install -y percona-xtrabackup-24
   fi
 fi
 
-# Install pytest correctly for different versions
-if [[ "$(lsb_release -sc)" == "bookworm" ]]; then
+echo "Fixing OpenSSL shared libraries..."
+if ! ldconfig -p | grep -q "libssl.so.3"; then
+  echo "Creating symbolic link for libssl.so.3..."
+  if [ -f /usr/lib64/libssl.so.3 ]; then
+    sudo ln -sf /usr/lib64/libssl.so.3 /usr/lib/libssl.so.3
+  elif [ -f /usr/lib/x86_64-linux-gnu/libssl.so.3 ]; then
+    sudo ln -sf /usr/lib/x86_64-linux-gnu/libssl.so.3 /usr/lib/libssl.so.3
+  else
+    echo "libssl.so.3 not found! Installing manually..."
+    wget https://www.openssl.org/source/openssl-3.0.0.tar.gz
+    tar -xf openssl-3.0.0.tar.gz && cd openssl-3.0.0
+    ./config && make -j$(nproc) && sudo make install
+  fi
+  sudo ldconfig
+fi
+
+if [[ $(lsb_release -sc) == 'bookworm' ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest
 fi  
 
-# Extract MySQL tarball
-TARBALL_NAME=$(find . -maxdepth 1 -name '*.tar.gz' -o -name '*.deb' -o -name '*.rpm' | head -n1 | xargs basename)
-if [[ -z "${TARBALL_NAME}" ]]; then
-  echo "ERROR: No PXC tarball found in the current directory!"
+TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
+if [ -z "${TARBALL_NAME}" ]; then
+  echo "Please put PXC tarball into this directory!"
   exit 1
 fi
-
+if [ -z "${PXC_VERSION}" ]; then
+  echo "PXC_VERSION environment variable needs to be set!"
+  echo "export PXC_VERSION=\"8.0.17-8\""
+fi
+if [ -z "${PXC_REVISION}" ]; then
+  echo "PXC_REVISION environment variable needs to be set!"
+  echo "export PXC_REVISION=\"868a4ef\""
+fi
+if [ -z "${WSREP_VERSION}" ]; then
+  echo "WSREP_VERSION environment variable needs to be set!"
+  echo "export WSREP_VERSION=\"26.4.3\""
+fi
+if [ -z "${PXC57_PKG_VERSION}" ]; then
+  echo "PXC57_PKG_VERSION environment variable needs to be set!"
+  echo "export PXC57_PKG_VERSION=\"5.7.31-rel34-43.2\""
+fi
 tar xf "${TARBALL_NAME}"
-PXC_DIR_NAME="${TARBALL_NAME%.tar.gz}"
-PXC_DIR_NAME="${PXC_DIR_NAME%.deb}"
-PXC_DIR_NAME="${PXC_DIR_NAME%.rpm}"
-
+PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
 export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
-cp conf/*cnf "$BASE_DIR/" || echo " No custom MySQL configuration files found."
+cp conf/*cnf $BASE_DIR/
 
 echo "Running tests..."
-echo "Test Directory: ${PXC_DIR_NAME}"
-python3 -m pytest --ignore="${PXC_DIR_NAME}/percona-xtradb-cluster-tests" -v --junit-xml report.xml "$@"
+echo "${PXC_DIR_NAME}"
+python3 -m pytest --ignore="${PXC_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@
