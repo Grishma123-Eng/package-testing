@@ -23,8 +23,7 @@ if [ -f /etc/redhat-release ]; then
     sudo yum install -y percona-xtrabackup-24
   fi
 else
-  export DEBIAN_FRONTEND=noninteractive 
-  UCF_FORCE_CONFOLD=1 sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl < /dev/null
   if [[ $(lsb_release -sc) == 'xenial' ]]; then
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     sudo apt update
@@ -44,7 +43,7 @@ else
     sudo apt-get install -y percona-xtrabackup-24
   fi
 fi
-if [[ $(lsb_release -sc) == 'bookworm' ]]; then
+if [[ $(lsb_release -sc) == 'bookworm' || $(lsb_release -sc) == 'noble' ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest
