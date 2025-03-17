@@ -2,6 +2,7 @@
 export PATH=${HOME}/.local/bin:${PATH}
 
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+PRO='YES'
 
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
@@ -71,7 +72,7 @@ if [ -z "${PXC57_PKG_VERSION}" ]; then
 fi
 
 echo "non pro base dir setting.."
-if [[ "$PRO" != "true" ]]; then
+if [[ "$PRO" != "YES" ]]; then
   echo "PRO IS NOT TRUE HERE!!!"
   TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
   if [ -z "${TARBALL_NAME}" ]; then
