@@ -45,14 +45,14 @@
 
 - name: add pro repository on rmp x86_64
   template: src=../templates/pro_rpm_repo_file_pxc80.j2
-            dest=/etc/yum.repos.d/psmysql-pro.repo
+            dest=/etc/yum.repos.d/psmysql-pro.repop
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "testing"
     releasever: "{{ release_version.stdout }}"
   when:
-    - ansible_os_family == "RedHat" ansible_distribution != "Amazon"
+    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
     - arch_output == "x86_64"
 
 - name: add pro repository on rmp aarch64 (ARM)
