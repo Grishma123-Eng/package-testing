@@ -225,7 +225,7 @@
       packages:
       - percona-xtradb-cluster-pro-full
     when: 
-      - ansible_os_family == "RedHat" 
+      - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "yes"
     environment:
