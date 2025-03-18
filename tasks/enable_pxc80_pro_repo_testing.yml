@@ -33,11 +33,6 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: enable repo for debian
-  command: sudo percona-release enable pxc-84-pro testing --user_name=chaos --repo_token=7rIoVcbVJ1Xm9RnfcUH5NG9v1wXAfTgX
-  when:
-    - ansible_os_family == "Debian"
-
 - name: update deb cache
   command: apt update
   when:
