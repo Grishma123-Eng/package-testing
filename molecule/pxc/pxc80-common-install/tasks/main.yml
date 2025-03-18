@@ -434,6 +434,7 @@
       jump: DROP
     when: 
       - lookup('env', 'upgrade_repo') == ""  
+      -  ansible_distribution != "Amazon"
 
 #-------------Blocked non PRO
 

@@ -54,7 +54,7 @@
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
-    #- arch_output == "x86_64"
+    - arch_output == "x86_64"
 
 - name: add pro repository on rmp aarch64 (ARM)
   template: src=../templates/pro_rpm_repo_file_pxc80_arm.j2
@@ -71,7 +71,10 @@
   shell: "source /etc/os-release && echo $VERSION_ID"
   register: release_version
   changed_when: false
-  when: ansible_distribution == "Amazon"
+  when: 
+    - ansible_distribution == "Amazon"
+    - arch_output == "x86_64"
+
 
 - name: add pro repository on rmp amd
   template: src=../templates/pro_rpm_repo_file_pxc80.j2
