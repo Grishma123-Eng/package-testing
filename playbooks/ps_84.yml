@@ -128,6 +128,7 @@
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
+    when: ansible_distribution != "Amazon"
 
   - name: install Percona XtraBackup 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
