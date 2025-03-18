@@ -73,7 +73,6 @@
   changed_when: false
   when: 
     - ansible_distribution == "Amazon"
-    - arch_output == "x86_64"
 
 
 - name: add pro repository on rmp amd
@@ -86,6 +85,7 @@
     releasever: "{{ release_version.stdout }}" 
   when:
     - ansible_distribution == "Amazon" 
+    - arch_output == "x86_64"
 
 - name: add pro repository on rmp aarch64 (ARM)
   template: src=../templates/pro_rpm_repo_file_pxc80_arm.j2
