@@ -59,6 +59,7 @@
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    - arch_output== "x86_64"
 
 
 - name: add pro repository on rmp aarch64 (ARM)
@@ -68,6 +69,7 @@
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "testing"
+    releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
     - arch_output == "aarch64" or ansible_architecture == "arm64"
@@ -79,7 +81,6 @@
   when: 
     - ansible_distribution == "Amazon"
 
-
 - name: add pro repository on rmp amd
   template: src=../templates/pro_rpm_repo_file_pxc80.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
@@ -90,6 +91,7 @@
     releasever: "{{ release_version.stdout }}" 
   when:
     - ansible_distribution == "Amazon" 
+    - arch_output== "x86_64"
 
 - name: add pro repository on rmp aarch64 (ARM)
   template: src=../templates/pro_rpm_repo_file_pxc80_arm.j2
