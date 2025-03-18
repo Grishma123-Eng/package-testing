@@ -95,6 +95,7 @@
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "testing"
+    releasever: "{{ release_version.stdout }}" 
   when:
     - ansible_distribution == "Amazon"
     - arch_output == "aarch64" or ansible_architecture == "arm64"
