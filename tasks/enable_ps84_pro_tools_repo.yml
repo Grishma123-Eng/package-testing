@@ -66,7 +66,7 @@
   changed_when: false
   when: ansible_distribution == "Amazon"
 
-- name: Add Pro Repository on Amazon Linux 2023
+- name: Add Pro Repository on Amazon Linux 2023 AMD
   template: 
     src: ../templates/pro_rpm_repo_file_ps84.j2
     dest: /etc/yum.repos.d/psmysql-pro.repo
@@ -76,6 +76,24 @@
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
     releasever: "{{ release_version.stdout }}"  # Use extracted release version
   when: ansible_distribution == "Amazon"
+
+- name: Get release version for Amazon Linux ARCH
+  shell: "source /etc/os-release && echo $VERSION_ID"
+  register: release_version
+  changed_when: false
+  when: ansible_distribution == "Amazon"
+
+- name: add pro repository on rmp aarch64
+  template: src=../templates/pro_rpm_repo_file_ps84_arm.j2
+            dest=/etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
    
 
 - name: enable the tools repo
