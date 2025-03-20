@@ -43,6 +43,8 @@ def set_pro_fips_vars():
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
+    ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
+    pxc_version_percona = ps_version.split('-')[0]
 
 
     if (os.getenv('PRO')):
