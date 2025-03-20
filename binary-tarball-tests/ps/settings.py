@@ -44,7 +44,7 @@ def set_pro_fips_vars():
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
     ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
-    pxc_version_percona = ps_version.split('-')[0]
+    ps_version_percona = ps_version.split('-')[0]
 
 
     if (os.getenv('PRO')):
@@ -71,7 +71,8 @@ def set_pro_fips_vars():
         'base_dir': base_dir,
         'ps_version_upstream': ps_version_upstream,
         'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona
+        'ps_version_percona': ps_version_percona,
+        'ps_version_pro_percona': ps_version_pro_percona
     }
 
 @pytest.fixture(scope="module")
