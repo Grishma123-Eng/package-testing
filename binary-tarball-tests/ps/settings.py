@@ -43,9 +43,7 @@ def set_pro_fips_vars():
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
-    ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
     ps_version_percona = ps_version.split('-')[0]
-
 
     if (os.getenv('PRO')):
       base_dir = '/usr/percona-server'
@@ -61,6 +59,7 @@ def set_pro_fips_vars():
 
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+    ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
 
     return {
         'pro': pro,
@@ -92,6 +91,7 @@ ps_revision = os.getenv('PS_REVISION')
 
 ps_version_upstream, ps_version_percona = ps_version.split('-')
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
 
 print("Before variable prints")  # Debugging statement
 
