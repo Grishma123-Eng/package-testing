@@ -43,7 +43,7 @@ def set_pro_fips_vars():
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
-    ps_version_percona = ps_version.split('-')[0]
+
 
     if (os.getenv('PRO')):
       base_dir = '/usr/percona-server'
@@ -59,7 +59,6 @@ def set_pro_fips_vars():
 
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
-    ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
 
     return {
         'pro': pro,
@@ -70,8 +69,7 @@ def set_pro_fips_vars():
         'base_dir': base_dir,
         'ps_version_upstream': ps_version_upstream,
         'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona,
-        'ps_version_pro_percona': ps_version_pro_percona
+        'ps_version_percona': ps_version_percona
     }
 
 @pytest.fixture(scope="module")
@@ -91,7 +89,6 @@ ps_revision = os.getenv('PS_REVISION')
 
 ps_version_upstream, ps_version_percona = ps_version.split('-')
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
-ps_version_pro_percona = ".".join(ps_version.split(".")[:-1])
 
 print("Before variable prints")  # Debugging statement
 
@@ -238,7 +235,7 @@ ps8x_components = (
 ps8x_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.3' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.4' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
@@ -246,8 +243,8 @@ ps8x_files = (
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.3'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.3'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.4'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.4'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps8x_openssl_files = (
