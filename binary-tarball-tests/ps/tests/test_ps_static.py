@@ -61,8 +61,8 @@ def test_binaries_version(host,pro_fips_vars):
                     f"Release {ps_version_percona}, Revision {ps_revision_pro})"
                 )
                 expected_mysqld_output = (
-                    f"{base_dir}/bin/mysqld  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), "
-                    f"Release {ps_version_percona}, Revision {ps_revision})"
+                    f"{base_dir}/bin/mysqld  Ver {ps_version} for Linux on x86_64 (Percona Server Pro (GPL), "
+                    f"Release {ps_version_percona}, Revision {ps_revision_pro})"
                 )
         else: 
             # Newer versions with Pro support
