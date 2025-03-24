@@ -29,7 +29,7 @@
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "main"
+    repo: "release"
   when:
     - ansible_os_family == "Debian"
 
@@ -50,7 +50,7 @@
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "main"
+    repo: "release"
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
@@ -63,7 +63,7 @@
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "main"
+    repo: "release"
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
@@ -82,7 +82,7 @@
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo:  "main"
+    repo:  "release"
     releasever: "{{ release_version.stdout }}" 
   when:
     - ansible_distribution == "Amazon" 
@@ -94,7 +94,7 @@
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "main"
+    repo: "release"
     releasever: "{{ release_version.stdout }}" 
   when:
     - ansible_distribution == "Amazon"
