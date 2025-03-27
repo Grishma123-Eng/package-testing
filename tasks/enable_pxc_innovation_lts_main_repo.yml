@@ -13,10 +13,14 @@
   - name: add the Percona yum repos for RHEL
     yum: 
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" ansible_distribution != "Amazon"
 
-  - name: enable main repo pxc-84-lts 
-    command: percona-release enable-only pxc-84-lts release
+  - name: Install percona release Amazon
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
+
+  - name: enable main repo {{ pxc_inn_lts_repo_name }}
+    command: percona-release enable-only {{ pxc_inn_lts_repo_name }} release
 
   - name: add the main tools repo
     command: percona-release enable tools release
