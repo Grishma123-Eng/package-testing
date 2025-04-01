@@ -201,6 +201,8 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
 
 elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]] || [[ ${product} =~ ^pxc8[0-9]{1}pro$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
+    actual_value=$(mysql -u root -p -e "SELECT ${i};" 2>/dev/null | tail -n 1) 
+    echo "Checking ${i}: ${actual_value}"
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
       echo "${i} is correct" >> "${log}"
     else
