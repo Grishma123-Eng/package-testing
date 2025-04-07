@@ -1,5 +1,5 @@
 - job:
-    name: test-pxc-binary-tarball-pro
+    name: test-pxc-binary-tarball-pro-test
     project-type: pipeline
     description: |
         Do not edit this job through the web!
@@ -36,9 +36,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/Percona-QA/package-testing.git
+            url: https://github.com/Grishma123-Eng/package-testing.git
             branches:
-            - 'master'
+            - 'pxc-final'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: binary-tarball-tests/pxc/test-pxc-binary-tarball-pro.groovy

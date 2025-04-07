@@ -3,8 +3,8 @@ pipeline {
     label "micro-amazon"
     }
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.40-31.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '9cd31bf', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '8.4.4-4', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: '52a4f9d', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '4.21', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -119,7 +119,19 @@ pipeline {
             run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage OracleLinux 9 
+        } 
+          stage('Amazon linux 2023') {
+          agent {
+            label "min-al2023-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
+            run_test()
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        }//End stage OracleLinux 9 
       } //End parallel
     } //End stage Run tests
   } 
@@ -155,7 +167,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/pxc-${PXC_VERSION_MAJOR}-pro/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION_NAME}/"
+      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/qa-test/pxc-gated-${PXC_VERSION_MAJOR}/"
     
     elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
