@@ -167,7 +167,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/qa-test/pxc-gated-${PXC_VERSION_MAJOR}/"
+      TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/qa-test/pxc-gated-${PXC_VERSION}/"
     
     elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
