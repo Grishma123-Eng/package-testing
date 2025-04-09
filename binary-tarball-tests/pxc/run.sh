@@ -4,10 +4,17 @@ export PATH=${HOME}/.local/bin:${PATH}
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
 echo "Installing dependencies..."
-if [ -f /etc/os-release ] && grep -q 'Amazon Linux' /etc/os-release && grep -q '2023' /etc/os-release; then
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  OS_ID=$ID
+  OS_VERSION=$VERSION_ID
+else
+  OS_ID="unknown"
+  OS_VERSION="unknown"
+fi
+if [ "$OS_ID" = "amzn" ] && [[ "$OS_VERSION" == "2023"* ]]; then
   echo "Detected Amazon Linux 2023"
-  sudo yum install -y python3 python3-pip libaio numactl openssl socat lsof libev
-  export PATH="${HOME}/.local/bin:${PATH}"
+  sudo dnf install -y python3 python3-pip git curl wget tar gzip which findutils glibc-langpack-en
   pip3 install --user pytest-testinfra pytest
 elif [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
