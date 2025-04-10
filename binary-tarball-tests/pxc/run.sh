@@ -15,7 +15,7 @@ echo "Installing dependencies..."
 
 if [ "$OS_TYPE" = "al2023" ]; then
   sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip
-  fi
+  
 elif [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
   # below needed for 5.6 mysql_install_db
