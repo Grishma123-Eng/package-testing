@@ -5,7 +5,7 @@ pipeline {
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '8.4.4-4', description: 'PXC full version')
     string(name: 'PXC_REVISION', defaultValue: '52a4f9d', description: 'PXC revision')
-    string(name: 'WSREP_VERSION', defaultValue: '4.21', description: 'WSREP version')
+    string(name: 'WSREP_VERSION', defaultValue: '26.1.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
       defaultValue: false,
@@ -166,6 +166,12 @@ void run_test() {
           export GLIBC_VERSION="2.35"
         fi
       fi
+
+      if grep -qi "Amazon Linux 2023" /etc/os-release; then
+        echo "Detected Amazon Linux 2023"
+        export GLIBC_VERSION="2.34"
+      fi
+
       TARBALL_NAME="Percona-XtraDB-Cluster-Pro_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://repo.percona.com/private/${client_id}-${client_token}/qa-test/pxc-gated-${PXC_VERSION_NAME}/"
     
