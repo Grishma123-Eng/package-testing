@@ -31,10 +31,10 @@ pxc8x_binaries = [
   'bin/pxc_extra/pxb-8.0/bin/xbcrypt', 'bin/pxc_extra/pxb-8.0/bin/xbstream',
   'bin/pxc_extra/pxb-8.4/bin/xtrabackup', 'bin/pxc_extra/pxb-8.4/bin/xbcloud',
   'bin/pxc_extra/pxb-8.4/bin/xbcrypt', 'bin/pxc_extra/pxb-8.4/bin/xbstream',
-  'bin/pxc_extra/pxb-8.2/bin/xtrabackup', 'bin/pxc_extra/pxb-8.2/bin/xbcloud',
-  'bin/pxc_extra/pxb-8.2/bin/xbcrypt', 'bin/pxc_extra/pxb-8.2/bin/xbstream',
-  'bin/pxc_extra/pxb-8.3/bin/xtrabackup', 'bin/pxc_extra/pxb-8.3/bin/xbcloud',
-  'bin/pxc_extra/pxb-8.3/bin/xbcrypt', 'bin/pxc_extra/pxb-8.3/bin/xbstream',
+  #'bin/pxc_extra/pxb-8.2/bin/xtrabackup', 'bin/pxc_extra/pxb-8.2/bin/xbcloud',
+ # 'bin/pxc_extra/pxb-8.2/bin/xbcrypt', 'bin/pxc_extra/pxb-8.2/bin/xbstream',
+  #'bin/pxc_extra/pxb-8.3/bin/xtrabackup', 'bin/pxc_extra/pxb-8.3/bin/xbcloud',
+  #'bin/pxc_extra/pxb-8.3/bin/xbcrypt', 'bin/pxc_extra/pxb-8.3/bin/xbstream',
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
   'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
@@ -45,8 +45,8 @@ pxc8x_executables = pxc8x_binaries + [
   'bin/clustercheck', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
   'bin/pxc_extra/pxb-8.0/bin/xbcloud_osenv',
   'bin/pxc_extra/pxb-8.4/bin/xbcloud_osenv',
-  'bin/pxc_extra/pxb-8.2/bin/xbcloud_osenv',
-  'bin/pxc_extra/pxb-8.3/bin/xbcloud_osenv',
+  #'bin/pxc_extra/pxb-8.2/bin/xbcloud_osenv',
+  #'bin/pxc_extra/pxb-8.3/bin/xbcloud_osenv',
   'bin/ps-admin',
   'bin/mysqldumpslow',
   'bin/mysql_config',
@@ -65,7 +65,7 @@ pxc8x_functions = (
 pxc8x_files = (
   'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.4' ,
   'lib/libmysqlservices.a' ,
-  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/keyring_file.so',
+  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', #'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so'
 )
 if glibc_version == '2.35':
