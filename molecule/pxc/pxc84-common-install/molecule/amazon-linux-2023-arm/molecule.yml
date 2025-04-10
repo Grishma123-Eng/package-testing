@@ -6,9 +6,9 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: pxc2-80-common-al2023-install
+  - name: pxc2-84-common-al2023-install
     region: us-west-1
-    image: ami-0288dbce011958818
+    image: ami-0bcaacde1147f42f7
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: ec2-user
@@ -16,9 +16,9 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
-  - name: pxc3-80-common-al2023-install
+  - name: pxc3-84-common-al2023-install
     region: us-west-1
-    image: ami-0288dbce011958818
+    image: ami-0bcaacde1147f42f7
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: ec2-user
@@ -33,11 +33,11 @@ provisioner:
     destroy: ../../../playbooks/destroy_noble.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
-    side_effect: ../../../../../playbooks/pxc80_upgrade_common.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_common.yml
   inventory:
     host_vars:
-      pxc2-80-common-al2023-install:
+      pxc2-84-common-al2023-install:
         ip_env: "{{ ansible_host }}"
-      pxc3-80-common-al2023-install:
+      pxc3-84-common-al2023-install:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
