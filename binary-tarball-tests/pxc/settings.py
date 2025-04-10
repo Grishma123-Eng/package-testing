@@ -100,7 +100,7 @@ pxc80_binaries = [
   'bin/pxc_extra/pxb-8.0/bin/xtrabackup', 'bin/pxc_extra/pxb-8.0/bin/xbcloud',
   'bin/pxc_extra/pxb-8.0/bin/xbcrypt', 'bin/pxc_extra/pxb-8.0/bin/xbstream',
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow', #'bin/mysqlpump', 
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
   'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup',
   'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
