@@ -160,7 +160,7 @@ pxc57_binaries = [
   'bin/mysql_config_editor', 'bin/mysql_install_db', 'bin/mysql_plugin', 'bin/mysql_secure_installation',
   'bin/mysql_ssl_rsa_setup', 'bin/mysql_tzinfo_to_sql', 'bin/mysql_upgrade', 'bin/mysqladmin', 'bin/mysqlbinlog',
   'bin/mysqlcheck', 'bin/mysqld', 'bin/mysqldump',
-  'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqltest', 'bin/mysqlxtest', 'bin/perror',
+  'bin/mysqlimport',  'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqltest', 'bin/mysqlxtest', 'bin/perror',#'bin/mysqlpump',
   'bin/replace', 'bin/resolve_stack_dump',
   'bin/resolveip',
   'bin/zlib_decompress'
