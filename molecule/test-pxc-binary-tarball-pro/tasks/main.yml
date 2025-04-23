@@ -101,15 +101,15 @@
 
   - name: get testing repo TARBALL_LINK
     set_fact:
-      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated{{ lookup('env', 'PXC_VERSION_NAME') }}/{{ TARBALL_NAME }}"
+      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated{{ lookup('env', 'PXC_VERSION') }}/{{ TARBALL_NAME }}"
 
   - name: get testing repo MINIMAL_TARBALL_LINK
     set_fact:
-      MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated{{ lookup('env', 'PXC_VERSION_NAME') }}/{{ MINIMAL_TARBALL_NAME }}"
+      MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated{{ lookup('env', 'PXC_VERSION') }}/{{ MINIMAL_TARBALL_NAME }}"
 
   - name: get testing repo DEBUG_TARBALL_LINK
     set_fact:
-      DEBUG_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ lookup('env', 'PXC_VERSION_NAME') }}/{{ DEBUG_TARBALL_NAME }}"
+      DEBUG_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ lookup('env', 'PXC_VERSION') }}/{{ DEBUG_TARBALL_NAME }}"
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
@@ -121,18 +121,18 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+      branch: "{{ lookup('env', 'pxc-final') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
 
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION_NAME') }}.tar.gz
+      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz
       mode: '0644'
 
   - name: Unpack regular tarball
     unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION_NAME') }}.tar.gz
+      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
@@ -142,12 +142,12 @@
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
       url: '{{ MINIMAL_TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION_NAME') }}-minimal.tar.gz
+      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz
       mode: '0644'
 
   - name: Unpack minimal tarball
     unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION_NAME') }}-minimal.tar.gz
+      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
@@ -157,12 +157,12 @@
   - name: Download debug {{ DEBUG_TARBALL_NAME }}
     get_url:
       url: '{{ DEBUG_TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-debug.tar.gz
       mode: '0644'
 
   - name: Unpack debug tarball
     unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-debug.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
@@ -189,7 +189,7 @@
       line: "{{ item }}"
       state: present
     with_items:
-      - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
-      - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
+      - "PXC_REVISION={{ lookup('env', 'PXC_REVISION') }}"
+      - "PXC_VERSION={{ lookup('env', 'PXC_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
       - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
