@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ol9-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-1
+    image: ami-0d1958c85fb6a7b3e
+    vpc_subnet_id: subnet-04a8ad1b1d4da874
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare-pro.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "yes"
+    ANSIBLE_SSH_TRANSFER_METHOD: piped
+scenario:
+  name: oracle-9
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
+
