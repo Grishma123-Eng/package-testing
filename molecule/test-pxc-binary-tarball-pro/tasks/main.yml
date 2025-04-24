@@ -122,7 +122,7 @@
     - mv "package-testing-{{ branch }}" package-testing
     vars:
       branch: "{{ lookup('env', 'pxc-final') }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng, true) }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
 
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
