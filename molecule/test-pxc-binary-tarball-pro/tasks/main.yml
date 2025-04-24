@@ -121,7 +121,7 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
     vars:
-      branch: "{{ lookup('env', 'testing-branch') }}"
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: Download regular {{ TARBALL_NAME }}
