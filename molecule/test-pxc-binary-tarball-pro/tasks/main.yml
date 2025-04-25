@@ -90,7 +90,7 @@
   
   - name: Set PXC_VERSION from env
     set_fact:
-      PXC_VERSION_NAME: "{{ PXC_VERSION.split('-')[0] }}"
+      PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION') }}"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
