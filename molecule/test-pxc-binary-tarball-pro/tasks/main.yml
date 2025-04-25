@@ -87,10 +87,11 @@
   - name: get TARBALL_NAME
     set_fact:
       TARBALL_NAME: "Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
-  
-  - name: Set PXC_VERSION from env
+
+  - name: Set PXC_VERSION and PXC_VERSION_NAME
     set_fact:
-      PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION') }}"
+      PXC_VERSION: "{{ lookup('env', 'PXC_VERSION') }}"
+      PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION').split('-')[0] }}"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
