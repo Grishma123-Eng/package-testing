@@ -113,10 +113,6 @@
     set_fact:
       MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ PXC_VERSION_NAME }}/{{ MINIMAL_TARBALL_NAME }}"
 
-  - name: get testing repo DEBUG_TARBALL_LINK
-    set_fact:
-      DEBUG_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ PXC_VERSION_NAME }}/{{ DEBUG_TARBALL_NAME }}"
-
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
@@ -159,21 +155,6 @@
       extra_opts:
       - --transform
       - 's,^/*[^/]*,/usr/percona-server-minimal,S'
-
-  - name: Download debug {{ DEBUG_TARBALL_NAME }}
-    get_url:
-      url: '{{ DEBUG_TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-debug.tar.gz
-      mode: '0644'
-
-  - name: Unpack debug tarball
-    unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-debug.tar.gz
-      dest: /
-      remote_src: yes
-      extra_opts:
-      - --transform
-      - 's,^/*[^/]*,/usr/Percona-XtraDB-Cluster-Pro-debug,S'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
