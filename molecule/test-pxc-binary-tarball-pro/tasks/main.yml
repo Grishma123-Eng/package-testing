@@ -87,6 +87,10 @@
   - name: get TARBALL_NAME
     set_fact:
       TARBALL_NAME: "Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+  
+  - name: Set PXC_VERSION from env
+    set_fact:
+      PXC_VERSION_NAME: "{{ PXC_VERSION.split('-')[0] }}"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
@@ -102,7 +106,7 @@
 
   - name: get testing repo TARBALL_LINK
     set_fact:
-      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ lookup('env', 'PXC_VERSION') }}/{{ TARBALL_NAME }}"
+      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ lookup('env', 'PXC_VERSION_NAME') }}/{{ TARBALL_NAME }}"
 
   - name: get testing repo MINIMAL_TARBALL_LINK
     set_fact:
