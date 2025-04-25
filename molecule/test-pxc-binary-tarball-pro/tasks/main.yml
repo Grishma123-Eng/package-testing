@@ -86,7 +86,7 @@
 
   - name: get TARBALL_NAME
     set_fact:
-      TARBALL_NAME: "Percona-XtraDB-Cluster-Pro-{ lookup('env', 'PXC_VERSION') }}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+      TARBALL_NAME: "Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
