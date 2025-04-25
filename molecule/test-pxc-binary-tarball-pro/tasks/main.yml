@@ -106,7 +106,7 @@
 
   - name: get testing repo TARBALL_LINK
     set_fact:
-      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ lookup('env', 'PXC_VERSION_NAME') }}/{{ TARBALL_NAME }}"
+      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ PXC_VERSION_NAME }}/{{ TARBALL_NAME }}"
 
   - name: get testing repo MINIMAL_TARBALL_LINK
     set_fact:
