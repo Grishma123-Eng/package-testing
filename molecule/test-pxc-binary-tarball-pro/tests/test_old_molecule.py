@@ -7,7 +7,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-BASE_DIR='/usr/percona-server'
+BASE_DIR='/usr/Percona-XtraDB-Cluster-Pro'
 
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
@@ -16,7 +16,7 @@ def test_load_env_vars_define_in_test(host):
         for var, value in vars.items():
             cmd=f"echo {var}={value} >> /etc/environment"
             host.run(cmd)
-    cmd="groupxc $USER| awk -F' ' '{print $1$2$3}'"
+    cmd="groups $USER| awk -F' ' '{print $1$2$3}'"
     user_group=host.run(cmd).stdout.replace(" ", "").replace("\n","")
     with host.sudo():
         for dir in (f'./package-testing',BASE_DIR, BASE_DIR+'-minimal', BASE_DIR+'-debug'):
