@@ -129,12 +129,12 @@
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
+      dest: "usr/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
       mode: '0644'
 
   - name: Unpack regular tarball
     unarchive:
-      src: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
+      src: "usr/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
@@ -144,12 +144,12 @@
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
       url: '{{ MINIMAL_TARBALL_LINK }}'
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
+      dest: "usr/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
       mode: '0644'
 
   - name: Unpack minimal tarball
     unarchive:
-      src: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
+      src: "usr/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
