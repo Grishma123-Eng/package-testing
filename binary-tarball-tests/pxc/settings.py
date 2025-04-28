@@ -9,9 +9,14 @@ pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 wsrep_version = os.getenv('WSREP_VERSION')
 glibc_version = os.getenv('GLIBC_VERSION')
 pro = os.getenv('PRO')
-
-pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
-pxc_version_percona = pxc_version.split('-')[0]
+# Check if PXC version has a hyphen and split accordingly
+if '-' in pxc_version:
+    pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
+    pxc_version_percona = pxc_version.split('-')[0]
+else:
+    # If no hyphen, handle it accordingly (maybe assume it's a simple version number)
+    pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
+    pxc_version_percona = pxc_version
 
 
 pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
