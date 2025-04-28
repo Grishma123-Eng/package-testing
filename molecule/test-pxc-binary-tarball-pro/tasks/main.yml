@@ -129,32 +129,32 @@
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
       mode: '0644'
 
   - name: Unpack regular tarball
     unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz
+      src: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/usr/percona-server,S'
+      - 's,^/*[^/]*,/usr/Percona-XtraDB-Cluster-Pro,S'
 
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
       url: '{{ MINIMAL_TARBALL_LINK }}'
-      dest: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
       mode: '0644'
 
   - name: Unpack minimal tarball
     unarchive:
-      src: /usr/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz
+      src: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/usr/percona-server-minimal,S'
+      - 's,^/*[^/]*,/usr/Percona-XtraDB-Cluster-Pro-minimal,S'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
