@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 export PATH=${HOME}/.local/bin:${PATH}
+export PXC_VERSION=${PXC_VERSION}
 
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
