@@ -92,6 +92,8 @@
     set_fact:
       PXC_VERSION: "{{ lookup('env', 'PXC_VERSION') }}"
       PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION').split('-')[0] }}"
+      PXC_VERSION_MAJOR: "{{ (lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0] ~ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[1]) }}"
+      PXC_MAJOR_VERSION: "{{ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0:2] | join('.') }}"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
