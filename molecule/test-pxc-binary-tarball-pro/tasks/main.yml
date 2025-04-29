@@ -141,7 +141,7 @@
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/,S'
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro,S'
 
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
@@ -156,7 +156,7 @@
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc-minimal,S'
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro-minimal,S'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
