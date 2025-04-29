@@ -86,7 +86,7 @@
 
   - name: get TARBALL_NAME
     set_fact:
-      TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}.1_Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+      TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
   - name: Set PXC_VERSION and PXC_VERSION_NAME
     set_fact:
@@ -97,11 +97,11 @@
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
-      MINIMAL_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}.1_Linux.x86_64.glibc{{ GLIBC_VERSION }}-minimal.tar.gz"
+      MINIMAL_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}-minimal.tar.gz"
 
-  - name: get DEBUG_TARBALL_NAME
-    set_fact:
-      DEBUG_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}.1_Linux.x86_64.glibc{{ GLIBC_VERSION }}-debug.tar.gz"
+ # - name: get DEBUG_TARBALL_NAME
+  #  set_fact:
+  #    DEBUG_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}.1_Linux.x86_64.glibc{{ GLIBC_VERSION }}-debug.tar.gz"
 
   # # - name: get main repo TARBALL_LINK
   # #   set_fact:
@@ -124,6 +124,7 @@
     - unzip master.zip
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
+    - cd package-testing/binary-tarball-tests/pxc
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('PXC-FINAL') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
@@ -141,7 +142,7 @@
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/usr/Percona-XtraDB-Cluster-Pro,S'
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/,S'
 
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
@@ -156,7 +157,7 @@
       remote_src: yes
       extra_opts:
       - --transform
-      - 's,^/*[^/]*,/usr/Percona-XtraDB-Cluster-Pro-minimal,S'
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc-minimal,S'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
@@ -178,7 +179,10 @@
       line: "{{ item }}"
       state: present
     with_items:
-      - "PXC_REVISION={{ lookup('env', 'PXC_REVISION') }}"
-      - "PXC_VERSION={{ lookup('env', 'PXC_VERSION') }}"
-      - "PRO={{ lookup('env', 'PRO') }}"
-      - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+    - "PXC_REVISION={{ lookup('env', 'PXC_REVISION') }}"
+    - "PXC_VERSION={{ lookup('env', 'PXC_VERSION') }}"
+    - "PRO={{ lookup('env', 'PRO') }}"
+    - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+    - "PXC_VERSION_NAME={{ PXC_VERSION_NAME }}"
+    - "PXC_VERSION_MAJOR={{ pxc_version_major }}"
+    - "PXC_MAJOR_VERSION={{ PXC_MAJOR_VERSION }}"
