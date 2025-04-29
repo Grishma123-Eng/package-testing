@@ -183,5 +183,5 @@
     - "PRO={{ lookup('env', 'PRO') }}"
     - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
     - "PXC_VERSION_NAME={{ PXC_VERSION_NAME }}"
-    - "PXC_VERSION_MAJOR={{ pxc_version_major }}"
+    - "PXC_VERSION_MAJOR={{ PXC_VERSION_MAJOR }}"
     - "PXC_MAJOR_VERSION={{ PXC_MAJOR_VERSION }}"
