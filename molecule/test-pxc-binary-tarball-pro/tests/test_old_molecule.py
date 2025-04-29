@@ -7,7 +7,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-BASE_DIR='/usr/Percona-XtraDB-Cluster-Pro'
+BASE_DIR='/package-testing/binary-tarball-tests/pxc/'
 
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
