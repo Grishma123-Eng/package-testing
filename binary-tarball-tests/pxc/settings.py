@@ -1,19 +1,86 @@
+
 #!/usr/bin/env python3
 import os
 import re
 
-base_dir = os.getenv('BASE_DIR')
-pxc_version = os.getenv('PXC_VERSION')
-print(f"PXC_VERSION from environment: {pxc_version}")
-pxc_revision = os.getenv('PXC_REVISION')
-pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
-wsrep_version = os.getenv('WSREP_VERSION')
-glibc_version = os.getenv('GLIBC_VERSION')
-pro = os.getenv('PRO')
-pxc_version_main = pxc_version.split('-')[0]
-pxc_version_percona = '.'.join(pxc_version_main.split('.')[:2])
-pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
+def source_environment_file(filepath="/etc/environment"):
+    """
+    Loads environment variables from a given file into os.environ.
 
+    :param filepath: Path to the environment file (default is /etc/environment).
+    """
+    try:
+        with open(filepath, 'r') as file:
+            for line in file:
+                # Remove leading/trailing whitespace and skip comments or empty lines
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    # Split the line into key and value
+                    key, value = line.split('=', 1)
+                    # Remove any surrounding quotes from the value
+                    value = value.strip('\'"')
+                    # Add to os.environ
+                    os.environ[key] = value
+                    print(f'{line}')
+    except FileNotFoundError:
+        print(f"Error: File '{filepath}' not found.")
+    except Exception as e:
+        print(f"Error while sourcing environment file: {e}")
+
+def set_pro_vars():
+    """
+    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
+    """
+    source_environment_file()
+
+    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
+    pro = value in {"yes", "true", "1"}
+    
+    print(pro)  # True if value is "yes", "true", or "1", otherwise False
+
+   # fipxc_supported = True if os.getenv('PRO') == "yes" else False    
+    #fipxc_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
+   # debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
+    pxc_revision = os.getenv('PXC_REVISION')
+    pxc_version = os.getenv('PXC_VERSION')
+    if (os.getenv('PRO')):
+        base_dir = os.getenv('BASE_DIR')
+        print(f"PRINTING THE PRO VALUE PRO: {pro}")
+    else:
+      base_dir = os.getenv('BASE_DIR')
+
+    if pro:
+      print(f"TRUE PRO VAR WORKING")
+    else:
+      print(f"FALSE PRO VAR NOT WORKING")
+
+    pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
+    wsrep_version = os.getenv('WSREP_VERSION')
+    glibc_version = os.getenv('GLIBC_VERSION')
+    pxc_version_upstream,pxc_version_percona = pxc_version.split('-')
+    pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
+
+    return {
+        'pro': pro,
+        #'debug': debug,
+        #'fipxc_supported': fipxc_supported,
+        'pxc_revision': pxc_revision,
+        'pxc_version': pxc_version,
+        'base_dir': base_dir,
+        'pxc_version_upstream': pxc_version_upstream,
+        'pxc_version_major': pxc_version_major,
+        'pxc_version_percona': pxc_version_percona
+    }
+
+@pytest.fixture(scope="module")
+def pro_fipxc_vars():
+  """
+  Fixture that provides environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
+  """
+  return set_pro_vars()
+
+source_environment_file()
+  
 if pxc_version_major == "5.7":
   print(pxc_version)
   print(pxc57_pkg_version)
@@ -168,7 +235,7 @@ pxc57_executables = pxc57_binaries + [
   'bin/clustercheck',
   'bin/mysql_config',
   'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldumpslow',
-  'bin/ps-admin', 'bin/ps_mysqld_helper', 'bin/ps_tokudb_admin', 'bin/pyclustercheck',
+  'bin/ps-admin', 'bin/pxc_mysqld_helper', 'bin/pxc_tokudb_admin', 'bin/pyclustercheck',
   'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
 ]
 pxc57_plugins = (
