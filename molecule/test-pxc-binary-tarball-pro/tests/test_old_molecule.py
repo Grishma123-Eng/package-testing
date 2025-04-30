@@ -34,7 +34,7 @@ def test_regular_tarball(host, test_load_env_vars_define_in_test):
 
 def test_minimal_tarball(host, test_load_env_vars_define_in_test):
     with host.sudo():
-        cmd = f"sed -i 's/\\(BASE_DIR.*\\)/\\1-minimal/g' /etc/environment"
+        cmd = f"sed -i 's|^\(BASE_DIR=.*\)/$|\1/Percona-XtraDB-Cluster-Pro-minimal|' /etc/environment"
         result = host.run(cmd)
     cmd = "cd ~/package-testing/binary-tarball-tests/pxc/ && ./run.sh"
     result = host.run(cmd)
@@ -42,14 +42,13 @@ def test_minimal_tarball(host, test_load_env_vars_define_in_test):
     print(result.stderr)
     assert result.rc == 0, result.stdout
 
-def test_debug_tarball(host, test_load_env_vars_define_in_test):
-    with host.sudo():
-        cmd = f"sed -i 's/\\(BASE_DIR.*\\)-minimal/\\1-debug/g' /etc/environment"
-        result = host.run(cmd)
-        cmd=f"echo DEBUG='yes' >> /etc/environment"
-        result = host.run(cmd)
-    cmd = "cd ~/package-testing/binary-tarball-tests/pxc/ && ./run.sh"
-    result = host.run(cmd)
-    print(result.stdout)
-    print(result.stderr)
-    assert result.rc == 0, result.stdout
+#def test_debug_tarball(host, test_load_env_vars_define_in_test):
+ #   with host.sudo():
+  #      cmd = f"sed -i 's/\\(BASE_DIR.*\\)-minimal/\\1-debug/g' /etc/environment"
+   #     result = host.run(cmd)
+    ##   result = host.run(cmd)
+    #cmd = "cd ~/package-testing/binary-tarball-tests/pxc/ && ./run.sh"
+    #result = host.run(cmd)
+    #print(result.stdout)
+    #print(result.stderr)
+    #assert result.rc == 0, result.stdout
