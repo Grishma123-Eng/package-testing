@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 import os
 import re
+import pytest
 
 def source_environment_file(filepath="/etc/environment"):
     """
