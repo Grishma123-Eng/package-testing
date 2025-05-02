@@ -20,7 +20,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-    destroy: ../../../playbooks/destroy-noble-arm.yml
+   # destroy: ../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -34,12 +34,12 @@ verifier:
 scenario:
   name: debian-12
   destroy_sequence:
-    - destroy
+ #   - destroy
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
     - verify
-    - destroy
+  #  - destroy
 
