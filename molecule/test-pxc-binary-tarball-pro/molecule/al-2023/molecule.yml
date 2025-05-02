@@ -19,7 +19,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-    destroy: ../../../playbooks/destroy-noble-arm.yml
+  #  destroy: ../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -32,13 +32,12 @@ verifier:
     FIPS_SUPPORTED: "no"
 scenario:
   name: al-2023
-  destroy_sequence:
-    - destroy
+#  destroy_sequence:
+#    - destroy
   test_sequence:
-    - destroy
+#    - destroy
     - create
     - prepare
     - converge
     - verify
-    - destroy
-
+#    - destroy
