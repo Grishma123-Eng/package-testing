@@ -70,7 +70,10 @@ def set_pro_vars():
         'base_dir': base_dir,
         'pxc_version_upstream': pxc_version_upstream,
         'pxc_version_major': pxc_version_major,
-        'pxc_version_percona': pxc_version_percona
+        'pxc_version_percona': pxc_version_percona,
+        'pxc57_pkg_version': pxc57_pkg_version,
+        'wsrep_version': wsrep_version,
+        'glibc_version': glibc_version
     }
 
 @pytest.fixture(scope="module")
@@ -81,6 +84,16 @@ def pro_fipxc_vars():
   return set_pro_vars()
 
 source_environment_file()
+
+vars = set_pro_vars()
+
+pro = vars['pro']
+pxc_revision = vars['pxc_revision']
+pxc_version = vars['pxc_version']
+base_dir = vars['base_dir']
+pxc_version_upstream = vars['pxc_version_upstream']
+pxc_version_major = vars['pxc_version_major']
+pxc_version_percona = vars['pxc_version_percona']
   
 if pxc_version_major == "5.7":
   print(pxc_version)
@@ -199,7 +212,7 @@ pxc80_files = (
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so'
 )
-if glibc_version == '2.35':
+if GLIBC_VERSION == '2.35':
   pxc80_symlinks = (
     ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.41'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
