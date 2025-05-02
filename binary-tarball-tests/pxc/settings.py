@@ -94,6 +94,8 @@ base_dir = vars['base_dir']
 pxc_version_upstream = vars['pxc_version_upstream']
 pxc_version_major = vars['pxc_version_major']
 pxc_version_percona = vars['pxc_version_percona']
+pxc57_pkg_version = vars['pxc57_pkg_version']
+glibc_version = vars['glibc_version']
   
 if pxc_version_major == "5.7":
   print(pxc_version)
