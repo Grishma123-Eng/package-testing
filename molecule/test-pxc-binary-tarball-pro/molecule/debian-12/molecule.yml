@@ -33,7 +33,7 @@ verifier:
     FIPS_SUPPORTED: "no"
 scenario:
   name: debian-12
-  destroy_sequence:
+ # destroy_sequence:
  #   - destroy
   test_sequence:
     - destroy
