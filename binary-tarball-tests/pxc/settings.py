@@ -27,9 +27,8 @@ def source_environment_file(filepath="/etc/environment"):
         print(f"Error: File '{filepath}' not found.")
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
-
+        
 def set_pro_vars():
-    wsrep_version = os.getenv('WSREP_VERSION')
     """
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
@@ -57,7 +56,7 @@ def set_pro_vars():
       print(f"FALSE PRO VAR NOT WORKING")
 
     pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
-   # wsrep_version = os.getenv('WSREP_VERSION')
+    wsrep_version = os.getenv('WSREP_VERSION')
     glibc_version = os.getenv('GLIBC_VERSION')
     pxc_version_percona,pxc_version_upstream = pxc_version.split('-')
     pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
