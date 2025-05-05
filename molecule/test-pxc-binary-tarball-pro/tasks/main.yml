@@ -94,6 +94,7 @@
       PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION').split('-')[0] }}"
       PXC_VERSION_MAJOR: "{{ (lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0] ~ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[1]) }}"
       PXC_MAJOR_VERSION: "{{ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0:2] | join('.') }}"
+      WSREP_VERSION: "{{ lookup('env', 'WSREP_VERSION')}}"
 
   - name: get MINIMAL_TARBALL_NAME
     set_fact:
@@ -186,3 +187,4 @@
     - "PXC_VERSION_MAJOR={{ PXC_VERSION_MAJOR }}"
     - "PXC_MAJOR_VERSION={{ PXC_MAJOR_VERSION }}"
     - "GLIBC_VERSION={{ GLIBC_VERSION }}"
+    - "WSREP_VERSION={{ WSREP_VERSION }}"
