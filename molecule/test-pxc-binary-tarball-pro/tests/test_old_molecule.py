@@ -7,7 +7,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-BASE_DIR='/package-testing/binary-tarball-tests/pxc'
+BASE_DIR='/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro'
 
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
@@ -19,7 +19,7 @@ def test_load_env_vars_define_in_test(host):
     cmd="groups $USER| awk -F' ' '{print $1$2$3}'"
     user_group=host.run(cmd).stdout.replace(" ", "").replace("\n","")
     with host.sudo():
-        for dir in (f'./package-testing',BASE_DIR, BASE_DIR+'/Percona-XtraDB-Cluster-Pro-minimal'):
+        for dir in (f'./package-testing',BASE_DIR, BASE_DIR+'/-minimal'):
             cmd=f"chown -R {user_group} {dir}"
             host.check_output(cmd)
             cmd=f"ls -l {dir}"
@@ -34,7 +34,7 @@ def test_regular_tarball(host, test_load_env_vars_define_in_test):
 
 def test_minimal_tarball(host, test_load_env_vars_define_in_test):
     with host.sudo():
-        cmd = f"sed -i 's|^\(BASE_DIR=.*\)/$|\1/Percona-XtraDB-Cluster-Pro-minimal|' /etc/environment"
+        cmd = f"sed -i 's|^\(BASE_DIR=.*\)/$|\1/-minimal|' /etc/environment"
         result = host.run(cmd)
     cmd = "cd ~/package-testing/binary-tarball-tests/pxc/ && ./run.sh"
     result = host.run(cmd)
