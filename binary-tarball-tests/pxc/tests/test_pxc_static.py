@@ -19,6 +19,7 @@ def test_mysql_version(host):
         assert match, f"Expected version string not found in output: {output}"
     else:
         if (pro):
+            print(f"[DEBUG] pxc_version_pro_percona={pxc_version_pro_percona}, pxc_version_percona={pxc_version_percona}, pxc_revision={pxc_revision}, wsrep_version={wsrep_version}")
             expected = (
                 'mysql  Ver ' + pxc_version_pro_percona+'-pro for Linux on x86_64 (Percona XtraDB Cluster Pro binary (GPL) ' +
                 pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
