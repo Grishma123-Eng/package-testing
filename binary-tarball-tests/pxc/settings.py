@@ -53,7 +53,7 @@ def set_pro_vars():
     glibc_version = os.getenv('GLIBC_VERSION')
     pxc_version_percona,pxc_version_upstream = pxc_version.split('-')
     pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
-    pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
+    pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
 
     return {
         'pro': pro,
