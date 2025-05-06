@@ -14,18 +14,20 @@ BASE_DIR = '/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro
 #  FIXTURE: Prepares environment and creates directories
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
-    user = host.user().name
-    group = host.user().group
+    
     with host.sudo():
-        host.run(f"echo BASE_DIR={BASE_DIR} >> /etc/environment")
-        for dir in (
-            "/package-testing",
-            BASE_DIR,
-            f"{BASE_DIR}-minimal"
-        ):
-            host.run(f"mkdir -p {dir}")
-            host.run(f"chown -R {user}:{group} {dir}")
-            host.run(f"ls -ld {dir}")
+        vars={'BASE_DIR':BASE_DIR}
+        for var, value in vars.items():
+            cmd=f"echo {var}={value} >> /etc/environment"
+            host.run(cmd)
+    cmd="groups $USER| awk -F' ' '{print $1$2$3}'"
+    user_group=host.run(cmd).stdout.replace(" ", "").replace("\n","")
+    with host.sudo():
+        for dir in (f'./package-testing',BASE_DIR, BASE_DIR+'-minimal'):
+            cmd=f"chown -R {user_group} {dir}"
+            host.check_output(cmd)
+            cmd=f"ls -l {dir}"
+            host.run(cmd)
 
 def test_regular_tarball(host, test_load_env_vars_define_in_test):
     cmd = "cd package-testing/binary-tarball-tests/pxc/ && ./run.sh"
