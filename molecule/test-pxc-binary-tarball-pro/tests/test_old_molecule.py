@@ -42,7 +42,7 @@ def run_tarball_test(host, base_dir_suffix=None, extra_env=""):
                 host.run(f"echo '{var}' >> /etc/environment")
 
     # Make sure path exists and run test script
-    cmd = f"cd {BASE_DIR} && ./run.sh"
+    cmd = "cd ~/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro && ./run.sh"
     result = host.run(cmd)
     print("STDOUT:", result.stdout)
     print("STDERR:", result.stderr)
