@@ -4,6 +4,8 @@ import testinfra
 
 from settings import *
 
+pxc_executables, pxc_files, pxc_symlinks = get_artifact_sets()
+
 def test_executables_exist(host):
     for executable in pxc_executables:
         assert host.file(base_dir+'/'+executable).exists
