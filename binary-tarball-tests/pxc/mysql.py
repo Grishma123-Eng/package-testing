@@ -140,15 +140,22 @@ wsrep_cluster_address=gcomm://127.0.0.1:5010,127.0.0.1:5011
     def startup_check(self, socket):
         """Check if MySQL server is running and ready to accept connections"""
         ping_query = self.basedir + '/bin/mysqladmin --user=root --socket=' + socket + ' ping > /dev/null 2>&1'
-        for startup_timer in range(120):
+        for _ in range(120):
             ping_check = subprocess.call(ping_query, shell=True, stderr=subprocess.DEVNULL)
             if ping_check == 0:
                 return True
             time.sleep(1)
         
         # If we get here, the server didn't start
-        node_num = socket[-5]  # Get node number from socket path
-        logfile = getattr(self, f'node{node_num}_logfile')
+        # Fix the node number extraction from socket path
+        node_num = socket.split('_')[0][-1]  # Gets '1' from '/tmp/node1_mysql.sock'
+        
+        # Use proper attribute name based on node number
+        logfile_attr = f'node{node_num}_logfile'
+        if not hasattr(self, logfile_attr):
+            raise RuntimeError(f"MySQL server failed to start. Log file attribute {logfile_attr} not found.")
+        
+        logfile = getattr(self, logfile_attr)
         try:
             with open(logfile, 'r') as f:
                 logs = f.read()
