@@ -92,6 +92,7 @@ default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
 wsrep_slave_threads=8
 wsrep_debug=1
+wsrep_provider_options=\"socket.ssl=no\"
 """
 
         # Node 1 configuration (bootstrap node)
