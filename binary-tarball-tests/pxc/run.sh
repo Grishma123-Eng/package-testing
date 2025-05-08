@@ -98,10 +98,14 @@ else
 fi
 
 tar xf "${TARBALL_NAME}"
-PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
-export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
+#PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
+#export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
+if [ ! -d "$BASE_DIR" ]; then
+  echo "Error: Base directory $BASE_DIR does not exist!"
+  exit 1
+fi
+cp conf/*.cnf "$BASE_DIR/"
 
-cp conf/*cnf "$BASE_DIR/"
 
 if [ -z "${BASE_DIR}" ]; then
   echo "BASE_DIR environment variable needs to be set!"
