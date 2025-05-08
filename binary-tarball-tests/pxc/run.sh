@@ -6,6 +6,7 @@ source /etc/environment
 export PATH=${HOME}/.local/bin:${PATH}
 export PXC_VERSION=${PXC_VERSION}
 export WSREP_VERSION=${WSREP_VERSION}
+export TARBALL_NAME=${TARBALL_NAME}
 
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
