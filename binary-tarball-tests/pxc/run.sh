@@ -63,8 +63,6 @@ else
   pip3 install --user pytest-testinfra pytest
 fi  
 
-
-
 echo "non pro base dir setting.."
 if [[ "$PRO" != "true" ]]; then
   echo "PRO IS NOT TRUE HERE!!!"
@@ -98,6 +96,11 @@ else
   echo "BASE_DIR is for PRO $BASE_DIR"
 fi
 
+tar xf "${TARBALL_NAME}"
+PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
+export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
+
+cp conf/*cnf "$BASE_DIR/"
 
 if [ -z "${BASE_DIR}" ]; then
   echo "BASE_DIR environment variable needs to be set!"
