@@ -31,6 +31,21 @@
     until: result is not failed
     when: ansible_os_family == "Debian"
 
+  - name: Create Python virtual environment only for Ubuntu 24.04 (Noble)
+    command: python3 -m venv /opt/testenv
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "24.04"
+
+  - name: Install pytest in the virtual environment
+    command: /opt/testenv/bin/pip install pytest pytest-testinfra
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "24.04"
+
+  - name: Ensure the virtual environment is in PATH for testinfra
+    lineinfile:
+      path: /etc/environment
+      line: "PATH=/opt/testenv/bin:$PATH"
+      state: present
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_version == "24.04"
+    
   - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
     apt:
       name: "{{ packages }}"
