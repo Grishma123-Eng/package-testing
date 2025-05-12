@@ -27,7 +27,6 @@
       - tar
       - gawk
       - libtirpc3
-      - libaio1
     register: result
     until: result is not failed
     when: ansible_os_family == "Debian"
