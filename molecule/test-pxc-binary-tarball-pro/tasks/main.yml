@@ -41,7 +41,7 @@
       - libaio1 
     register: result
     until: result is not failed
-    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04"
+    when: ansible_os_family == "Debian" and  ansible_distribution_version not in ["24.04"]
 
   - name: install needed packages for running tests with yum
     yum:
