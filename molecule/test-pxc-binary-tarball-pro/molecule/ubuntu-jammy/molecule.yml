@@ -19,7 +19,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-    destroy: ../../../playbooks/destroy-noble-arm.yml
+#    destroy: ../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
 verifier:
