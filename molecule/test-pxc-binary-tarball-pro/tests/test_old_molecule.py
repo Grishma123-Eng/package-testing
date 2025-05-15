@@ -9,7 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 # Define base directory used in tests
-BASE_DIR = '/package-testing/binary-tarball-tests/pxc/Percona-XtraDB-Cluster-Pro'
+BASE_DIR = '/package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro'
 
 #  FIXTURE: Prepares environment and creates directories
 @pytest.fixture(scope='module')
@@ -30,7 +30,7 @@ def test_load_env_vars_define_in_test(host):
             host.run(cmd)
 
 def test_regular_tarball(host, test_load_env_vars_define_in_test):
-    cmd = "cd package-testing/binary-tarball-tests/pxc/ && ./run.sh"
+    cmd = "cd package-testing/binary-tarball-tests/pxc/PRO && ./run.sh"
     result = host.run(cmd)
     print(result.stdout)
     print(result.stderr)
@@ -40,7 +40,7 @@ def test_minimal_tarball(host, test_load_env_vars_define_in_test):
     with host.sudo():
         cmd = f"sed -i 's|^\(BASE_DIR=.*\)/$|\1/-minimal|' /etc/environment"
         result = host.run(cmd)
-    cmd = "cd package-testing/binary-tarball-tests/pxc/ && ./run.sh"
+    cmd = "cd package-testing/binary-tarball-tests/pxc/PRO && ./run.sh"
     result = host.run(cmd)
     print(result.stdout)
     print(result.stderr)
