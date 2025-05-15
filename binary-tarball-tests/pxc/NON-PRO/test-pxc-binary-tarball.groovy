@@ -149,7 +149,7 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/Grishma123-Eng/package-testing.git --branch pxc-final --depth 1
     cd package-testing/binary-tarball-tests/pxc/NON-PRO
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
