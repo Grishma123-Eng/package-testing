@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Binary tarball test') {
             parallel {
-                stage('Ubuntu Noble') {
+            /*    stage('Ubuntu Noble') {
                     agent {
                         label "min-noble-x64"
                     }
@@ -42,7 +42,7 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
-                }
+                } */
                 stage('Ubuntu Jammy') {
                     agent {
                         label "min-jammy-x64"

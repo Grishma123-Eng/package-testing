@@ -46,4 +46,4 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: binary-tarball-tests/pxc/NON_PRO/test-pxc-binary-tarball-EOL.groovy
+      script-path: binary-tarball-tests/pxc/NON-PRO/test-pxc-binary-tarball-EOL.groovy
