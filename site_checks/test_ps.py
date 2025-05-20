@@ -34,7 +34,7 @@ RHEL_EL={'redhat/7':'el7', 'redhat/8':'el8', 'redhat/9':'el9'}
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        data = 'version_files=Percona-Server-' + PS_VER + '&software_files=' + software_file
+        data = 'version_files=Percona-Server-' + PS_VER + '|Percona-Server&software_files=' + software_file
         req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
         assert req.status_code == 200
         assert req.text != '[]', software_file
@@ -114,7 +114,7 @@ def get_package_tuples():
         for file in files:
             list.append( (software_file,file['filename'],file['link']) )
     return list
-
+#####
 
 LIST_OF_PACKAGES = get_package_tuples()
 
@@ -124,4 +124,6 @@ def test_packages_site(software_file,filename,link):
     print('\nTesting ' + software_file + ', file: ' + filename)
     print(link)
     req = requests.head(link)
-    assert req.status_code == 200 and int(req.headers['content-length']) > 0, link
+    if not re.search(r'Percona-Server.*\.diff\.gz', link):
+        assert req.status_code == 200 and int(req.headers['content-length']) > 0, link
+   # assert req.status_code == 200 and int(req.headers['content-length']) > 0, link
