@@ -58,7 +58,7 @@ def get_package_tuples():
         #    continue
         # Test binary tarballs
         if "binary" in SOFTWARE_FILES:
-            glibc_versions = ["2.17", "2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.17", "2.28", "2.31", "2.34", "2.35"]
+            glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
                 for suffix in ["", "-minimal"]:
                     filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
@@ -72,17 +72,17 @@ def get_package_tuples():
         if "source" in SOFTWARE_FILES:
             for filename in [
                 f"percona-server-{PS_VER}.tar.gz",
-                f"percona-server_{PS_VER}.orig.tar.gz",
-                f"percona-server-5.7_{PS_VER}.orig.tar.gz",
-                f"percona-server-{PS_VER_FULL}.generic.src.rpm",
-                f"Percona-Server-57-{PS_VER_FULL}.generic.src.rpm",
+               # f"percona-server_{PS_VER}.orig.tar.gz",
+             #   f"percona-server-5.7_{PS_VER}.orig.tar.gz",
+             #   f"percona-server-{PS_VER_FULL}.generic.src.rpm",
+              #  f"Percona-Server-57-{PS_VER_FULL}.generic.src.rpm",
             ]:
                 packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{filename}"))
 
 
         # Test source tarballs
         for software_file in DEB_SOFTWARE_FILES:
-            suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+            suffix = f"{PS_VER_FULL}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
             deb_files = [
                 f"percona-server-server_{suffix}",
                 f"percona-server-test_{suffix}",
