@@ -79,10 +79,8 @@ def get_package_tuples():
             #assert "percona-server_" + PS_VER  + ".orig.tar.gz" in req.text or "percona-server-5.7_" + PS_VER  + ".orig.tar.gz" in req.text
             #assert "percona-server-" + PS_VER_FULL  + ".generic.src.rpm" in req.text or "Percona-Server-57-" + PS_VER_FULL + ".generic.src.rpm" in req.text
         # Test packages for every OS
-        else:
-            if version.parse(PS_VER) > version.parse("8.0.0"):
-                if software_file in DEB_SOFTWARE_FILES:
-                    ps_deb_suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+        elif software_file in DEB_SOFTWARE_FILES:
+            ps_deb_suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
             deb_filenames = [
                 f"percona-server-server_{ps_deb_suffix}",
                 f"percona-server-test_{ps_deb_suffix}",
@@ -112,27 +110,26 @@ def get_package_tuples():
                  #   assert "percona-server-source_" + ps_deb_name_suffix in req.text
                  #   assert "percona-server-common_" + ps_deb_name_suffix in req.text
                  #   assert "percona-server-dbg_" + ps_deb_name_suffix in req.text
-                if software_file in RHEL_SOFTWARE_FILES:
-                    ps_rpm_suffix = f"{PS_VER}.{PS_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
-                    rpm_filenames = [
-                        f"percona-server-server-{ps_rpm_suffix}",
-                        f"percona-server-test-{ps_rpm_suffix}",
-                        f"percona-server-client-{ps_rpm_suffix}",
-                        f"percona-server-rocksdb-{ps_rpm_suffix}",
-                        f"percona-mysql-router-{ps_rpm_suffix}",
-                        f"percona-server-devel-{ps_rpm_suffix}",
-                        f"percona-server-shared-{ps_rpm_suffix}",
-                        f"percona-icu-data-files-{ps_rpm_suffix}",
-                        f"percona-server-debuginfo-{ps_rpm_suffix}"
-                    ]
-                if software_file != "redhat/9":
-                    rpm_filenames.append(f"percona-server-shared-compat-{ps_rpm_suffix}")
+        elif software_file in RHEL_SOFTWARE_FILES:
+            ps_rpm_suffix = f"{PS_VER}.{PS_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
+            rpm_filenames = [
+                f"percona-server-server-{ps_rpm_suffix}",
+                f"percona-server-test-{ps_rpm_suffix}",
+                f"percona-server-client-{ps_rpm_suffix}",
+                f"percona-server-rocksdb-{ps_rpm_suffix}",
+                f"percona-mysql-router-{ps_rpm_suffix}",
+                f"percona-server-devel-{ps_rpm_suffix}",
+                f"percona-server-shared-{ps_rpm_suffix}",
+                f"percona-icu-data-files-{ps_rpm_suffix}",
+                f"percona-server-debuginfo-{ps_rpm_suffix}"
+            ]
+            if software_file != "redhat/9":
+                rpm_filenames.append(f"percona-server-shared-compat-{ps_rpm_suffix}")
 
             for fname in rpm_filenames:
                 url = f"{base_path}/binary/redhat/{software_file.split('/')[-1]}/x86_64/{fname}"
                 if url_exists(url):
-                    list.append((software_file, fname, url))
-    return list
+                    list.append((software_file, fname, url))     
                 #    ps_rpm_name_suffix=PS_VER + "." + PS_BUILD_NUM + "." + RHEL_EL[software_file] + ".x86_64.rpm"
                  #   assert "percona-server-server-" + ps_rpm_name_suffix in req.text
                   #  assert "percona-server-test-" + ps_rpm_name_suffix in req.text
@@ -145,7 +142,7 @@ def get_package_tuples():
                   #  if software_file != "redhat/9":
                    #     assert "percona-server-shared-compat-" + ps_rpm_name_suffix in req.text
                     #assert "percona-server-debuginfo-" + ps_rpm_name_suffix in req.text
-    
+    return list
 #####
 
 LIST_OF_PACKAGES = get_package_tuples()
