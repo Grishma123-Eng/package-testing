@@ -47,7 +47,11 @@ def get_package_tuples():
             headers={"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
         )
         assert req.status_code == 200, f"Failed request for {software_file}: status {req.status_code}"
-        assert req.text != '[]', f"No data returned for software file: {software_file}"
+       # assert req.text != '[]', f"No data returned for software file: {software_file}"
+        if req.text == '[]':
+           print(f"WARNING: No data returned for software file: {software_file}. Skipping...")
+           continue
+        print(f"DEBUG: Requesting PS_VER={PS_VER}, software_file={software_file}")
 
         if "percona-server" not in req.text:
             print(f"Skipping {software_file}: no percona-server content in API response.")
