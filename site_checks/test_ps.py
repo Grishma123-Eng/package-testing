@@ -18,11 +18,7 @@ version_main, build_full = PS_VER_FULL.split("-")      # "8.0.42", "33.1"
 PS_VER = f"{version_main}-{build_full.split('.')[0]}"  # "8.0.42-33"
 PS_BUILD_NUM = build_full.split(".")[1]                 # "1"
 MAJOR_VERSION = ".".join(version_main.split(".")[:2])
-#DISTRO = os.getenv("DISTRO", "bullseye")
-#ARCH = os.getenv("ARCH", "amd64")
 
-#PS_VER = '.'.join(PS_VER_FULL.split('.')[:-1]) #8.0.34-26
-#PS_BUILD_NUM = PS_VER_FULL.split('.')[-1] # "1"
 BASE_PATH = f"https://downloads.percona.com/downloads/Percona-Server-{MAJOR_VERSION}/Percona-Server-{PS_VER}"
 
 if version.parse(PS_VER) > version.parse("8.1.0"):
@@ -82,7 +78,8 @@ def get_package_tuples():
 
         # Test source tarballs
         for software_file in DEB_SOFTWARE_FILES:
-            suffix = f"{PS_VER_FULL}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+
+            suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
             deb_files = [
                 f"percona-server-server_{suffix}",
                 f"percona-server-test_{suffix}",
@@ -98,7 +95,7 @@ def get_package_tuples():
                 f"percona-server-dbg_{suffix}"
             ]
         for file in deb_files:
-            packages.append((software_file, file, f"{BASE_PATH}/binary/deb/{software_file}/amd64/{file}"))
+            packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
 
     # RPM packages
     for software_file in RHEL_SOFTWARE_FILES:
@@ -118,7 +115,7 @@ def get_package_tuples():
         if software_file != "redhat/9":
             rpm_files.append(f"percona-server-shared-compat-{suffix}")
         for file in rpm_files:
-            packages.append((software_file, file, f"{BASE_PATH}/binary/rpm/{el}/x86_64/{file}"))
+            packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
 
     return packages
 
