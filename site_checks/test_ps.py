@@ -98,7 +98,7 @@ def get_package_tuples():
     # RPM packages
     for software_file in RHEL_SOFTWARE_FILES:
         el = RHEL_EL[software_file]
-        suffix = f"{PS_VER}.{PS_BUILD_NUM}.{el}.x86_64.rpm"
+        suffix = f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
         rpm_files = [
             f"percona-server-server-{suffix}",
             f"percona-server-test-{suffix}",
