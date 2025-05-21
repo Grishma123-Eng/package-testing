@@ -75,82 +75,62 @@ def get_package_tuples():
             if version.parse(PS_VER) >= version.parse("8.0.0"):
                 if software_file in DEB_SOFTWARE_FILES:
                     ps_deb_name_suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
-                    deb_packages = [
-                        "percona-server-server_",
-                        "percona-server-test_",
-                        "percona-server-client_",
-                        "percona-server-rocksdb_",
-                        "percona-mysql-router_",
-                        "libperconaserverclient21-dev_",
-                        "libperconaserverclient21_",
-                        "percona-server-source_",
-                        "percona-server-common_",
-                        "percona-server-dbg_",
-                    ]
-                    assert any(
-                        f"{pkg}{ps_deb_name_suffix}" in req.text for pkg in ["libperconaserverclient21-dev_", "libperconaserverclient22-dev_"]
-                    ), "Missing libperconaserverclient-dev package"
-                    assert any(
-                        f"{pkg}{ps_deb_name_suffix}" in req.text for pkg in ["libperconaserverclient21_", "libperconaserverclient22_"]
-                    ), "Missing libperconaserverclient package"
-
-                    for pkg in deb_packages:
-                        # Skip libperconaserverclientXX as checked above
-                        if pkg.startswith("libperconaserverclient"):
-                            continue
-                        assert f"{pkg}{ps_deb_name_suffix}" in req.text, f"Missing package {pkg}{ps_deb_name_suffix}"
-                if software_file in RHEL_SOFTWARE_FILES:
+                    assert f"percona-server-server_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-server-test_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-server-client_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-server-rocksdb_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-mysql-router_{ps_deb_name_suffix}" in req.text
+                    assert any(x in req.text for x in [
+                        f"libperconaserverclient21-dev_{ps_deb_name_suffix}",
+                        f"libperconaserverclient22-dev_{ps_deb_name_suffix}"
+                    ]), "Missing libperconaserverclient-dev package"
+                    assert any(x in req.text for x in [
+                        f"libperconaserverclient21_{ps_deb_name_suffix}",
+                        f"libperconaserverclient22_{ps_deb_name_suffix}"
+                    ]), "Missing libperconaserverclient package"
+                    assert f"percona-server-source_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-server-common_{ps_deb_name_suffix}" in req.text
+                    assert f"percona-server-dbg_{ps_deb_name_suffix}" in req.text
+                    
+                elif software_file in RHEL_SOFTWARE_FILES:
                     ps_rpm_name_suffix = f"{PS_VER}.{PS_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
-                    rpm_packages = [
-                        "percona-server-server-",
-                        "percona-server-test-",
-                        "percona-server-client-",
-                        "percona-server-rocksdb-",
-                        "percona-mysql-router-",
-                        "percona-server-devel-",
-                        "percona-server-shared-",
-                        "percona-icu-data-files-",
-                        "percona-server-debuginfo-",
-                    ]
-                    for pkg in rpm_packages:
-                        assert f"{pkg}{ps_rpm_name_suffix}" in req.text, f"Missing RPM package {pkg}{ps_rpm_name_suffix}"
+                    assert f"percona-server-server-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-test-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-client-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-rocksdb-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-mysql-router-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-devel-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-shared-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-icu-data-files-{ps_rpm_name_suffix}" in req.text
                     if software_file != "redhat/9":
-                        assert f"percona-server-shared-compat-{ps_rpm_name_suffix}" in req.text, "Missing shared-compat package"
+                        assert f"percona-server-shared-compat-{ps_rpm_name_suffix}" in req.text
+                    assert f"percona-server-debuginfo-{ps_rpm_name_suffix}" in req.text
 
-            elif version.parse("5.7.0") <= ver_obj < version.parse("8.0.0"):
-                if software_file in DEB_SOFTWARE_FILES:
-                    ps_deb_name_suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
-                    deb_packages_57 = [
-                        "percona-server-server-5.7_",
-                        "percona-server-test-5.7_",
-                        "percona-server-client-5.7_",
-                        "percona-server-rocksdb-5.7_",
-                        "percona-server-tokudb-5.7_",
-                        "libperconaserverclient20-dev_",
-                        "libperconaserverclient20_",
-                        "percona-server-source-5.7_",
-                        "percona-server-common-5.7_",
-                        "percona-server-5.7-dbg_",
-                    ]
-                    for pkg in deb_packages_57:
-                        assert f"{pkg}{ps_deb_name_suffix}" in req.text, f"Missing package {pkg}{ps_deb_name_suffix}"
-
-                if software_file in RHEL_SOFTWARE_FILES:
-                    ps_rpm_name_suffix = f"{PS_VER}.{PS_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
-                    rpm_packages_57 = [
-                        "Percona-Server-server-57-",
-                        "Percona-Server-test-57-",
-                        "Percona-Server-client-57-",
-                        "Percona-Server-rocksdb-57-",
-                        "Percona-Server-tokudb-57-",
-                        "Percona-Server-devel-57-",
-                        "Percona-Server-shared-57-",
-                        "Percona-Server-57-debuginfo-",
-                    ]
-                    for pkg in rpm_packages_57:
-                        assert f"{pkg}{ps_rpm_name_suffix}" in req.text, f"Missing RPM package {pkg}{ps_rpm_name_suffix}"
+                elif version.parse("5.7.0") < version.parse(PS_VER) < version.parse("8.0.0"):
+                    if software_file in DEB_SOFTWARE_FILES:
+                        ps_deb_name_suffix = PS_VER + "-" + PS_BUILD_NUM + "." + software_file + "_amd64.deb"
+                        assert f"percona-server-server-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-test-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-client-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-rocksdb-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-tokudb-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"libperconaserverclient20-dev_{ps_deb_name_suffix}" in req.text
+                        assert f"libperconaserverclient20_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-source-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-common-5.7_{ps_deb_name_suffix}" in req.text
+                        assert f"percona-server-5.7-dbg_{ps_deb_name_suffix}" in req.text
+                elif software_file in RHEL_SOFTWARE_FILES:
+                    ps_rpm_name_suffix = PS_VER + "." + PS_BUILD_NUM + "." + RHEL_EL[software_file] + ".x86_64.rpm"
+                    assert f"Percona-Server-server-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-test-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-client-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-rocksdb-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-tokudb-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-devel-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-shared-57-{ps_rpm_name_suffix}" in req.text
                     if software_file != "redhat/9":
-                        assert f"Percona-Server-shared-compat-57-{ps_rpm_name_suffix}" in req.text, "Missing shared-compat package"
+                        assert f"Percona-Server-shared-compat-57-{ps_rpm_name_suffix}" in req.text
+                    assert f"Percona-Server-57-debuginfo-{ps_rpm_name_suffix}" in req.text
 
         files = json.loads(req.text)
         for file in files:
