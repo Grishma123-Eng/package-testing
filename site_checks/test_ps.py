@@ -34,7 +34,7 @@ else:
     raise AssertionError(f"Unsupported Percona Server version: {PS_VER}")
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
-RHEL_EL={'redhat/7':'el7', 'redhat/8':'el8', 'redhat/9':'el9'}
+RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
 
 def get_package_tuples():
     packages = []
@@ -87,9 +87,7 @@ def get_package_tuples():
                 f"percona-server-rocksdb_{suffix}",
                 f"percona-mysql-router_{suffix}",
                 f"libperconaserverclient21-dev_{suffix}",
-                f"libperconaserverclient22-dev_{suffix}",
                 f"libperconaserverclient21_{suffix}",
-                f"libperconaserverclient22_{suffix}",
                 f"percona-server-source_{suffix}",
                 f"percona-server-common_{suffix}",
                 f"percona-server-dbg_{suffix}"
