@@ -40,7 +40,7 @@ def get_package_tuples():
     packages = []
     #base_path = f"https://downloads.percona.com/downloads/Percona-Server-{PS_VER}/Percona-Server-{PS_VER}-{PS_BUILD_NUM}"
     for software_file in SOFTWARE_FILES:
-        data = 'version_files=Percona-Server-' + PS_VER + '|Percona-Server&software_files=' + software_file
+        data = 'version_files=percona-Server-' + PS_VER + '&software_files=' + software_file
         req = requests.post(
             "https://www.percona.com/products-api.php",
             data=data,
@@ -48,6 +48,10 @@ def get_package_tuples():
         )
         assert req.status_code == 200, f"Failed request for {software_file}: status {req.status_code}"
         assert req.text != '[]', f"No data returned for software file: {software_file}"
+
+        if "percona-server" not in req.text:
+            print(f"Skipping {software_file}: no percona-server content in API response.")
+            continue
         # Test binary tarballs
         if software_file == 'binary':
             if version.parse(PS_VER) < version.parse("8.0.0"):
