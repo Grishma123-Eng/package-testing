@@ -38,21 +38,7 @@ RHEL_EL={ 'redhat/8':'8', 'redhat/9':'9'}
 
 def get_package_tuples():
     packages = []
-    
-    #base_path = f"https://downloads.percona.com/downloads/Percona-Server-{PS_VER}/Percona-Server-{PS_VER}-{PS_BUILD_NUM}"
     for software_file in SOFTWARE_FILES:
-     #   data = 'version_files=percona-Server-' + PS_VER + '&software_files=' + software_file
-     #   req = requests.post(
-      #      "https://www.percona.com/products-api.php",
-       ##     data=data,
-        #    headers={"content-type": "application/x-www-form-urlencoded; charset=UTF-8"}
-      #  )
-       # assert req.status_code == 200, f"Failed request for {software_file}: status {req.status_code}"
-       # assert req.text != '[]', f"No data returned for software file: {software_file}"
-      #  if "percona-server" not in req.text:
-       #     print(f"Skipping {software_file}: no percona-server content in API response.")
-        #    continue
-        # Test binary tarballs
         if "binary" in SOFTWARE_FILES:
             glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
@@ -68,10 +54,6 @@ def get_package_tuples():
         if "source" in SOFTWARE_FILES:
             for filename in [
                 f"percona-server-{PS_VER}.tar.gz",
-               # f"percona-server_{PS_VER}.orig.tar.gz",
-             #   f"percona-server-5.7_{PS_VER}.orig.tar.gz",
-             #   f"percona-server-{PS_VER_FULL}.generic.src.rpm",
-              #  f"Percona-Server-57-{PS_VER_FULL}.generic.src.rpm",
             ]:
                 packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{filename}"))
 
