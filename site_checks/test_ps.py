@@ -22,19 +22,19 @@ MAJOR_VERSION = ".".join(version_main.split(".")[:2])
 BASE_PATH = f"https://downloads.percona.com/downloads/Percona-Server-{MAJOR_VERSION}/Percona-Server-{PS_VER}"
 
 if version.parse(PS_VER) > version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy','noble']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy','noble']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'bionic', 'focal', 'jammy', 'noble']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'bionic', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 else:
     raise AssertionError(f"Unsupported Percona Server version: {PS_VER}")
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
-RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
+RHEL_EL={ 'redhat/8':'8', 'redhat/9':'9'}
 
 def get_package_tuples():
     packages = []
