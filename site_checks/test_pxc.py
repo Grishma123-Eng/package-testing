@@ -173,8 +173,6 @@ def get_package_tuples():
                 
                 return list
 
-    LIST_OF_PACKAGES = get_package_tuples()
-
 
 LIST_OF_PACKAGES = get_package_tuples()
 
