@@ -77,21 +77,20 @@ def get_package_tuples():
 
 
         # Test source tarballs
-        for software_file in DEB_SOFTWARE_FILES:
-
-            suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
-            deb_files = [
-                f"percona-server-server_{suffix}",
-                f"percona-server-test_{suffix}",
-                f"percona-server-client_{suffix}",
-                f"percona-server-rocksdb_{suffix}",
-                f"percona-mysql-router_{suffix}",
-                f"libperconaserverclient21-dev_{suffix}",
-                f"libperconaserverclient21_{suffix}",
-                f"percona-server-source_{suffix}",
-                f"percona-server-common_{suffix}",
-                f"percona-server-dbg_{suffix}"
-            ]
+    for software_file in DEB_SOFTWARE_FILES:
+        suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+        deb_files = [
+            f"percona-server-server_{suffix}",
+            f"percona-server-test_{suffix}",
+            f"percona-server-client_{suffix}",
+            f"percona-server-rocksdb_{suffix}",
+            f"percona-mysql-router_{suffix}",
+            f"libperconaserverclient21-dev_{suffix}",
+            f"libperconaserverclient21_{suffix}",
+            f"percona-server-source_{suffix}",
+            f"percona-server-common_{suffix}",
+            f"percona-server-dbg_{suffix}"
+        ]
         for file in deb_files:
             packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
 
