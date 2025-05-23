@@ -65,14 +65,14 @@ def get_package_tuples():
                             f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz",
                             f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}.tar.gz"]
                         for file in filename:
-                            list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
+                            list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{file}"))
 
                 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
                     for filename in [
                         f"Percona-XtraDB-Cluster-" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+"-minimal.tar.gz",
                         f"Percona-XtraDB-Cluster-" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+".tar.gz"
                     ]:
-                        list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
+                        list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{file}"))
 
         # Check source tarballs
         elif software_file == 'source':
