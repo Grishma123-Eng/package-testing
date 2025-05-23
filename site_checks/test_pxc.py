@@ -171,7 +171,7 @@ def get_package_tuples():
                     for file in rpm_files:
                         list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 
-                return list
+    return list
 
 
 LIST_OF_PACKAGES = get_package_tuples()
