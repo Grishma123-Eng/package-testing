@@ -26,7 +26,7 @@ PXC_VER_PERCONA = '.'.join(PXC_VER_FULL.split('.')[:-1]) # 8.1.0-1, 8.0.34-26, 5
 PXC_BUILD_NUM = PXC_VER_FULL.split('.')[-1] # 1
 DATA_VERSION=''.join(PXC_VER_FULL.split('.')[:2])
 
-BASE_PATH = f"https://downloads.percona.com/downloads/percona-xtradb-cluster-{DATA_VERSION}/percona-xtradb-cluster-{PXC_VER_UPSTREAM}"
+BASE_PATH = f"https://downloads.percona.com/downloads/Percona-Xtradb-Cluster-{DATA_VERSION}/Percona-Xtradb-Cluster-{PXC_VER_UPSTREAM}"
 
 # Create list of supported software files and PXC 57 specific version numbers
 if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
@@ -62,15 +62,15 @@ def get_package_tuples():
                 if version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0"):
                     for suffix in ["", "-minimal"]:
                         filename = [
-                            f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz",
-                            f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}.tar.gz"]
+                            f"Percona-XtraDB-Cluster_{PXC_VER_FULL}_Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz",
+                            f"Percona-XtraDB-Cluster_{PXC_VER_FULL}_Linux.x86_64.glibc{glibc_version}.tar.gz"]
                         for file in filename:
                             list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{file}"))
 
                 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
                     for filename in [
-                        f"Percona-XtraDB-Cluster-" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+"-minimal.tar.gz",
-                        f"Percona-XtraDB-Cluster-" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+".tar.gz"
+                        f"Percona-XtraDB-Cluster_" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+"-minimal.tar.gz",
+                        f"Percona-XtraDB-Cluster_" + PXC_VER_UPSTREAM + "-rel" + PXC57_INNODB + "-" + PXC57_WSREP_PROV_VER + "." + PXC_BUILD_NUM + ".Linux.x86_64.glibc"+glibc_version+".tar.gz"
                     ]:
                         list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{file}"))
 
