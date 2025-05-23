@@ -25,6 +25,7 @@ elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(
 PXC_VER_PERCONA = '.'.join(PXC_VER_FULL.split('.')[:-1]) # 8.1.0-1, 8.0.34-26, 5.7.43-31.65
 PXC_BUILD_NUM = PXC_VER_FULL.split('.')[-1] # 1
 DATA_VERSION=''.join(PXC_VER_FULL.split('.')[:2])
+PXC_VER= PXC_VER_FULL.split(".")[0] + "." + PXC_VER_FULL.split(".")[1]
 
 # Create list of supported software files and PXC 57 specific version numbers
 if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
@@ -49,7 +50,7 @@ RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        data = 'version_files=Percona-XtraDB-Cluster-' + PXC_VER_UPSTREAM + '&software_files=' + software_file
+        data = 'version_files=Percona-XtraDB-Cluster-' + PXC_VER_UPSTREAM + '|Percona-XtraDB-Cluster-' + PXC_VER + '&software_files=' + software_file
         req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
         assert req.status_code == 200
         assert req.text != '[]', software_file
