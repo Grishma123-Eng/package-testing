@@ -50,7 +50,7 @@ RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        data = 'version_files=Percona-XtraDB-Cluster-' + PXC_VER_UPSTREAM + '|Percona-XtraDB-Cluster-' + PXC_VER + '&software_files=' + software_file
+        data = 'version_files=Percona-XtraDB-Cluster-' + PXC_VER_UPSTREAM + '|Percona-XtraDB-Cluster-&software_files=' + software_file
         req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
         assert req.status_code == 200
         assert req.text != '[]', software_file
