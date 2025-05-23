@@ -28,14 +28,14 @@ DATA_VERSION=''.join(PXC_VER_FULL.split('.')[:2])
 
 # Create list of supported software files and PXC 57 specific version numbers
 if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster','bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster','bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'bionic','focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'bionic','focal', 'jammy', 'noble']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
     # Get PXC57 specific version numbers
     PXC57_WSREP_PROV_VER = PXC_VER_FULL.split('.')[-2] # for 5.7.43-31.65.1 = 65
     assert os.environ.get("PXC57_INNODB"), "PXC57_INNODB parameter is not defined!"
@@ -44,7 +44,7 @@ elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
 
-RHEL_EL={'redhat/7':'el7', 'redhat/8':'el8', 'redhat/9':'el9'}
+RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 
 def get_package_tuples():
     list = []
