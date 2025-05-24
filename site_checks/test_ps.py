@@ -95,6 +95,45 @@ def get_package_tuples():
             rpm_files.append(f"percona-server-shared-compat-{suffix}")
         for file in rpm_files:
             packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+    
+    if version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
+                assert any("dbg" in f or "debug" in f for f in deb_files + rpm_files), \
+                    "Neither 'dbg' nor 'debug' found in expected filenames"
+                if software_file in DEB_SOFTWARE_FILES:
+                    suffix = f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+                deb_files = [
+                    f"percona-server-server-5.7_{suffix}",
+                    f"percona-server-test-5.7_{suffix}",
+                    f"percona-server-client-5.7_{suffix}",
+                    f"percona-server-rocksdb-5.7_{suffix}",
+                    f"percona-server-tokudb-5.7_{suffix}",
+                    f"percona-server-source-5.7_{suffix}",
+                    f"percona-server-common-5.7_{suffix}",
+                    f"percona-server-5.7-dbg_{suffix}"
+                ]
+                for file in deb_files:
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+
+    if version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
+                assert any("dbg" in f or "debug" in f for f in deb_files + rpm_files), \
+                    "Neither 'dbg' nor 'debug' found in expected filenames"
+                if software_file in RHEL_SOFTWARE_FILES:
+                    el = RHEL_EL[software_file]
+                    suffix = f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
+                    rpm_files = [
+                        f"Percona-Server-server-57-{suffix}",
+                        f"Percona-Server-test-57-{suffix}",
+                        f"Percona-Server-client-57-{suffix}",
+                        f"Percona-Server-rocksdb-57-{suffix}",
+                        f"Percona-Server-tokudb-57-{suffix}",
+                        f"Percona-Server-devel-57-{suffix}",
+                        f"Percona-Server-shared-57-{suffix}"
+                    ]
+                    if software_file != "redhat/9":
+                        rpm_files.append(f"percona-server-shared-compat-{suffix}")
+                    for file in rpm_files:
+                        packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+                        
 
     return packages
 
