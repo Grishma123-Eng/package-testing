@@ -150,15 +150,19 @@ def get_package_tuples():
                 f"percona-orchestrator-cli_{ORCH_VER}",
                 f"percona-orchestrator_{ORCH_VER}",
                 # Check PT deb packages:
-                f"percona-toolkit_{PT_VER}",
+                f"percona-toolkit_{PT_VER}" ]
+                for file in deb_files:
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check PXB deb packages:
                 pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
-                f"percona-xtrabackup-{pxb_deb_name_suffix}",
+                filename= [f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
-                f"percona-xtrabackup-test-{pxb_deb_name_suffix}",
+                f"percona-xtrabackup-test-{pxb_deb_name_suffix}" ]
+                for file in filename:
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check proxysql deb packages:
-                f"proxysql2_{PROXYSQL_VER}" ]
-                for file in deb_files:
+                proxysql=f"proxysql2_{PROXYSQL_VER}" 
+                for file in proxysql:
                     packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
             if software_file in RHEL_SOFTWARE_FILES:
                 # Check PS rpm packages:
@@ -183,15 +187,18 @@ def get_package_tuples():
                 f'percona-orchestrator-cli-{ORCH_VER}',
                 f'percona-orchestrator-client-{ORCH_VER}',
                 # Check PT rpm packages:
-                f'percona-toolkit-{PT_VER}',
+                f'percona-toolkit-{PT_VER}']
+                for file in rpm_files:
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 # Check PXB rpm packages:
-                pxb_rpm_name_suffix= f"{PXB_VER}.{PXB_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
+                pxb_rpm_name_suffix=  f"{PXB_VER}.{PXB_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
+                filename= [
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 # Check proxysql rpm packages:
                 f"proxysql2-{PROXYSQL_VER}" ]
-                for file in rpm_files:
+                for file in filename:
                     packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
     
     return packages
