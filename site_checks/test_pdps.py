@@ -196,8 +196,6 @@ def get_package_tuples():
     return packages
 LIST_OF_PACKAGES = get_package_tuples()
 
-LIST_OF_PACKAGES = get_package_tuples()
-
 # Check that every link from website is working (200 reply and has some content-length)
 @pytest.mark.parametrize(('software_file', 'filename', 'link'), LIST_OF_PACKAGES)
 def test_packages_site(software_file, filename, link):
