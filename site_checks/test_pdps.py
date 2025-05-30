@@ -66,32 +66,33 @@ def get_package_tuples():
        # assert req.status_code == 200
        # assert req.text != '[]', software_file
         # Test binary tarballs
-        if "binary" in SOFTWARE_FILES:
-            glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
-            for glibc_version in glibc_versions:
-                # Check PS tarballs:
-                for suffix in ["", "-minimal"]:
-                    filename =  f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
-                    packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
-
-                if glibc_version in ['2.34', '2.35'] and version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0"):
-                    for suffix in ["-zenfs", "-zenfs-minimal"]:
-                        filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
+        for software_file in SOFTWARE_FILES:
+            if software_file == "binary":
+                glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
+                for glibc_version in glibc_versions:
+                    # Check PS tarballs:
+                    for suffix in ["", "-minimal"]:
+                        filename =  f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
 
-                if glibc_version == "2.17":
-                    xb_files = [ 
-                    f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
-                    f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
-                    ]
-                    for file in xb_files:
-                        packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+                    if glibc_version in ['2.34', '2.35'] and version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0"):
+                        for suffix in ["-zenfs", "-zenfs-minimal"]:
+                            filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
+                            packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
 
-            # Check ProxySQL
-                if glibc_versions in ["2.17","2.23"]:
-                    for glibc_version in glibc_versions:
-                        filename= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc2.17.tar.gz"
-                        packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+                    if glibc_version == "2.17":
+                        xb_files = [ 
+                        f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
+                        f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
+                        ]
+                        for file in xb_files:
+                            packages.append((software_file, xb_files, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+
+                # Check ProxySQL
+                    if glibc_version in ["2.17","2.23"]:
+                        for glibc_version in glibc_versions:
+                            filename= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc2.17.tar.gz"
+                            packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check mysql-shell tarballs:
             # Check PT
           #  filename = f"'percona-toolkit' + PT_VER + '_x86_64.tar.gz'"
@@ -99,7 +100,7 @@ def get_package_tuples():
             # Check PXB
             
         # Test source tarballs
-        elif "source" in SOFTWARE_FILES:
+            elif software_file == "source":
             # Check PS sources:
             source_files = [
                 f"percona-server-{PS_VER}.tar.gz",
@@ -113,7 +114,7 @@ def get_package_tuples():
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
             ]
             for file in source_files:
-                packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{file}"))
+                packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
             # Check mysql-shell sources:
           #  assert re.search(rf'percona-mysql-shell_{PS_VER_UPSTREAM}-\d+\.orig\.tar\.gz', req.text)
            # assert re.search(rf'percona-mysql-shell-{PS_VER_UPSTREAM}-\d+\.generic\.src\.rpm', req.text)
