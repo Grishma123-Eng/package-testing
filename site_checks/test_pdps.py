@@ -79,7 +79,7 @@ def get_package_tuples():
                         filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
 
-                if glibc_version="2.17":
+                if glibc_version == "2.17":
                     filename = [ 
                     f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
                     f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
