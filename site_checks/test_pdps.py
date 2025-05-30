@@ -102,19 +102,19 @@ def get_package_tuples():
         # Test source tarballs
             elif software_file == "source":
             # Check PS sources:
-            source_files = [
-                f"percona-server-{PS_VER}.tar.gz",
-                f"percona-server-{PS_VER}.orig.tar.gz",
-                f"percona-server-{PS_VER_FULL}.generic.src.rpm",
-                f"percona-mysql-shell-{PS_VER_UPSTREAM}.tar.gz",
-                f"percona-orchestrator-{ORCH_VER}.tar.gz",
-                f"percona-orchestrator-{ORCH_VER_FULL}.generic.src.rpm",
-                f"percona-xtrabackup-{PXB_VER}.tar.gz",
-                f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz",
-                f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
-            ]
-            for file in source_files:
-                packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
+                source_files = [
+                    f"percona-server-{PS_VER}.tar.gz",
+                    f"percona-server-{PS_VER}.orig.tar.gz",
+                    f"percona-server-{PS_VER_FULL}.generic.src.rpm",
+                    f"percona-mysql-shell-{PS_VER_UPSTREAM}.tar.gz",
+                    f"percona-orchestrator-{ORCH_VER}.tar.gz",
+                    f"percona-orchestrator-{ORCH_VER_FULL}.generic.src.rpm",
+                    f"percona-xtrabackup-{PXB_VER}.tar.gz",
+                    f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz",
+                    f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
+                ]
+                for file in source_files:
+                    packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
             # Check mysql-shell sources:
           #  assert re.search(rf'percona-mysql-shell_{PS_VER_UPSTREAM}-\d+\.orig\.tar\.gz', req.text)
            # assert re.search(rf'percona-mysql-shell-{PS_VER_UPSTREAM}-\d+\.generic\.src\.rpm', req.text)
