@@ -44,10 +44,10 @@ ORCH_VER = ORCH_VER_FULL.split('-')[0]
 
 # Create list of supported software files
 if version.parse(PS_VER) > version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
     assert not version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"), "PS 5.7 is not suported"
@@ -79,11 +79,6 @@ def get_package_tuples():
                         filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
                 # Check mysql-shell tarballs:
-                if glibc_version not in ['2.35']:
-                    filename = [ f"percona-mysql-shell-{PS_VER_UPSTREAM}-linux-glibc{glibc_version}.tar.gz",
-                    f"percona-toolkit{PT_VER}_x86_64.tar.gz" ]
-                    for file in filename:
-                        packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{file}"))
             # Check PT
           #  filename = f"'percona-toolkit' + PT_VER + '_x86_64.tar.gz'"
            # packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
@@ -104,7 +99,7 @@ def get_package_tuples():
         # Test source tarballs
         elif "source" in SOFTWARE_FILES:
             # Check PS sources:
-            for filename in [
+            filename = [
                 f"percona-server-{PS_VER}.tar.gz",
                 f"percona-server-{PS_VER}.orig.tar.gz",
                 f"percona-server-{PS_VER_FULL}.generic.src.rpm",
@@ -114,9 +109,9 @@ def get_package_tuples():
                 f"percona-xtrabackup-{PXB_VER}.tar.gz",
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz",
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
-
-            ]:
-                packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{filename}"))
+            ]
+            for file in filename:
+                packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{file}"))
             # Check mysql-shell sources:
           #  assert re.search(rf'percona-mysql-shell_{PS_VER_UPSTREAM}-\d+\.orig\.tar\.gz', req.text)
            # assert re.search(rf'percona-mysql-shell-{PS_VER_UPSTREAM}-\d+\.generic\.src\.rpm', req.text)
