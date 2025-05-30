@@ -167,8 +167,8 @@ def get_package_tuples():
             if software_file in RHEL_SOFTWARE_FILES:
                 # Check PS rpm packages:
                 el = RHEL_EL[software_file]
-                ps_rpm_name_suffix= [
-                f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
+                ps_rpm_name_suffix= f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
+                rpm_files = [
                 f"percona-server-server-{ps_rpm_name_suffix}",
                 f"percona-server-test-{ps_rpm_name_suffix}",
                 f"percona-server-client-{ps_rpm_name_suffix}",
@@ -177,17 +177,17 @@ def get_package_tuples():
                 f"percona-server-devel-{ps_rpm_name_suffix}",
                 f"percona-server-shared-{ps_rpm_name_suffix}",
                 f"percona-icu-data-files-{ps_rpm_name_suffix}",
-                if software_file != "redhat/9":
-                    f"percona-server-shared-compat-{ps_rpm_name_suffix}",
                 f"percona-server-debuginfo-{ps_rpm_name_suffix}",
-                # Check mysql rpm packages:
                 f'percona-mysql-shell-{PS_VER_UPSTREAM}',
-                # Check orchestrator rpm packages:
                 f'percona-orchestrator-{ORCH_VER}',
                 f'percona-orchestrator-cli-{ORCH_VER}',
-                f'percona-orchestrator-client-{ORCH_VER}',
-                # Check PT rpm packages:
+                f'percona-orchestrator-client-{ORCH_VER}'
                 f'percona-toolkit-{PT_VER}']
+                if software_file != "redhat/9":
+                    rpm_files.append(f"percona-server-shared-compat-{ps_rpm_name_suffix}"),
+                # Check mysql rpm packages:
+                # Check orchestrator rpm packages:
+                # Check PT rpm packages:
                 for file in rpm_files:
                     packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 # Check PXB rpm packages:
