@@ -97,7 +97,8 @@ def get_package_tuples():
             # Check ProxySQL
             glibc_versions=["2.17","2.23"]
             for glibc_version in glibc_versions:
-                assert 'proxysql-' + PROXYSQL_VER + '-Linux-x86_64.glibc2.17.tar.gz',
+                filename= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc2.17.tar.gz"
+                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
         # Test source tarballs
         elif "source" in SOFTWARE_FILES:
             # Check PS sources:
