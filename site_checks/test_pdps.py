@@ -138,8 +138,8 @@ def get_package_tuples():
                 f"percona-server-client_{ps_deb_name_suffix}",
                 f"percona-server-rocksdb_{ps_deb_name_suffix}",
                 f"percona-mysql-router_{ps_deb_name_suffix}",
-                f"libperconaserverclient21-dev_{ps_deb_name_suffix}", or f"libperconaserverclient22-dev_{ps_deb_name_suffix}",
-                f"libperconaserverclient21_{ps_deb_name_suffix}", or f"libperconaserverclient22_{ps_deb_name_suffix}",
+                f"libperconaserverclient22-dev_{ps_deb_name_suffix}",
+                f"libperconaserverclient22_{ps_deb_name_suffix}",
                 f"percona-server-source_{ps_deb_name_suffix}",
                 f"percona-server-common_{ps_deb_name_suffix}",
                 f"percona-server-dbg_{ps_deb_name_suffix}",
@@ -152,7 +152,7 @@ def get_package_tuples():
                 # Check PT deb packages:
                 f"percona-toolkit_{PT_VER}",
                 # Check PXB deb packages:
-                pxb_deb_name_suffix=PXB_MAJOR_VERSION + '_' + PXB_VER + "-" + PXB_BUILD_NUM + "." + software_file + "_amd64.deb"
+                pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
                 f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-test-{pxb_deb_name_suffix}",
@@ -185,7 +185,7 @@ def get_package_tuples():
                 # Check PT rpm packages:
                 f'percona-toolkit-{PT_VER}',
                 # Check PXB rpm packages:
-                pxb_rpm_name_suffix='-' + PXB_VER + "." + PXB_BUILD_NUM + "." + RHEL_EL[software_file] + ".x86_64.rpm"
+                pxb_rpm_name_suffix= f"{PXB_VER}.{PXB_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
