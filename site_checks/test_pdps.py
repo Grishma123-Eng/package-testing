@@ -78,24 +78,26 @@ def get_package_tuples():
                     for suffix in ["-zenfs", "-zenfs-minimal"]:
                         filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
+
+                if glibc_version="2.17":
+                    filename = [ 
+                    f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
+                    f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
+                    ]
+                for file in filename:
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+
+            # Check ProxySQL
+                if glibc_versions=["2.17","2.23"]:
+                    for glibc_version in glibc_versions:
+                        filename= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc2.17.tar.gz"
+                        packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check mysql-shell tarballs:
             # Check PT
           #  filename = f"'percona-toolkit' + PT_VER + '_x86_64.tar.gz'"
            # packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
             # Check PXB
-            glibc_version="2.17"
-            filename = [ 
-                f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
-                f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
-                ]
-            for file in filename:
-                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
-
-            # Check ProxySQL
-            glibc_versions=["2.17","2.23"]
-            for glibc_version in glibc_versions:
-                filename= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc2.17.tar.gz"
-                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+            
         # Test source tarballs
         elif "source" in SOFTWARE_FILES:
             # Check PS sources:
