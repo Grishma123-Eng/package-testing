@@ -84,8 +84,8 @@ def get_package_tuples():
                     f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
                     f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
                     ]
-                for file in xb_files:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+                    for file in xb_files:
+                        packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
 
             # Check ProxySQL
                 if glibc_versions in ["2.17","2.23"]:
