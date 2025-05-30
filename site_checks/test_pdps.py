@@ -56,6 +56,8 @@ SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
 
 RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
 
+BASE_PATH = f"https://downloads.percona.com/downloads/percona-distribution-mysql-ps/percona-distribution-mysql-ps-{PS_VER_UPSTREAM}"
+
 def get_package_tuples():
     packages = []
     for software_file in SOFTWARE_FILES:
