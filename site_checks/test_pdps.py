@@ -104,14 +104,9 @@ def get_package_tuples():
             # Check PS sources:
                 source_files = [
                     f"percona-server-{PS_VER}.tar.gz",
-                    f"percona-server-{PS_VER}.orig.tar.gz",
-                    f"percona-server-{PS_VER_FULL}.generic.src.rpm",
                     f"percona-mysql-shell-{PS_VER_UPSTREAM}.tar.gz",
                     f"percona-orchestrator-{ORCH_VER}.tar.gz",
-                    f"percona-orchestrator-{ORCH_VER_FULL}.generic.src.rpm",
-                    f"percona-xtrabackup-{PXB_VER}.tar.gz",
-                    f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz",
-                    f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
+                    f"percona-xtrabackup-{PXB_VER}.tar.gz"
                 ]
                 for file in source_files:
                     packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
@@ -128,68 +123,66 @@ def get_package_tuples():
            # assert "proxysql2_" + PROXYSQL_VER + ".orig.tar.gz",
             #assert re.search(rf'proxysql2-{PROXYSQL_VER}-\d+\.\d+\.generic\.src\.rpm', req.text)
         # Test packages for every OS
-        else:
-            if software_file in DEB_SOFTWARE_FILES:
-                # Check PS deb packages:
-                ps_deb_name_suffix= f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
-                deb_files = [
-                f"percona-server-server_{ps_deb_name_suffix}",
-                f"percona-server-test_{ps_deb_name_suffix}",
-                f"percona-server-client_{ps_deb_name_suffix}",
-                f"percona-server-rocksdb_{ps_deb_name_suffix}",
-                f"percona-mysql-router_{ps_deb_name_suffix}",
-                f"libperconaserverclient22-dev_{ps_deb_name_suffix}",
-                f"libperconaserverclient22_{ps_deb_name_suffix}",
-                f"percona-server-source_{ps_deb_name_suffix}",
-                f"percona-server-common_{ps_deb_name_suffix}",
-                f"percona-server-dbg_{ps_deb_name_suffix}",
+        for software_file in DEB_SOFTWARE_FILES:
+            ps_deb_name_suffix= f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
+            deb_files = [
+            f"percona-server-server_{ps_deb_name_suffix}",
+            f"percona-server-test_{ps_deb_name_suffix}",
+            f"percona-server-client_{ps_deb_name_suffix}",
+            f"percona-server-rocksdb_{ps_deb_name_suffix}",
+            f"percona-mysql-router_{ps_deb_name_suffix}",
+            f"libperconaserverclient22-dev_{ps_deb_name_suffix}",
+            f"libperconaserverclient22_{ps_deb_name_suffix}",
+            f"percona-server-source_{ps_deb_name_suffix}",
+            f"percona-server-common_{ps_deb_name_suffix}",
+            f"percona-server-dbg_{ps_deb_name_suffix}",
                 # Check mysql-shell deb packages:
-                f"percona-mysql-shell_{PS_VER_UPSTREAM}",
+            f"percona-mysql-shell_{PS_VER_UPSTREAM}",
                 # Check orchestrator deb packages:
-                f"percona-orchestrator-client_{ORCH_VER}",
-                f"percona-orchestrator-cli_{ORCH_VER}",
-                f"percona-orchestrator_{ORCH_VER}",
+            f"percona-orchestrator-client_{ORCH_VER}",
+            f"percona-orchestrator-cli_{ORCH_VER}",
+            f"percona-orchestrator_{ORCH_VER}",
                 # Check PT deb packages:
-                f"percona-toolkit_{PT_VER}" ]
-                for file in deb_files:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+            f"percona-toolkit_{PT_VER}" ]
+            for file in deb_files:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check PXB deb packages:
-                pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
-                filename= [f"percona-xtrabackup-{pxb_deb_name_suffix}",
-                f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
-                f"percona-xtrabackup-test-{pxb_deb_name_suffix}" ]
-                for file in filename:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+            pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
+            filename= [f"percona-xtrabackup-{pxb_deb_name_suffix}",
+            f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
+            f"percona-xtrabackup-test-{pxb_deb_name_suffix}" ]
+            for file in filename:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check proxysql deb packages:
-                proxysql=f"proxysql2_{PROXYSQL_VER}" 
-                for file in proxysql:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
-            if software_file in RHEL_SOFTWARE_FILES:
+            proxysql=f"proxysql2_{PROXYSQL_VER}" 
+            for file in proxysql:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+        for software_file in RHEL_SOFTWARE_FILES:
                 # Check PS rpm packages:
-                el = RHEL_EL[software_file]
-                ps_rpm_name_suffix= f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
-                rpm_files = [
-                f"percona-server-server-{ps_rpm_name_suffix}",
-                f"percona-server-test-{ps_rpm_name_suffix}",
-                f"percona-server-client-{ps_rpm_name_suffix}",
-                f"percona-server-rocksdb-{ps_rpm_name_suffix}",
-                f"percona-mysql-router-{ps_rpm_name_suffix}",
-                f"percona-server-devel-{ps_rpm_name_suffix}",
-                f"percona-server-shared-{ps_rpm_name_suffix}",
-                f"percona-icu-data-files-{ps_rpm_name_suffix}",
-                f"percona-server-debuginfo-{ps_rpm_name_suffix}",
-                f'percona-mysql-shell-{PS_VER_UPSTREAM}',
-                f'percona-orchestrator-{ORCH_VER}',
-                f'percona-orchestrator-cli-{ORCH_VER}',
-                f'percona-orchestrator-client-{ORCH_VER}'
-                f'percona-toolkit-{PT_VER}']
-                if software_file != "redhat/9":
-                    rpm_files.append(f"percona-server-shared-compat-{ps_rpm_name_suffix}"),
+            el = RHEL_EL[software_file]
+            ps_rpm_name_suffix= f"{PS_VER}.{PS_BUILD_NUM}.el{el}.x86_64.rpm"
+            rpm_files = [
+            f"percona-server-server-{ps_rpm_name_suffix}",
+            f"percona-server-test-{ps_rpm_name_suffix}",
+            f"percona-server-client-{ps_rpm_name_suffix}",
+            f"percona-server-rocksdb-{ps_rpm_name_suffix}",
+            f"percona-mysql-router-{ps_rpm_name_suffix}",
+            f"percona-server-devel-{ps_rpm_name_suffix}",
+            f"percona-server-shared-{ps_rpm_name_suffix}",
+            f"percona-icu-data-files-{ps_rpm_name_suffix}",
+            f"percona-server-debuginfo-{ps_rpm_name_suffix}",
+            f'percona-mysql-shell-{PS_VER_UPSTREAM}',
+            f'percona-orchestrator-{ORCH_VER}',
+            f'percona-orchestrator-cli-{ORCH_VER}',
+            f'percona-orchestrator-client-{ORCH_VER}'
+            f'percona-toolkit-{PT_VER}']
+            if software_file != "redhat/9":
+                rpm_files.append(f"percona-server-shared-compat-{ps_rpm_name_suffix}"),
                 # Check mysql rpm packages:
                 # Check orchestrator rpm packages:
                 # Check PT rpm packages:
-                for file in rpm_files:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+            for file in rpm_files:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 # Check PXB rpm packages:
                 pxb_rpm_name_suffix=  f"{PXB_VER}.{PXB_BUILD_NUM}.{RHEL_EL[software_file]}.x86_64.rpm"
                 filename= [
@@ -200,6 +193,8 @@ def get_package_tuples():
                 f"proxysql2-{PROXYSQL_VER}" ]
                 for file in filename:
                     packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+                
+                
     
     return packages
 LIST_OF_PACKAGES = get_package_tuples()
