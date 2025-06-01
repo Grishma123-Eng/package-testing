@@ -33,6 +33,11 @@ assert re.search(r'^\d+\.\d+\.\d+$', PROXYSQL_VER), "PROXYSQL version format is 
 PS_VER = '.'.join(PS_VER_FULL.split('.')[:-1]) # 8.0.34-26
 PS_VER_UPSTREAM = PS_VER_FULL.split('-')[0] # 8.0.34
 PS_BUILD_NUM = PS_VER_FULL.split('.')[-1] # 1
+upstream_version, build_str = PS_VER_FULL.split("-")  # "8.0.34", "26.1"
+minor_version = upstream_version.split(".")[-1]  # "34"
+build_parts = build_str.split(".")  # ["26", "1"]
+
+PS_LAST_VER = f"{int(minor_version) % 10}-{build_parts[1]}"  # Output: 4-1
 
 # PXB
 PXB_VER = '.'.join(PXB_VER_FULL.split('.')[:-1]) # 8.0.34-29
@@ -130,18 +135,16 @@ def get_package_tuples():
             f"percona-server-test_{ps_deb_name_suffix}",
             f"percona-server-client_{ps_deb_name_suffix}",
             f"percona-server-rocksdb_{ps_deb_name_suffix}",
-            f"percona-mysql-router_{ps_deb_name_suffix}",
-            f"libperconaserverclient22-dev_{ps_deb_name_suffix}",
-            f"libperconaserverclient22_{ps_deb_name_suffix}",
+            f"percona-mysql-router_{ps_deb_name_suffix}",,
             f"percona-server-source_{ps_deb_name_suffix}",
             f"percona-server-common_{ps_deb_name_suffix}",
             f"percona-server-dbg_{ps_deb_name_suffix}",
                 # Check mysql-shell deb packages:
-            f"percona-mysql-shell_{PS_VER_UPSTREAM}",
+            f"percona-mysql-shell_{PS_VER_UPSTREAM}-1-1",
                 # Check orchestrator deb packages:
-            f"percona-orchestrator-client_{ORCH_VER}",
-            f"percona-orchestrator-cli_{ORCH_VER}",
-            f"percona-orchestrator_{ORCH_VER}",
+            f"percona-orchestrator-client_{ORCH_VER_FULL}",
+            f"percona-orchestrator-cli_{ORCH_VER_FULL}",
+            f"percona-orchestrator_{ORCH_VER_FULL}",
                 # Check PT deb packages:
             f"percona-toolkit_{PT_VER}" ]
             for file in deb_files:
