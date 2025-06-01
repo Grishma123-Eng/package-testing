@@ -135,7 +135,7 @@ def get_package_tuples():
             f"percona-server-test_{ps_deb_name_suffix}",
             f"percona-server-client_{ps_deb_name_suffix}",
             f"percona-server-rocksdb_{ps_deb_name_suffix}",
-            f"percona-mysql-router_{ps_deb_name_suffix}",,
+            f"percona-mysql-router_{ps_deb_name_suffix}",
             f"percona-server-source_{ps_deb_name_suffix}",
             f"percona-server-common_{ps_deb_name_suffix}",
             f"percona-server-dbg_{ps_deb_name_suffix}",
