@@ -144,7 +144,7 @@ def get_package_tuples():
                 # Check orchestrator deb packages:
             f"percona-orchestrator-client_{ORCH_VER_FULL}",
             f"percona-orchestrator-cli_{ORCH_VER_FULL}",
-            f"percona-orchestrator_{ORCH_VER_FULL}",
+            f"percona-orchestrator_{ORCH_VER_FULL}"]
                 # Check PT deb packages:
           #  f"percona-toolkit_{PT_VER}.1" ]
             for file in deb_files:
