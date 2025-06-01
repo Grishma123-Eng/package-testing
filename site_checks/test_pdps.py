@@ -146,7 +146,7 @@ def get_package_tuples():
             f"percona-orchestrator-cli_{ORCH_VER_FULL}",
             f"percona-orchestrator_{ORCH_VER_FULL}",
                 # Check PT deb packages:
-            f"percona-toolkit_{PT_VER}" ]
+          #  f"percona-toolkit_{PT_VER}.1" ]
             for file in deb_files:
                 packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check PXB deb packages:
@@ -157,9 +157,9 @@ def get_package_tuples():
             for file in filename:
                 packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
                 # Check proxysql deb packages:
-            proxysql=f"proxysql2_{PROXYSQL_VER}" 
-            for file in proxysql:
-                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+         #   proxysql=f"proxysql2_{PROXYSQL_VER}" 
+          #  for file in proxysql:
+           #     packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
         for software_file in RHEL_SOFTWARE_FILES:
                 # Check PS rpm packages:
             el = RHEL_EL[software_file]
