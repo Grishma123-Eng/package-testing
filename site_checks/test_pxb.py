@@ -59,41 +59,41 @@ def get_package_tuples():
         if "source" in SOFTWARE_FILES:
             for filename in [
                 f"percona-xtrabackup-{PXB_VER}.tar.gz" ,
-                f"percona-xtrabackup-{MAJOR_VERSION}_{PXB_VER}.orig.tar.gz"
+              #  f"percona-xtrabackup-{MAJOR_VERSION}_{PXB_VER}.orig.tar.gz"
             ]:
                 packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{filename}"))
 
-            if version.parse(PXB_VER) > version.parse("8.0.0"):
-                file1= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
-                packages.append(("source", file1, f"{BASE_PATH}/source/tarball/{file1}"))
+    #       if version.parse(PXB_VER) > version.parse("8.0.0"):
+        #        file1= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
+        #        packages.append(("source", file1, f"{BASE_PATH}/source/tarball/{file1}"))
 
-            elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
-                file2= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}-{PXB_BUILD_NUM}.generic.src.rpm"
-                packages.append(("source", file2, f"{BASE_PATH}/source/tarball/{file2}"))
+         #   elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
+         #       file2= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}-{PXB_BUILD_NUM}.generic.src.rpm"
+         #       packages.append(("source", file2, f"{BASE_PATH}/source/tarball/{file2}"))
 
         # Test packages for every OS
-        else:
-            if software_file in DEB_SOFTWARE_FILES:
-                pxb_deb_name_suffix= f"{MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
-                deb_file= [
+        for software_file in DEB_SOFTWARE_FILES:
+            pxb_deb_name_suffix= f"{MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
+            deb_file= [
                 f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-test-{pxb_deb_name_suffix}" ]
-                for file in deb_file:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+            for file in deb_file:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+                
 
-            elif software_file in RHEL_SOFTWARE_FILES:
-                el = RHEL_EL[software_file]
-                if version.parse(PXB_VER) > version.parse("8.0.0"):
-                    pxb_rpm_name_suffix= f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
-                elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
-                    pxb_rpm_name_suffix= f"-{PXB_VER}-{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
-                rhel_file=[
+        for software_file in RHEL_SOFTWARE_FILES:
+            el = RHEL_EL[software_file]
+            if version.parse(PXB_VER) > version.parse("8.0.0"):
+            pxb_rpm_name_suffix= f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
+            elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
+            pxb_rpm_name_suffix= f"-{PXB_VER}-{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
+            rhel_file=[
                 f"percona-xtrabackup-{MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-{MAJOR_VERSION}'-debuginfo'{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{MAJOR_VERSION}{pxb_rpm_name_suffix}"]
-                for file in rhel_file:
-                    packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+            for file in rhel_file:
+                packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
 
     
     return packages
