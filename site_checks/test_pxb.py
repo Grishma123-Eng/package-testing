@@ -64,11 +64,11 @@ def get_package_tuples():
 
             if version.parse(PXB_VER) > version.parse("8.0.0"):
                 file1= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
-                packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file1}"))
+                packages.append(("source", file1, f"{BASE_PATH}/source/tarball/{file1}"))
 
             elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
                 file2= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}-{PXB_BUILD_NUM}.generic.src.rpm"
-                packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file2}"))
+                packages.append(("source", file2, f"{BASE_PATH}/source/tarball/{file2}"))
 
         # Test packages for every OS
         else:
