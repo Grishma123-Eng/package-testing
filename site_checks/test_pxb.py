@@ -92,7 +92,7 @@ def get_package_tuples():
                 f"percona-xtrabackup-{MAJOR_VERSION}'-debuginfo'{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{MAJOR_VERSION}{pxb_rpm_name_suffix}"]
                 for file in rhel_file:
-                packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
+                    packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
 
     
     return packages
