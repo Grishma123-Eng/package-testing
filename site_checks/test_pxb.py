@@ -85,9 +85,9 @@ def get_package_tuples():
         for software_file in RHEL_SOFTWARE_FILES:
             el = RHEL_EL[software_file]
             if version.parse(PXB_VER) > version.parse("8.0.0"):
-            pxb_rpm_name_suffix= f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
+                pxb_rpm_name_suffix= f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
             elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
-            pxb_rpm_name_suffix= f"-{PXB_VER}-{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
+                pxb_rpm_name_suffix= f"-{PXB_VER}-{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
             rhel_file=[
                 f"percona-xtrabackup-{MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-{MAJOR_VERSION}'-debuginfo'{pxb_rpm_name_suffix}",
