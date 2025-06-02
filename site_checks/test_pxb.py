@@ -10,6 +10,7 @@ import re
 from packaging import version
 
 PXB_VER_FULL = os.environ.get("PXB_VER_FULL")
+PXB_VERSION= re.sub(r'\.\d+$', '', PXB_VER_FULL)
 PXB_VER_UPSTREAM = PXB_VER_FULL.split('-')[0] # 8.0.34 OR 8.1.0 OR 2.4.28
 MAJOR_VERSION=''.join(PXB_VER_FULL.split('.')[:2]) # 80
 MAJOR_MINOR_VERSION = '.'.join(PXB_VER_UPSTREAM.split('.')[:2])  
@@ -38,7 +39,7 @@ SOFTWARE_FILES=['binary','source']+DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES
 
 RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
 
-BASE_PATH = f"https://downloads.percona.com/downloads/Percona-XtraBackup-{MAJOR_MINOR_VERSION}/Percona-XtraBackup-{PXB_VER_FULL}"
+BASE_PATH = f"https://downloads.percona.com/downloads/Percona-XtraBackup-{MAJOR_MINOR_VERSION}/Percona-XtraBackup-{PXB_VERSION}"
 
 def get_package_tuples():
     packages = []
