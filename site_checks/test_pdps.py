@@ -174,11 +174,11 @@ def get_package_tuples():
             f"percona-server-shared-{ps_rpm_name_suffix}",
             f"percona-icu-data-files-{ps_rpm_name_suffix}",
             f"percona-server-debuginfo-{ps_rpm_name_suffix}",
-            f'percona-mysql-shell-{PS_VER_UPSTREAM}-1.el{el}.x86_64.rpm',
+         #   f'percona-mysql-shell-{PS_VER_UPSTREAM}-1.el{el}.x86_64.rpm',
             f'percona-orchestrator-{ORCH_VER_FULL}.el{el}.x86_64.rpm',
             f'percona-orchestrator-cli-{ORCH_VER_FULL}.el{el}.x86_64.rpm',
-            f'percona-orchestrator-client-{ORCH_VER_FULL}.el{el}.x86_64.rpm',
-            f'percona-toolkit-{PT_VER}']
+            f'percona-orchestrator-client-{ORCH_VER_FULL}.el{el}.x86_64.rpm']
+          #  f'percona-toolkit-{PT_VER}'
             if software_file != "redhat/9":
                 rpm_files.append(f"percona-server-shared-compat-{ps_rpm_name_suffix}"),
                 # Check mysql rpm packages:
