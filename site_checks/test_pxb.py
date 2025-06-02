@@ -52,8 +52,8 @@ def get_package_tuples():
             glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
                 for suffix in ["", "-minimal"]:
-                filename = f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz"
-                packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
+                    filename = f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz"
+                    packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
         # Check source tarballs
         if "source" in SOFTWARE_FILES:
             for filename in [
