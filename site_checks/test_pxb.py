@@ -27,17 +27,17 @@ elif version.parse(PXB_VER_UPSTREAM) > version.parse("2.0.0") and version.parse(
 # Create list of supported software files
 if version.parse(PXB_VER) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXB_VER) > version.parse("8.0.0") and version.parse(PXB_VER) < version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
     DEB_SOFTWARE_FILES=['stretch', 'buster', 'bullseye', 'xenial', 'bionic', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 
 SOFTWARE_FILES=['binary','source']+DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES
 
-RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
+RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 
 BASE_PATH = f"https://downloads.percona.com/downloads/Percona-XtraBackup-{MAJOR_MINOR_VERSION}/Percona-XtraBackup-{PXB_VERSION}"
 
@@ -90,7 +90,7 @@ def get_package_tuples():
                 pxb_rpm_name_suffix= f"-{PXB_VER}-{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
             rhel_file=[
                 f"percona-xtrabackup-{MAJOR_VERSION}{pxb_rpm_name_suffix}",
-                f"percona-xtrabackup-{MAJOR_VERSION}'-debuginfo'{pxb_rpm_name_suffix}",
+                f"percona-xtrabackup-{MAJOR_VERSION}-debuginfo-{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{MAJOR_VERSION}{pxb_rpm_name_suffix}"]
             for file in rhel_file:
                 packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
