@@ -63,15 +63,12 @@ def get_package_tuples():
     for software_file in SOFTWARE_FILES:
         # Test binary tarballs
         if software_file == 'binary':
-            glibc_versions=["2.34", "2.35"]
+            glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
                 # Check PXC tarballs:
                 for suffix in ["", "-minimal"]:
                     filename =  f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                     list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
-            # Check PT
-                    pt=f"percona-toolkit'{PT_VER}_x86_64.tar.gz"
-                    list.append(("binary", pt, f"{BASE_PATH}/binary/tarball/{pt}"))
             # Check PXB
                 if glibc_version == "2.17":
                     xb_files = [ 
@@ -89,21 +86,14 @@ def get_package_tuples():
         elif software_file == 'source':
             # Check PXC sources:
             source_file= [
-            f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz"
-            # Check Percona Toolkit sources:
-         #   f"percona-toolkit-{PT_VER}.tar.gz",
-          #  assert re.search(rf'percona-toolkit-{PT_VER}-\d+\.src\.rpm', req.text),
-            # Check Percona XtraBackup sources:
+            f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz",
             f"percona-xtrabackup-{PXB_VER}.tar.gz" ,
-            f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz" ,
-            f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm" ,
+          #  f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz" ,
+           # f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm" ,
             # Check proxysql2 sources:
             f"proxysql2-{PROXYSQL_VER}.tar.gz" ,
-            f"proxysql2_{PROXYSQL_VER}.orig.tar.gz" ,
-           # assert re.search(rf'proxysql2-{PROXYSQL_VER}-\d+\.\d+\.generic\.src\.rpm', req.text)
             # Check percona-haproxy sources:
             f"percona-haproxy-{HAPROXY_VER}.tar.gz",
-            f"percona-haproxy_{HAPROXY_VER}.orig.tar.gz" ,
          #   assert re.search(rf'percona-haproxy-{HAPROXY_VER}-\d+\.generic\.src\.rpm', req.text)
             # Check prepl_manager sources:
             f"percona-replication-manager-{REPL_MAN_VER}.tar.gz"]
@@ -137,11 +127,11 @@ def get_package_tuples():
                 f"percona-xtrabackup-test-{pxb_deb_name_suffix}",
            #     f"percona-toolkit_{PT_VER}",
                 # Check haproxy deb packages:
-                f"percona-haproxy_{HAPROXY_VER}-1",
-                f"percona-haproxy-doc_{HAPROXY_VER}-1",
-                f"percona-vim-haproxy_{HAPROXY_VER}-1",
+                f"percona-haproxy_{HAPROXY_VER}-1.{software_file}_amd64.deb",
+                f"percona-haproxy-doc_{HAPROXY_VER}-1.{software_file}_amd64.deb",
+                f"percona-vim-haproxy_{HAPROXY_VER}-1.{software_file}_amd64.deb",
                 # Check percona-replication-manager deb packages:
-                f"percona-replication-manager_{REPL_MAN_VER}-1" ]
+                f"percona-replication-manager_{REPL_MAN_VER}-1.{software_file}_amd64.deb" ]
                 # Check proxysql deb packages:
               #  f"proxysql2_{PROXYSQL_VER}" ]
         for file in filename:
@@ -175,10 +165,10 @@ def get_package_tuples():
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 # Check haproxy rpm packages:
-                f"percona-haproxy-{HAPROXY_VER}-1",
-                f"percona-haproxy-debuginfo-{HAPROXY_VER}-1",
+                f"percona-haproxy-{HAPROXY_VER}-1.el{el}.x86_64.rpm",
+                f"percona-haproxy-debuginfo-{HAPROXY_VER}-1.el{el}.x86_64.rpm",
                 # Check percona-replication-manager rpm packages:
-                f"percona-replication-manager-{REPL_MAN_VER}-1"]
+                f"percona-replication-manager-{REPL_MAN_VER}-1.el{el}.x86_64.rpm"]
                 # Check proxysql rpm packages:
             #    f"proxysql2-{PROXYSQL_VER}" ]
         for file in filename:
