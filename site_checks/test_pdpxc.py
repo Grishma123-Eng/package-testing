@@ -110,7 +110,7 @@ def get_package_tuples():
             # Check prepl_manager sources:
             f"percona-replication-manager-{REPL_MAN_VER}.tar.gz"]
             for file in source_files:
-                packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
+                list.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
         
     for software_file in DEB_SOFTWARE_FILES:
                 # Check PXC deb packages:
@@ -161,10 +161,10 @@ def get_package_tuples():
                 f"percona-xtradb-cluster-full-{pxc_rpm_name_suffix}",
                 f"percona-xtradb-cluster-devel-{pxc_rpm_name_suffix}",
                 f"percona-xtradb-cluster-shared-{pxc_rpm_name_suffix}",
-                f"percona-xtradb-cluster-icu-data-files-{pxc_rpm_name_suffix}",
+                f"percona-xtradb-cluster-icu-data-files-{pxc_rpm_name_suffix}"]
         if software_file != "redhat/9":
-            f"percona-xtradb-cluster-shared-compat-{pxc_rpm_name_suffix}",
-            f"percona-xtradb-cluster-debuginfo-{pxc_rpm_name_suffix}"]
+            rpm_files.append(f"percona-xtradb-cluster-shared-compat-{pxc_rpm_name_suffix}"),
+            rpm_files.append(f"percona-xtradb-cluster-debuginfo-{pxc_rpm_name_suffix}")
         for file in rpm_files:
             list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 # Check PT rpm packages:
@@ -184,7 +184,7 @@ def get_package_tuples():
                 # Check proxysql rpm packages:
                 f"proxysql2-{PROXYSQL_VER}" ]
         for file in filename:
-            packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))    
+            list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))    
             
 
     return list
