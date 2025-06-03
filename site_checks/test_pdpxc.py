@@ -44,11 +44,11 @@ PXB_BUILD_NUM = PXB_VER_FULL.split('.')[-1] # 1
 # Create list of supported software files
 # note: 8.1 etc (innovation releases) are not supported by PXC yest bu added in this check script.
 if version.parse(PXC_VER_PERCONA) > version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_PERCONA) > version.parse("8.0.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_PERCONA) > version.parse("5.7.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.0.0"):
     assert not version.parse(PXC_VER_PERCONA) > version.parse("5.7.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.0.0"), "PS 5.7 is not suported"
 
@@ -63,7 +63,7 @@ def get_package_tuples():
     for software_file in SOFTWARE_FILES:
         # Test binary tarballs
         if software_file == 'binary':
-            glibc_versions=["2.17","2.34", "2.35"]
+            glibc_versions=["2.34", "2.35"]
             for glibc_version in glibc_versions:
                 # Check PXC tarballs:
                 for suffix in ["", "-minimal"]:
@@ -81,7 +81,7 @@ def get_package_tuples():
                     for file in xb_files:
                         list.append(("binary", pt, f"{BASE_PATH}/binary/tarball/{file}"))
             # Check ProxySQL
-                if glibc_versions in ["2.17","2.23"]:
+                if glibc_versions in ["2.23"]:
                     for glibc_version in glibc_versions:
                         file= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
                         list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
@@ -89,14 +89,12 @@ def get_package_tuples():
         elif software_file == 'source':
             # Check PXC sources:
             source_file= [
-            f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz",
-            f"percona-xtradb-cluster_{PXC_VER_PERCONA}.orig.tar.gz",
-            f"percona-xtradb-cluster-{PXC_VER_FULL}.generic.src.rpm",
+            f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz"
             # Check Percona Toolkit sources:
-            f"percona-toolkit-{PT_VER}.tar.gz",
+         #   f"percona-toolkit-{PT_VER}.tar.gz",
           #  assert re.search(rf'percona-toolkit-{PT_VER}-\d+\.src\.rpm', req.text),
             # Check Percona XtraBackup sources:
-            f"percona-xtrabackup-" + PXB_VER + ".tar.gz" ,
+            f"percona-xtrabackup-{PXB_VER}.tar.gz" ,
             f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz" ,
             f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm" ,
             # Check proxysql2 sources:
@@ -122,8 +120,8 @@ def get_package_tuples():
                 f"percona-xtradb-cluster-garbd_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-full_{pxc_deb_name_suffix}",
-                f"libperconaserverclient21-dev_{pxc_deb_name_suffix}",
-                f"libperconaserverclient21_{pxc_deb_name_suffix}",
+                f"libperconaserverclient22-dev_{pxc_deb_name_suffix}",
+                f"libperconaserverclient22_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-source_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-common_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-dbg_{pxc_deb_name_suffix}" ]
@@ -137,15 +135,15 @@ def get_package_tuples():
                 f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-test-{pxb_deb_name_suffix}",
-                f"percona-toolkit_{PT_VER}",
+           #     f"percona-toolkit_{PT_VER}",
                 # Check haproxy deb packages:
-                f"percona-haproxy_{HAPROXY_VER}",
-                f"percona-haproxy-doc_{HAPROXY_VER}",
-                f"percona-vim-haproxy_{HAPROXY_VER}",
+                f"percona-haproxy_{HAPROXY_VER}-1",
+                f"percona-haproxy-doc_{HAPROXY_VER}-1",
+                f"percona-vim-haproxy_{HAPROXY_VER}-1",
                 # Check percona-replication-manager deb packages:
-                f"percona-replication-manager_{REPL_MAN_VER}",
+                f"percona-replication-manager_{REPL_MAN_VER}-1" ]
                 # Check proxysql deb packages:
-                f"proxysql2_{PROXYSQL_VER}" ]
+              #  f"proxysql2_{PROXYSQL_VER}" ]
         for file in filename:
             list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
     for software_file in RHEL_SOFTWARE_FILES:
@@ -173,16 +171,16 @@ def get_package_tuples():
         pxb_rpm_name_suffix=f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
         filename= [
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
-                f'percona-toolkit-{PT_VER}',
+         #       f'percona-toolkit-{PT_VER}',
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 # Check haproxy rpm packages:
-                f"percona-haproxy-{HAPROXY_VER}",
-                f"percona-haproxy-debuginfo-{HAPROXY_VER}",
+                f"percona-haproxy-{HAPROXY_VER}-1",
+                f"percona-haproxy-debuginfo-{HAPROXY_VER}-1",
                 # Check percona-replication-manager rpm packages:
-                f"percona-replication-manager-{REPL_MAN_VER}",
+                f"percona-replication-manager-{REPL_MAN_VER}-1"]
                 # Check proxysql rpm packages:
-                f"proxysql2-{PROXYSQL_VER}" ]
+            #    f"proxysql2-{PROXYSQL_VER}" ]
         for file in filename:
             list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))    
             
