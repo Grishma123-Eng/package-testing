@@ -67,7 +67,7 @@ def get_package_tuples():
             for glibc_version in glibc_versions:
                 # Check PXC tarballs:
                 for suffix in ["", "-minimal"]:
-                    filename =  f"Percona-XtraDB-Cluster_{PXC_VER_FULL}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
+                    filename =  f"Percona-XtraDB-Cluster_{PXC_VER_PERCONA}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                     list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
             # Check PXB
                 if glibc_version == "2.17":
