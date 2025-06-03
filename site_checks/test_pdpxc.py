@@ -171,7 +171,7 @@ def get_package_tuples():
                 
                 # Check PXB rpm packages:
         pxb_rpm_name_suffix=f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
-            filename= [
+        filename= [
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
                 f'percona-toolkit-{PT_VER}',
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
