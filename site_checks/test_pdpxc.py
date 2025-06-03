@@ -109,7 +109,7 @@ def get_package_tuples():
          #   assert re.search(rf'percona-haproxy-{HAPROXY_VER}-\d+\.generic\.src\.rpm', req.text)
             # Check prepl_manager sources:
             f"percona-replication-manager-{REPL_MAN_VER}.tar.gz"]
-            for file in source_files:
+            for file in source_file:
                 list.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
         
     for software_file in DEB_SOFTWARE_FILES:
