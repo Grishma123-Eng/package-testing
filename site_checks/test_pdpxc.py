@@ -54,15 +54,20 @@ elif version.parse(PXC_VER_PERCONA) > version.parse("5.7.0") and version.parse(P
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
 
-RHEL_EL={'redhat/7':'el7', 'redhat/8':'el8', 'redhat/9':'el9'}
+RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
+
+base_url = "https://downloads.percona.com/downloads/percona-distribution-mysql-pxc"
 
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        data = 'version_files=percona-distribution-mysql-pxc-' + PXC_VER_UPSTREAM + '&software_files=' + software_file
-        req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
-        assert req.status_code == 200
-        assert req.text != '[]', software_file
+       # data = 'version_files=percona-distribution-mysql-pxc-' + '|percona-distribution-mysql-pxc-' + PXC_VER_UPSTREAM + '&software_files=' + software_file
+        #req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
+        url = f"{base_url}/percona-distribution-mysql-pxc-{PXC_VER_UPSTREAM}/binary/{software_file}/"
+        print(f"Checking URL: {url}")
+        req = requests.get(url)
+        assert req.status_code == 200, f"Failed to access {url}"
+        assert req.text != '[]', f"No files found for {software_file} at {url}"
         # Test binary tarballs
         if software_file == 'binary':
             glibc_versions=["2.17","2.34", "2.35"]
