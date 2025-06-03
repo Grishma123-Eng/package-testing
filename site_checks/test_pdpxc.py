@@ -61,9 +61,15 @@ base_url = "https://downloads.percona.com/downloads/percona-distribution-mysql-p
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
+        if software_file in DEB_SOFTWARE_FILES:
+            subfolder = f"debian/{software_file}"
+        elif software_file in RHEL_SOFTWARE_FILES:
+            subfolder = software_file
+        else:
+            subfolder = software_file
        # data = 'version_files=percona-distribution-mysql-pxc-' + '|percona-distribution-mysql-pxc-' + PXC_VER_UPSTREAM + '&software_files=' + software_file
         #req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
-        url = f"{base_url}/percona-distribution-mysql-pxc-{PXC_VER_UPSTREAM}/binary/{software_file}/"
+        url = f"{base_url}/percona-distribution-mysql-pxc-{PXC_VER_UPSTREAM}/binary/{subfolder}/"
         print(f"Checking URL: {url}")
         req = requests.get(url)
         assert req.status_code == 200, f"Failed to access {url}"
