@@ -63,7 +63,7 @@ def get_package_tuples():
     for software_file in SOFTWARE_FILES:
         # Test binary tarballs
         if software_file == 'binary':
-            glibc_versions = ["2.35"] if version.parse(PXC_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
+            glibc_versions = ["2.35"] if version.parse(PXC_VER_PERCONA) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
                 # Check PXC tarballs:
                 for suffix in ["", "-minimal"]:
