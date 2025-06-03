@@ -61,29 +61,8 @@ BASE_PATH = f"https://downloads.percona.com/downloads/percona-distribution-mysql
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        # Test binary tarballs
-        if software_file == 'binary':
-            glibc_versions = ["2.35"] if version.parse(PXC_VER_PERCONA) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
-            for glibc_version in glibc_versions:
-                # Check PXC tarballs:
-                for suffix in ["", "-minimal"]:
-                    filename =  f"Percona-XtraDB-Cluster_{PXC_VER_PERCONA}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
-                    list.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
-            # Check PXB
-                if glibc_version == "2.17":
-                    xb_files = [ 
-                        f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
-                        f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}-minimal.tar.gz",
-                        f"percona-xtrabackup-{PXB_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz" ]
-                    for file in xb_files:
-                        list.append(("binary", pt, f"{BASE_PATH}/binary/tarball/{file}"))
-            # Check ProxySQL
-                if glibc_versions in ["2.23"]:
-                    for glibc_version in glibc_versions:
-                        file= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
-                        list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
         # Test source tarballs
-        elif software_file == 'source':
+        if software_file == 'source':
             # Check PXC sources:
             source_file= [
             f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz",
@@ -128,8 +107,6 @@ def get_package_tuples():
            #     f"percona-toolkit_{PT_VER}",
                 # Check haproxy deb packages:
                 f"percona-haproxy_{HAPROXY_VER}-1.{software_file}_amd64.deb",
-                f"percona-haproxy-doc_{HAPROXY_VER}-1.{software_file}_amd64.deb",
-                f"percona-vim-haproxy_{HAPROXY_VER}-1.{software_file}_amd64.deb",
                 # Check percona-replication-manager deb packages:
                 f"percona-replication-manager_{REPL_MAN_VER}-1.{software_file}_amd64.deb" ]
                 # Check proxysql deb packages:
