@@ -151,7 +151,7 @@ def get_package_tuples():
     for software_file in RHEL_SOFTWARE_FILES:
                 # Check PXC rpm packages:
         el = RHEL_EL[software_file]
-        pxc_rpm_name_suffix= f"{PXC_VER_PERCONA}.{PXC_BUILD_NUM}.el{e}.x86_64.rpm"
+        pxc_rpm_name_suffix= f"{PXC_VER_PERCONA}.{PXC_BUILD_NUM}.el{el}.x86_64.rpm"
         rpm_files= [
                 f"percona-xtradb-cluster-server-{pxc_rpm_name_suffix}",
                 f"percona-xtradb-cluster-test-{pxc_rpm_name_suffix}",
