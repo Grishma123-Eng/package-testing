@@ -81,7 +81,7 @@ def get_package_tuples():
                     for file in xb_files:
                         list.append(("binary", pt, f"{BASE_PATH}/binary/tarball/{file}"))
             # Check ProxySQL
-                if glibc_versions in ["2.17","2.23"]
+                if glibc_versions in ["2.17","2.23"]:
                     for glibc_version in glibc_versions:
                         file= f"proxysql-{PROXYSQL_VER}-Linux-x86_64.glibc{glibc_version}.tar.gz"
                         list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
