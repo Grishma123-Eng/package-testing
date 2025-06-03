@@ -132,7 +132,7 @@ def get_package_tuples():
                 # Check PT deb packages:
                 
                 # Check PXB deb packages:
-        pxb_deb_name_suffix= {PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}." + software_file + "_amd64.deb"
+        pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
         filename =[
                 f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
