@@ -98,7 +98,7 @@ def get_package_tuples():
             # Check Percona XtraBackup sources:
             f"percona-xtrabackup-" + PXB_VER + ".tar.gz" ,
             f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz" ,
-            f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{XB_BUILD_NUM}.generic.src.rpm" ,
+            f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm" ,
             # Check proxysql2 sources:
             f"proxysql2-{PROXYSQL_VER}.tar.gz" ,
             f"proxysql2_{PROXYSQL_VER}.orig.tar.gz" ,
