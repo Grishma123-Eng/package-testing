@@ -61,7 +61,7 @@ base_url = "https://downloads.percona.com/downloads/percona-distribution-mysql-p
 def get_package_tuples():
     list = []
     for software_file in SOFTWARE_FILES:
-        
+
         if software_file in DEB_SOFTWARE_FILES:
             subfolder = f"debian/{software_file}"
         elif software_file in RHEL_SOFTWARE_FILES:
@@ -84,8 +84,8 @@ def get_package_tuples():
                 data=data,
                 headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"}
         )
-        assert req.status_code == 200, f"Failed to access {url}"
-        assert req.text != '[]', f"No files found for {software_file} at {url}"
+        assert req.status_code == 200, f"API call failed for {data}"
+        assert req.text.strip() != '[]', f"No files returned for {subfolder} via API"
         # Test binary tarballs
         if software_file == 'binary':
             glibc_versions=["2.17","2.34", "2.35"]
