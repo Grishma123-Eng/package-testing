@@ -318,8 +318,7 @@
   - name: Print backup output Redhat/Centos
     debug:
       msg: "{{ backup_redhat.stdout_lines }}"
-    when:
-    - backup_redhat is defined
+    when: ansible_os_family == "RedHat"
 
   - name: run backup for Debian
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
@@ -329,8 +328,8 @@
   - name: Print backup for Debian
     debug:
       msg: "{{ backup_debian.stdout_lines }}"
-    when:
-    - backup_debian is defined
+    when: ansible_os_family == "Debian"
+    
 
   - name: prepare backup
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
@@ -344,8 +343,7 @@
   - name: Show streaming + encryption backup output (RedHat)
     debug:
       msg: "{{ redhat_stream_backup.stdout_lines }}"
-    when:
-    - redhat_stream_backup is defined
+    when: ansible_os_family == "RedHat"
 
   - name: run backup for Debian with streaming and encryption enabled
     shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
