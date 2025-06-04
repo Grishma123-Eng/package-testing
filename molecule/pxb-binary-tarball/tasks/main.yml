@@ -317,7 +317,7 @@
 
   - name: Print backup output Redhat/Centos
     debug:
-      msg: backup_redhat.stdout_lines
+      msg: "{{ backup_redhat.stdout_lines }}"
 
   - name: run backup for Debian
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
@@ -326,7 +326,7 @@
 
   - name: Print backup for Debian
     debug:
-      msg: backup_debian.stdout_lines 
+      msg: "{{ backup_debian.stdout_lines }}"
 
   - name: prepare backup
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
