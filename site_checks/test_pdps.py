@@ -68,9 +68,6 @@ def get_package_tuples():
     for software_file in SOFTWARE_FILES:
       #  data = 'version_files=percona-distribution-mysql-ps-' + PS_VER_UPSTREAM + '&software_files=' + software_file
       #  req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
-       # assert req.status_code == 200
-       # assert req.text != '[]', software_file
-        # Test binary tarballs
         for software_file in SOFTWARE_FILES:
             if software_file == "binary":
                 glibc_versions = ["2.35"] if version.parse(PS_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
@@ -115,18 +112,6 @@ def get_package_tuples():
                 ]
                 for file in source_files:
                     packages.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
-            # Check mysql-shell sources:
-          #  assert re.search(rf'percona-mysql-shell_{PS_VER_UPSTREAM}-\d+\.orig\.tar\.gz', req.text)
-           # assert re.search(rf'percona-mysql-shell-{PS_VER_UPSTREAM}-\d+\.generic\.src\.rpm', req.text)
-            # Check orchestrator sources:
-            # Check Percona Toolkit sources:
-           # assert "percona-toolkit-" + PT_VER + ".tar.gz",
-           # assert re.search(rf'percona-toolkit-{PT_VER}-\d+\.src\.rpm', req.text)
-            # Check Percona XtraBackup sources:
-            # Check proxysql2 sources:
-          #  assert "proxysql2-" + PROXYSQL_VER + ".tar.gz",
-           # assert "proxysql2_" + PROXYSQL_VER + ".orig.tar.gz",
-            #assert re.search(rf'proxysql2-{PROXYSQL_VER}-\d+\.\d+\.generic\.src\.rpm', req.text)
         # Test packages for every OS
         for software_file in DEB_SOFTWARE_FILES:
             ps_deb_name_suffix= f"{PS_VER}-{PS_BUILD_NUM}.{software_file}_amd64.deb"
@@ -156,10 +141,7 @@ def get_package_tuples():
             f"percona-xtrabackup-test-{pxb_deb_name_suffix}" ]
             for file in filename:
                 packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
-                # Check proxysql deb packages:
-         #   proxysql=f"proxysql2_{PROXYSQL_VER}" 
-          #  for file in proxysql:
-           #     packages.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
+
         for software_file in RHEL_SOFTWARE_FILES:
                 # Check PS rpm packages:
             el = RHEL_EL[software_file]
@@ -174,27 +156,20 @@ def get_package_tuples():
             f"percona-server-shared-{ps_rpm_name_suffix}",
             f"percona-icu-data-files-{ps_rpm_name_suffix}",
             f"percona-server-debuginfo-{ps_rpm_name_suffix}",
-         #   f'percona-mysql-shell-{PS_VER_UPSTREAM}-1.el{el}.x86_64.rpm',
             f'percona-orchestrator-{ORCH_VER_FULL}.el{el}.x86_64.rpm',
             f'percona-orchestrator-cli-{ORCH_VER_FULL}.el{el}.x86_64.rpm',
             f'percona-orchestrator-client-{ORCH_VER_FULL}.el{el}.x86_64.rpm']
-          #  f'percona-toolkit-{PT_VER}'
+
             if software_file != "redhat/9":
                 rpm_files.append(f"percona-server-shared-compat-{ps_rpm_name_suffix}"),
-                # Check mysql rpm packages:
-                # Check orchestrator rpm packages:
-                # Check PT rpm packages:
             for file in rpm_files:
                 packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
-                # Check PXB rpm packages:
                 el = RHEL_EL[software_file]
                 pxb_rpm_name_suffix=  f"{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
                 filename= [
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo-{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}-{pxb_rpm_name_suffix}"]
-                # Check proxysql rpm packages:
-               # f"proxysql2-{PROXYSQL_VER}" ]
                 for file in filename:
                     packages.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
                 

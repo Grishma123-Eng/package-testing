@@ -67,14 +67,8 @@ def get_package_tuples():
             source_file= [
             f"Percona-XtraDB-Cluster-{PXC_VER_PERCONA}.tar.gz",
             f"percona-xtrabackup-{PXB_VER}.tar.gz" ,
-          #  f"percona-xtrabackup-{PXB_MAJOR_VERSION}_{PXB_VER}.orig.tar.gz" ,
-           # f"percona-xtrabackup-{PXB_MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm" ,
-            # Check proxysql2 sources:
             f"proxysql2-{PROXYSQL_VER}.tar.gz" ,
-            # Check percona-haproxy sources:
             f"percona-haproxy-{HAPROXY_VER}.tar.gz",
-         #   assert re.search(rf'percona-haproxy-{HAPROXY_VER}-\d+\.generic\.src\.rpm', req.text)
-            # Check prepl_manager sources:
             f"percona-replication-manager-{REPL_MAN_VER}.tar.gz"]
             for file in source_file:
                 list.append(("source", file, f"{BASE_PATH}/source/tarball/{file}"))
@@ -96,21 +90,13 @@ def get_package_tuples():
                 f"percona-xtradb-cluster-dbg_{pxc_deb_name_suffix}" ]
         for file in deb_files:
             list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
-                # Check PT deb packages:
-                
-                # Check PXB deb packages:
         pxb_deb_name_suffix= f"{PXB_MAJOR_VERSION}_{PXB_VER}-{PXB_BUILD_NUM}.{software_file}_amd64.deb"
         filename =[
                 f"percona-xtrabackup-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-dbg-{pxb_deb_name_suffix}",
                 f"percona-xtrabackup-test-{pxb_deb_name_suffix}",
-           #     f"percona-toolkit_{PT_VER}",
-                # Check haproxy deb packages:
                 f"percona-haproxy_{HAPROXY_VER}-1.{software_file}_amd64.deb",
-                # Check percona-replication-manager deb packages:
                 f"percona-replication-manager_{REPL_MAN_VER}-1.{software_file}_amd64.deb" ]
-                # Check proxysql deb packages:
-              #  f"proxysql2_{PROXYSQL_VER}" ]
         for file in filename:
             list.append((software_file, file, f"{BASE_PATH}/binary/debian/{software_file}/x86_64/{file}"))
     for software_file in RHEL_SOFTWARE_FILES:
@@ -132,22 +118,15 @@ def get_package_tuples():
             rpm_files.append(f"percona-xtradb-cluster-debuginfo-{pxc_rpm_name_suffix}")
         for file in rpm_files:
             list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
-                # Check PT rpm packages:
-                
-                # Check PXB rpm packages:
+
         pxb_rpm_name_suffix=f"-{PXB_VER}.{PXB_BUILD_NUM}.el{el}.x86_64.rpm"
         filename= [
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
-         #       f'percona-toolkit-{PT_VER}',
                 f"percona-xtrabackup-{PXB_MAJOR_VERSION}-debuginfo{pxb_rpm_name_suffix}",
                 f"percona-xtrabackup-test-{PXB_MAJOR_VERSION}{pxb_rpm_name_suffix}",
-                # Check haproxy rpm packages:
                 f"percona-haproxy-{HAPROXY_VER}-1.el{el}.x86_64.rpm",
                 f"percona-haproxy-debuginfo-{HAPROXY_VER}-1.el{el}.x86_64.rpm",
-                # Check percona-replication-manager rpm packages:
                 f"percona-replication-manager-{REPL_MAN_VER}-1.el{el}.x86_64.rpm"]
-                # Check proxysql rpm packages:
-            #    f"proxysql2-{PROXYSQL_VER}" ]
         for file in filename:
             list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))    
             
@@ -155,8 +134,6 @@ def get_package_tuples():
     return list
 
 LIST_OF_PACKAGES = get_package_tuples()
-
-# Check that every link from website is working (200 reply and has some content-length)
 @pytest.mark.parametrize(('software_file', 'filename', 'link'), LIST_OF_PACKAGES)
 def test_packages_site(software_file, filename, link):
     print(f'\nTesting {software_file}, file: {filename}')

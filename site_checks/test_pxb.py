@@ -45,11 +45,6 @@ def get_package_tuples():
     packages = []
     for software_file in SOFTWARE_FILES:
         if "binary" in SOFTWARE_FILES:
-    #    data = 'version_files=Percona-XtraBackup-' + PXB_VER + '&software_files=' + software_file
-    #    req = requests.post("https://www.percona.com/products-api.php",data=data,headers = {"content-type": "application/x-www-form-urlencoded; charset=UTF-8"})
-    #    assert req.status_code == 200
-    #    assert req.text != '[]', software_file
-        # Check binary tarballs
             glibc_versions = ["2.35"] if version.parse(PXB_VER) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
                 for suffix in ["", "-minimal"]:
@@ -58,18 +53,9 @@ def get_package_tuples():
         # Check source tarballs
         if "source" in SOFTWARE_FILES:
             for filename in [
-                f"percona-xtrabackup-{PXB_VER}.tar.gz" ,
-              #  f"percona-xtrabackup-{MAJOR_VERSION}_{PXB_VER}.orig.tar.gz"
+                f"percona-xtrabackup-{PXB_VER}.tar.gz" 
             ]:
                 packages.append(("source", filename, f"{BASE_PATH}/source/tarball/{filename}"))
-
-    #       if version.parse(PXB_VER) > version.parse("8.0.0"):
-        #        file1= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}.{PXB_BUILD_NUM}.generic.src.rpm"
-        #        packages.append(("source", file1, f"{BASE_PATH}/source/tarball/{file1}"))
-
-         #   elif version.parse(PXB_VER) > version.parse("2.0.0") and version.parse(PXB_VER) < version.parse("8.0.0"):
-         #       file2= f"percona-xtrabackup-{MAJOR_VERSION}-{PXB_VER}-{PXB_BUILD_NUM}.generic.src.rpm"
-         #       packages.append(("source", file2, f"{BASE_PATH}/source/tarball/{file2}"))
 
         # Test packages for every OS
         for software_file in DEB_SOFTWARE_FILES:
