@@ -336,7 +336,7 @@
 
 
   - name: run backup for Redhat/Centos with streaming and encryption enabled
-    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > 2>&1
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 2>&1
     when: ansible_os_family == "RedHat"
     register: redhat_stream_backup
 
