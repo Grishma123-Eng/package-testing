@@ -322,7 +322,7 @@
 
   - name: Fail the task intentionally
     fail:
-    msg: "Backup stream file was not created!"
+      msg: "Backup stream file was not created!"
     when: ansible_os_family == "RedHat"
 
   - name: run backup for Debian
