@@ -320,6 +320,11 @@
       msg: "{{ backup_redhat.stdout_lines }}"
     when: ansible_os_family == "RedHat"
 
+  - name: Fail the task intentionally
+    fail:
+    msg: "Backup stream file was not created!"
+    when: ansible_os_family == "RedHat"
+
   - name: run backup for Debian
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
     when: ansible_os_family == "Debian"
