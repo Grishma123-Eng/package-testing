@@ -314,11 +314,21 @@
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
     when: ansible_os_family == "RedHat"
     register: backup_redhat
+    ignore_errors: no
 
-  - name: Print backup output Redhat/Centos
+  - name: Fail if backup  failed for Redhat/Centos
+    fail:
+     msg: "Backup failed: {{ backup_redhat.stderr }}"
+    when:
+      - ansible_os_family == "RedHat"
+      - backup_redhat.rc != 0
+
+  - name: Show backup success logs
     debug:
-      msg: "{{ backup_redhat.stdout_lines }}"
-    when: ansible_os_family == "RedHat"
+     msg: "Backup succeeded. Output: {{ backup_redhat.stdout_lines }}"
+    when:
+      - ansible_os_family == "RedHat"
+      - backup_redhat.rc == 0
 
   - name: Fail the task intentionally
     fail:
