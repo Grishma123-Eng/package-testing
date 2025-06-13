@@ -325,7 +325,10 @@
 
   - name: Show backup success logs
     debug:
-     msg: "Backup succeeded. Output: {{ backup_redhat.stdout_lines }}"
+     msg: |
+        Backup succeeded.
+        STDOUT: {{ backup_redhat.stdout_lines }}
+        STDERR: {{ backup_redhat.stderr_lines }}
     when:
       - ansible_os_family == "RedHat"
       - backup_redhat.rc == 0
