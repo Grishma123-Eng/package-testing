@@ -111,7 +111,7 @@
 
   - name: set base path based on repo type
     set_fact:
-      base_repo_path: "{{ 'qa-test/pxc-gated-' + PXC_VERSION_NAME if lookup('env', 'REPO') == 'testing' else 'pxc-' + PXC_VERSION_MAJOR + '-pro/tarball' }}"
+      base_repo_path: "{{ 'qa-test/pxc-gated-' + PXC_VERSION_NAME if lookup('env', 'REPO') == 'testing' else 'pxc-' + PXC_VERSION_MAJOR + '-pro/tarballs/Percona-XtraDB-Cluster-' + PXC_VERSION_NAME }}"
 
 
   - name: get testing repo TARBALL_LINK
