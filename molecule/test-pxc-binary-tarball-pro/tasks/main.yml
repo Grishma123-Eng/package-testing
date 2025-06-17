@@ -111,12 +111,8 @@
 
   - name: set base path based on repo type
     set_fact:
-      base_repo_path: >-
-        {% if lookup('env', 'REPO') == 'testing' %}
-          qa-test/pxc-gated-{{ PXC_VERSION_NAME }}
-        {% else %}
-          pxc-{{ PXC_VERSION_MAJOR }}-pro/tarball
-        {% endif %}
+      base_repo_path: "{{ 'qa-test/pxc-gated-' + PXC_VERSION_NAME if repo == 'testing' else 'pxc-' + PXC_VERSION_MAJOR + '-pro/tarball' }}"
+
 
   - name: get testing repo TARBALL_LINK
     set_fact:
