@@ -4,7 +4,7 @@ source /etc/environment
 
 #!/usr/bin/env bash
 export PATH=${HOME}/.local/bin:${PATH}
-export PXC_VERSION=${PXC_VERSION}
+export PROXYSQL_VERSION=${PROXYSQL_VERSION}
 export WSREP_VERSION=${WSREP_VERSION}
 export TARBALL_NAME=${TARBALL_NAME}
 
@@ -32,7 +32,7 @@ elif [ -f /etc/redhat-release ]; then
     sudo yum install -y python3 python3-pip
   fi
   sudo yum install -y libev
-  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+  if [ "${PROXYSQL_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     sudo percona-release enable pxb-24 testing
     sudo yum install -y percona-xtrabackup-24
@@ -50,7 +50,7 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
-  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+  if [ "${PROXYSQL_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
     sudo percona-release enable pxb-24 testing
@@ -73,6 +73,6 @@ fi
 cp conf/*.cnf "$BASE_DIR/"
 
 echo "Running tests..."
-python3 -m pytest --ignore="${PXC_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@
+python3 -m pytest --ignore="${PROXYSQL_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@
 
 #PRO=$(echo ${PRO})
