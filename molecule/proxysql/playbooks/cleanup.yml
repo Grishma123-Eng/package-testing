@@ -10,9 +10,7 @@
         state: absent
       vars:
         paths:
-        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
-        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
-        - /usr/percona-server
-        - /tmp/percona-server-minimal
-        - /tmp/percona-server-debug
+        - /tmp/proxysql-{{ lookup('env', 'proxysql_version') }}.tar.gz
+        - /tmp/proxysql-{{ lookup('env', 'proxysql_version') }}-minimal.tar.gz
+        - /tmp/proxysqlr-{{ lookup('env', 'proxysql_version') }}-debug.tar.gz
+        - /usr/proxysql
