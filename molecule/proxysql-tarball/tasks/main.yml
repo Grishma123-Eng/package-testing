@@ -87,6 +87,12 @@
         Folder: {{ tarball_folder }}
         URL: https://downloads.percona.com/downloads/TESTING/proxysql-{{ proxysql_folder_version }}/{{ tarball_name }}
 
+  - name: Ensure /package-testing/proxysql directory exists
+    file:
+      path: /package-testing/proxysql
+      state: directory
+      mode: '0755'
+
   - name: Download ProxySQL tarball
     ansible.builtin.get_url:
       url: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ proxysql_folder_version }}/{{ tarball_name }}"
