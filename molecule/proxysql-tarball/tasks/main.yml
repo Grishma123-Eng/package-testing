@@ -73,7 +73,7 @@
   - name: Set full and short ProxySQL versions
     set_fact:
       proxysql_version: "{{ lookup('env', 'PROXYSQL_VERSION') }}"
-      proxysql_folder_version: "{{ lookup('env', 'PROXYSQL_VERSION').split('-')[0] }}"
+      proxysql_folder_version: "proxysql-{{ lookup('env', 'PROXYSQL_VERSION').split('-')[0] }}"
 
   - name: Set tarball name and folder name
     set_fact:
