@@ -76,8 +76,8 @@
 
   - name: Set tarball name and folder name
     set_fact:
-      tarball_name: "proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
-      tarball_folder: "proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
+      tarball_name: "proxysql-{{ proxysql_folder_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+      tarball_folder: "proxysql-{{ proxysql_folder_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
 
 
   - name: Show constructed URL and filename
@@ -85,11 +85,11 @@
      msg: |
         Tarball name: {{ tarball_name }}
         Folder: {{ tarball_folder }}
-        URL: https://downloads.percona.com/downloads/TESTING/proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}/{{ tarball_name }}
+        URL: https://downloads.percona.com/downloads/TESTING/proxysql-{{ proxysql_folder_version }}/{{ tarball_name }}
 
   - name: Download ProxySQL tarball
     ansible.builtin.get_url:
-      url: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}/{{ tarball_name }}"
+      url: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ proxysql_folder_version }}/{{ tarball_name }}"
       dest: "/package-testing/proxysql/{{ tarball_name }}"
       mode: '0644'
 
