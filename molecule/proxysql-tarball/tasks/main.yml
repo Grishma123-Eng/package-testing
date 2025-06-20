@@ -77,8 +77,8 @@
 
   - name: Set tarball name and folder name
     set_fact:
-      tarball_name: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
-      tarball_folder: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ glibc_version }}"
+      tarball_name: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+      tarball_folder: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
 
 
   - name: Show constructed URL and filename
