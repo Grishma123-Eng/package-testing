@@ -130,7 +130,7 @@
 
   - name: Unpack regular tarball
     unarchive:
-      src: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'lookup('env', 'PROXYSQL_VERSION')') }}.tar.gz"
+      src: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
