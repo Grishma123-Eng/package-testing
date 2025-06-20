@@ -72,13 +72,12 @@
 #
   - name: Set full and short ProxySQL versions
     set_fact:
-      proxysql_version: "{{ lookup('env', 'PROXYSQL_VERSION') }}"
-      proxysql_folder_version: "{{ proxysql_version.split('-')[0] }}"
+      proxysql_folder_version: "{{ lookup('env', 'PROXYSQL_VERSION').split('-')[0] }}"
 
   - name: Set tarball name and folder name
     set_fact:
-      tarball_name: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
-      tarball_folder: "proxysql-{{ proxysql_version }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
+      tarball_name: "proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+      tarball_folder: "proxysql-{{ lookup('env', 'PROXYSQL_VERSION') }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
 
 
   - name: Show constructed URL and filename
@@ -126,12 +125,12 @@
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'proxysql_version') }}.tar.gz"
+      dest: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'lookup('env', 'PROXYSQL_VERSION')') }}.tar.gz"
       mode: '0644'
 
   - name: Unpack regular tarball
     unarchive:
-      src: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'proxysql_version') }}.tar.gz"
+      src: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'lookup('env', 'PROXYSQL_VERSION')') }}.tar.gz"
       dest: /
       remote_src: yes
       extra_opts:
