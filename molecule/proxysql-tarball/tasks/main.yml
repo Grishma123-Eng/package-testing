@@ -128,12 +128,6 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('PXC-FINAL') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
 
-  - name: Download regular {{ TARBALL_NAME }}
-    get_url:
-      url: '{{ TARBALL_LINK }}'
-      dest: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'lookup('env', 'PROXYSQL_VERSION')') }}.tar.gz"
-      mode: '0644'
-
   - name: Unpack regular tarball
     unarchive:
       src: "package-testing/binary-tarball-tests/proxysql/proxysql-{{ lookup('env', 'lookup('env', 'PROXYSQL_VERSION')') }}.tar.gz"
@@ -142,7 +136,6 @@
       extra_opts:
       - --transform
       - 's,^/*[^/]*,/package-testing/binary-tarball-tests/proxysql/proxysql,S'
-
 
   - name: Append values to /etc/environment file
     lineinfile:
