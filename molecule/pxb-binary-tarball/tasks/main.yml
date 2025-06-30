@@ -311,27 +311,28 @@
     command: /package-testing/plugins_test.sh
 
   - name: run backup for Redhat/Centos
-    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock &> /tmp/backuplog
     when: ansible_os_family == "RedHat"
-    register: backup_redhat
+    register: backup_cmd
     ignore_errors: no
 
-  - name: Fail if backup  failed for Redhat/Centos
-    fail:
-     msg: "Backup failed: {{ backup_redhat.stderr }}"
-    when:
-      - ansible_os_family == "RedHat"
-      - backup_redhat.rc != 0
+  - name: Check if backup was successful in log
+    shell: grep -c "completed OK" /tmp/backuplog
+    register: backup_success
+    when: ansible_os_family == "RedHat"
+    failed_when: backup_success.stdout | int == 0
 
-  - name: Show backup success logs
+  - name: Backup verification passed
     debug:
-     msg: |
-        Backup succeeded.
-        STDOUT: {{ backup_redhat.stdout_lines }}
-        STDERR: {{ backup_redhat.stderr_lines }}
+    msg: " Backup completed successfully — found {{ backup_success.stdout }} 'completed OK' entries in log."
+    when: ansible_os_family == "RedHat"
+
+  - name: Fail if backup command itself failed (before log check)
+    fail:
+      msg: "Backup command failed: {{ backup_cmd.stderr }}"
     when:
-      - ansible_os_family == "RedHat"
-      - backup_redhat.rc == 0
+    - ansible_os_family == "RedHat"
+    - backup_cmd.rc != 0
 
   - name: Fail the task intentionally
     fail:
