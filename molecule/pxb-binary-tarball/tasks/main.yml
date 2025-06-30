@@ -324,7 +324,7 @@
 
   - name: Backup verification passed
     debug:
-    msg: " Backup completed successfully — found {{ backup_success.stdout }} 'completed OK' entries in log."
+      msg: " Backup completed successfully — found {{ backup_success.stdout }} 'completed OK' entries in log."
     when: ansible_os_family == "RedHat"
 
   - name: Fail if backup command itself failed (before log check)
