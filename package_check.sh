@@ -105,7 +105,7 @@ elif [ $1 = "pxb84" ]; then
 elif [ $1 = "pxb84" ] && [ "$2" = "pro" ]; then
   version=${PXB84_PRO_VER}
   pkg_version=${PXB84_PRO_PKG_VER}
-elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
+elif [[ $1 =~ ^pxb9[0-9]{1}$ ]]; then
   version=${PXB_INN_LTS_VER}
   pkg_version=${PXB_INN_LTS_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
@@ -321,6 +321,10 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
     extra_version="-80"
   elif [ ${product} = "pxb84" ]; then
     extra_version="-84"
+  elif [ ${product} = "pxb91" ]; then
+    extra_version="-91"
+  elif [ ${product} = "pxb92" ]; then
+    extra_version="-92"
   else
     extra_version=""
   fi

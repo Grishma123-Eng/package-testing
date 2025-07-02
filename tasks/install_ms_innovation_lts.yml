@@ -47,7 +47,7 @@
       state: present
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-9x"
 
   - name: Import GPG key for RPM 8-3
     rpm_key:
