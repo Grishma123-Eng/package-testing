@@ -1,0 +1,17 @@
+---
+
+  - name: Setup SSH keys Debian
+    authorized_key:
+      user: admin
+      key: "{{ lookup('file', 'public_keys') }}"
+      state: present
+      exclusive: False
+    when: ansible_distribution == "Debian"
+
+  - name: Setup SSH keys Ubuntu
+    authorized_key:
+      user: ubuntu
+      key: "{{ lookup('file', 'public_keys') }}"
+      state: present
+      exclusive: False
+    when: ansible_distribution == "Ubuntu"
