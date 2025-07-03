@@ -43,6 +43,25 @@
         format: zip
       when:
         - mysqld_log.stat.exists or mysql_error_log.stat.exists
+
+    - name: Check if /var/tmp/mysql_logs.zip exists
+      stat:
+        path: /var/tmp/mysql_logs.zip
+      register: zip_file_stat
+
+    - name: Fetch the logs archive on localhost
+      fetch:
+        src: /var/tmp/mysql_logs.zip
+        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_mysql_logs.zip"
+        flat: yes
+      when: zip_file_stat.stat.exists
+      become: true
+
+    - name: Debug if no logs found to fetch
+      debug:
+        msg: "No log files found. Skipping fetch step."
+      when: not zip_file_stat.stat.exists
+      delegate_to: localhost
 ##
 
     - name: Get the arch value from /etc/os-release
