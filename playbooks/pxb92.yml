@@ -26,22 +26,6 @@
     when: 
       - lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 9x main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
-    when: 
-      - lookup('env', 'install_repo') == "main"
-#      - lookup('env', 'REPO_TYPE') !="PRO"
-
-  - name: include tasks for enabling PS 9x test repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
-    when: 
-      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
-  - name: include tasks for enabling PS 9x experimental repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
-    when: 
-      - lookup('env', 'install_repo') == "experimental"
-
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
@@ -71,28 +55,8 @@
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
-## INSTALL PS
-  - name: install Percona Server 8.0 packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
-    when:
-      - lookup('env', 'server_to_test') == "ps-9x-innovation"
-
 
 # Check for the installed packages using apt list 
-
-  - name: Check for the installed packages using apt list HERE!!!!!!!!
-    shell: apt list | grep percona
-    register: installed_packages
-    when:
-      - lookup('env', 'server_to_test') == "ps-9x-innovation"
-      - ansible_os_family == "Debian"
-
-  - name: Print the installed packages
-    debug:
-      var: installed_packages.stdout_lines
-    when:
-      - lookup('env', 'server_to_test') == "ps-9x-innovation"
-      - ansible_os_family == "Debian"
 
 # INSTALL MS 
 
@@ -155,20 +119,6 @@
       - lookup('env', 'REPO_TYPE') !="PRO"
 
 
-  - name: Check for the installed packages using apt list HERE 1!!!!!!!!
-    shell: apt list | grep percona
-    register: installed_packages1
-    when:
-      - lookup('env', 'server_to_test') == "ps-innovation-lts"
-      - ansible_os_family == "Debian"
-
-  - name: Print the installed packages
-    debug:
-      var: installed_packages1.stdout_lines
-    when:
-      - lookup('env', 'server_to_test') == "ps-innovation-lts"
-      - ansible_os_family == "Debian"
-
 # INSTALL PXB
 
   - name: install Percona XtraBackup 9x packages
@@ -201,18 +151,6 @@
     become: yes
     when: 
       - ansible_os_family == "Debian"
-
-  - name: PRINT INSTALLED XTRABACKUP version rhel
-    shell: rpm -qa | grep percona-xtrabackup
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-    register: xtrabackup_version_print
-
-  - name: DEBUG xtrabackup_version_print rhel
-    debug:
-      msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
 ##
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
@@ -284,23 +222,6 @@
       - zstd
     when: ansible_os_family == "RedHat"
 
-  - name: install lz4 and zstd packages on Ubuntu/Debian
-    apt:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - lz4
-      - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-
-  - name: install lz4 and zstd packages on Bionic 
-    apt:
-      name: "{{ packages }}"
-    vars: 
-      packages:
-      - liblz4-tool
-      - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
