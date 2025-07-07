@@ -12,7 +12,7 @@ platforms:
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: pxb-package-testing
+      iit-billing-tag: pxb-9x-testing
       job-name: ${JOB_NAME}
 provisioner:
   name: ansible
@@ -22,7 +22,7 @@ provisioner:
     destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
-    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+    converge: ../../../../playbooks/pxb92.yml
 scenario:
   name: ubuntu-jammy-arm
   destroy_sequence:
