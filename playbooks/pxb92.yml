@@ -100,11 +100,21 @@
 
 #----- ENABLE PXB REPOS
 
+
+  - name: Install percona-release on Ubuntu Jammy
+    apt:
+      name: percona-release
+      state: present
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu" 
+
+
   - name: Enable PXB 80 repo testing non pro
     command: percona-release enable-only pxb-9x-innovation testing
     when:
       - lookup('env', 'install_repo') == "testing"
       - lookup('env', 'REPO_TYPE') !="PRO"
+
 
   - name: Enable PXB 80 repo main non pro
     command: percona-release enable-only pxb-9x-innovation release
@@ -112,8 +122,9 @@
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'REPO_TYPE') !="PRO"
 
+
   - name: Enable PXB 80 repo exp in non pro
-    command: sudo percona-release enable-only pxb-9x-innovation experimental
+    command: percona-release enable-only pxb-9x-innovation experimental
     when:
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'REPO_TYPE') !="PRO"
