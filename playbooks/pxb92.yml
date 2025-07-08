@@ -112,8 +112,8 @@
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: Enable PXB 80 repo main non pro
-    command: percona-release enable-only pxb-9x-innovation experimental
+  - name: Enable PXB 80 repo exp in non pro
+    command: sudo percona-release enable-only pxb-9x-innovation experimental
     when:
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'REPO_TYPE') !="PRO"
