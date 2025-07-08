@@ -100,6 +100,14 @@
 
 #----- ENABLE PXB REPOS
 
+  - name: Add Percona APT repository manually for Jammy
+    ansible.builtin.shell: |
+      wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb -O /tmp/percona-release.deb
+      dpkg -i /tmp/percona-release.deb
+    args:
+      creates: /etc/apt/sources.list.d/percona-release.list
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
+    become: true
 
   - name: Install percona-release on Ubuntu Jammy
     apt:

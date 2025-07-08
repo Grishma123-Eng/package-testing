@@ -19,20 +19,20 @@ provisioner:
   log: True
   playbooks:
     create: ../../playbooks/create_noble.yml
-    destroy: ../../playbooks/destroy_noble.yml
+  #  destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/pxb92.yml
 scenario:
   name: ubuntu-jammy
-  destroy_sequence:
-    - destroy
+ # destroy_sequence:
+ #   - destroy
   cleanup_sequence:
     - cleanup
   test_sequence:
-    - destroy
+  #  - destroy
     - create
     - prepare
     - converge
     - cleanup
-    - destroy
+  #  - destroy
