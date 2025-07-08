@@ -2,7 +2,7 @@
 #
   - name: Set major_release_version variable
     set_fact:
-    major_release_version: "{{ major_release_version_register.stdout }}"
+      major_release_version: "{{ major_release_version_register.stdout }}"
   
   
   - name: install Percona XtraBackup new deb packages for pxb-{{ major_release_version }}
