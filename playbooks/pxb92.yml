@@ -145,10 +145,6 @@
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
 #  - name: start mysql service with systemctl command
 #    command: systemctl start mysqld
 #    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
@@ -162,14 +158,16 @@
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
-  - name: start mysql service with service module DEBIAN PXB80
+  - name: Start MySQL service (mysql or mysqld) on Debian
     ansible.builtin.systemd:
-      name: mysql
-      enabled: yes
+      name: "{{ item }}"
       state: started
-    become: yes
-    when: 
-      - ansible_os_family == "Debian"
+      enabled: yes
+    with_items:
+      - mysql
+      - mysqld
+    ignore_errors: true
+    when: ansible_os_family == "Debian"
 
 ##
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
@@ -215,12 +213,12 @@
     command: /package-testing/check_telemetry.sh pxb -e
 
   - name: check that Percona XtraBackup version is correct NON PRO
-    command: /package-testing/version_check.sh pxb92
+    command: /package-testing/version_check.sh pxb91
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: check that Percona XtraBackup package versions are correct NON PRO
-    command: /package-testing/package_check.sh pxb92
+    command: /package-testing/package_check.sh pxb91
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
