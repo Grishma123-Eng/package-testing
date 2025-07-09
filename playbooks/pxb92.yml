@@ -48,7 +48,6 @@
       async: 30
       poll: 0
       when:
-        - install_type == "tar"
         - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
     - name: Install MySQL from extracted .deb packages
