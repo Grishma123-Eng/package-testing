@@ -43,6 +43,14 @@
         dest: /tmp
         remote_src: yes
 
+    - name: Start MySQL from tarball manually
+      command: /opt/mysql/bin/mysqld_safe --defaults-file=/opt/mysql/my.cnf --user=mysql
+      async: 30
+      poll: 0
+      when:
+        - install_type == "tar"
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
     - name: Install MySQL from extracted .deb packages
       when: lookup('env', 'install_type') == 'tar'
       shell: dpkg -i /tmp/*.deb || apt-get install -f -y
