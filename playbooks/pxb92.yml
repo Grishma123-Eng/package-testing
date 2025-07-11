@@ -130,7 +130,7 @@
       when: ansible_os_family == "Debian"
 
     - name: Enable PXB 9.x innovation experimental repo
-      shell: percona-release enable only pxb-9x-innovation experimental
+      shell: percona-release enable pxb-9x-innovation experimental
       when: 
         - lookup('env', 'install_repo')  == "experimental"
 
