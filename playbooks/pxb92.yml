@@ -59,14 +59,14 @@
         state: present
       when: 
         - ansible_os_family == "Debian"
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
 
     - name: download and extract world database
       command: "{{ item }}"
       with_items:
         - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
       when:
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
 
 
     - name: install deb packages
@@ -80,26 +80,26 @@
         - unzip
       when: 
           - ansible_os_family == "Debian"
-          - lookup('env', 'server_to_test') == "ms_innovation_lts"
+          - server_to_test == "ms_innovation_lts"
 
 
     - name: Install mysql deb packages using tarballs ubuntu 22.04
       command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
       when: 
         - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
 
     - name: extract mysql deb packages for ubuntu 22.04
       command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
       when: 
         - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
  
     - name: extract mysql deb packages for ubuntu 22.04
       command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
       when: 
         - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
 
 ##
     - name: install mysql deb packages
@@ -108,13 +108,26 @@
         DEBIAN_FRONTEND: noninteractive
       when: 
         - ansible_os_family == "Debian"
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"  
+        - server_to_test == "ms_innovation_lts"  
 
     - name: Start the MySQL service
       service: name=mysql state=started
       when: 
         - ansible_os_family == "Debian"
-        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+        - server_to_test == "ms_innovation_lts"
+
+
+    - name: Download percona-release for Ubuntu
+      get_url:
+        url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+        dest: /tmp/percona-release.deb
+      when: ansible_os_family == "Debian"
+
+    - name: Install percona-release for Ubuntu
+      apt:
+        deb: /tmp/percona-release.deb
+        state: present
+      when: ansible_os_family == "Debian"
 
     - name: Enable PXB 9.x innovation experimental repo
       shell: percona-release enable only pxb-9x-innovation experimental
