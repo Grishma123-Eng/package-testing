@@ -6,127 +6,156 @@
     chdir: "{{ playbook_dir }}"
 
   tasks:
-    - name: Read MYSQL_VERSION from VERSIONS file
-      shell: grep '^MYSQL_VERSION=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
-      register: MYSQL_VERSION_var
 
-    - name: Set MySQL version fact
+
+    - name: Echo server_to_test variable
+      debug:
+        msg: "{{ lookup('env', 'server_to_test') }}"
+
+    - name: include tasks for test env setup
+      include_tasks: ../tasks/test_prep.yml
+
+ #   - name: Read MYSQL_VERSION from VERSIONS file
+  #    shell: grep '^MYSQL_VERSION=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+   #   register: MYSQL_VERSION_var
+
+   #- name: Set MySQL version fact
+     # set_fact:
+    #    MYSQL_VERSION: "{{ MYSQL_VERSION_var.stdout }}"
+
+    - name: Extract PXB major and minor version number using shell commands
+      shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
+      register: pxb_version_major_minor
+
+    - name: Extract PXB major version number using shell commands
+      shell: cat /package-testing/VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
+      register: pxb_version_major
+
+   # - name: Extract major.minor for MySQL
+    #  shell: echo "{{ MYSQL_VERSION }}" | cut -d. -f1,2
+     # register: mysql_major_minor
+
+    - name: Extract version number using shell commands
+      shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+      register: major_release_version
+
+    - name: Set major_release_version variable
       set_fact:
-        MYSQL_VERSION: "{{ MYSQL_VERSION_var.stdout }}"
+        major_release_version: "{{ major_release_version.stdout }}"
 
-    - name: Extract major.minor for MySQL
-      shell: echo "{{ MYSQL_VERSION }}" | cut -d. -f1,2
-      register: mysql_major_minor
-
-    - name: Set MySQL major.minor fact
+    - name: Set pxb_version_major variable
       set_fact:
-        mysql_major_minor: "{{ mysql_major_minor.stdout }}"
+        pxb_version_major: "{{ pxb_version_major.stdout }}"
 
-    - name: Extract PXB version
-      shell: grep '^PXB_VERSION=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
-      register: pxb_version_var
-
-    - name: Set PXB version fact
+    - name: Set pxb_version_major_minor variable
       set_fact:
-        pxb_version: "{{ pxb_version_var.stdout }}"
+        pxb_version_major_minor: "{{ pxb_version_major_minor.stdout }}"
 
-    - name: Download MySQL tarball for .tar-based install
-      when: lookup('env', 'install_type') == 'tar'
-      get_url:
-        url: "https://downloads.mysql.com/archives/get/p/23/file/mysql-server_{{ MYSQL_VERSION }}-1ubuntu22.04_amd64.deb-bundle.tar"
-        dest: "/package-testing/mysql-server_{{ MYSQL_VERSION }}.tar"
+#upstream:
 
-    - name: Extract MySQL tarball
-      when: lookup('env', 'install_type') == 'tar'
-      unarchive:
-        src: "/package-testing/mysql-server_{{ MYSQL_VERSION }}.tar"
-        dest: /tmp
-        remote_src: yes
+    - name: Import key for mysql-repo add GPG key (Debian)
+      apt_key:
+        url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023  
+        state: present
+      when: 
+        - ansible_os_family == "Debian"
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-    - name: Start MySQL from tarball manually
-      command: /opt/mysql/bin/mysqld_safe --defaults-file=/opt/mysql/my.cnf --user=mysql
-      async: 30
-      poll: 0
+    - name: download and extract world database
+      command: "{{ item }}"
+      with_items:
+        - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
       when:
         - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-    - name: Install MySQL from extracted .deb packages
-      when: lookup('env', 'install_type') == 'tar'
+
+    - name: install deb packages
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+      vars:
+        packages:
+        - vim
+        - pv
+        - unzip
+      when: 
+          - ansible_os_family == "Debian"
+          - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+
+    - name: Install mysql deb packages using tarballs ubuntu 22.04
+      command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
+      when: 
+        - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+    - name: extract mysql deb packages for ubuntu 22.04
+      command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
+      when: 
+        - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+ 
+    - name: extract mysql deb packages for ubuntu 22.04
+      command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
+      when: 
+        - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+##
+    - name: install mysql deb packages
       shell: dpkg -i /tmp/*.deb || apt-get install -f -y
       environment:
         DEBIAN_FRONTEND: noninteractive
+      when: 
+        - ansible_os_family == "Debian"
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"  
 
-    - name: Install MySQL from repo
-      when: lookup('env', 'install_type') == 'repo'
-      apt:
-        name: mysql-server
-        state: present
-        update_cache: yes
+    - name: Start the MySQL service
+      service: name=mysql state=started
+      when: 
+        - ansible_os_family == "Debian"
+        - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-    - name: Install dependencies
-      apt:
-        name:
-          - pv
-          - unzip
-          - lz4
-          - zstd
-        update_cache: yes
+    - name: Enable PXB 9.x innovation experimental repo
+      shell: percona-release enable only pxb-9x-innovation experimental
+      when: 
+        - lookup('env', 'install_repo')  == "experimental"
 
-    - name: Start MySQL service
+    - name: install Percona XtraBackup {{ major_release_version }} packages
+      include_tasks: ../tasks/install_pxb_innovation_lts.yml
+      when: 
+        - lookup('env', 'install_repo') == "experimental"
+
+#backup
+
+    - name: install plugins, import world database
+      command: /package-testing/plugins_test.sh
+
+    - name: check that Percona XtraBackup version is correct
+      command: /package-testing/version_check.sh pxb{{ major_release_version }}
+
+    - name: check that Percona XtraBackup package versions are correct
+      command: /package-testing/package_check.sh pxb{{ major_release_version }}
+
+    - name: run backup
+      command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+    - name: prepare backup
+      command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+    - name: Stop MySQL before restoring from PXB backup
       service:
         name: mysql
-        state: started
+        state: stopped
+      ignore_errors: true
 
-    - name: Set root password
-      shell: /package-testing/setpass_57.sh
-
-    - name: Install PXB from tarball
-      unarchive:
-        src: "/package-testing/percona-xtrabackup-{{ pxb_version }}-linux-x86_64.tar.gz"
-        dest: /opt
-        remote_src: yes
-
-    - name: Add PXB to PATH
-      shell: echo 'export PATH=/opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin:$PATH' >> ~/.bashrc
-
-    - name: Run full backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --backup --target-dir=/tmp/backups --user=root
-
-    - name: Prepare backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --prepare --target-dir=/tmp/backups
-
-    - name: Run LZ4 backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --backup --target-dir=/tmp/backup_lz4 --compress=lz4 --compress-threads=2 --user=root
-
-    - name: Decompress LZ4 backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --decompress --target-dir=/tmp/backup_lz4
-
-    - name: Prepare LZ4 backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --prepare --target-dir=/tmp/backup_lz4
-
-    - name: Run ZSTD backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --backup --target-dir=/tmp/backup_zstd --compress=zstd --compress-threads=2 --user=root
-
-    - name: Decompress ZSTD backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --decompress --target-dir=/tmp/backup_zstd
-
-    - name: Prepare ZSTD backup
-      shell: /opt/percona-xtrabackup-{{ pxb_version }}-linux-x86_64/bin/xtrabackup --prepare --target-dir=/tmp/backup_zstd
-
-    - name: Clean MySQL installation
-      apt:
-        name: mysql-server
-        state: absent
-        purge: yes
-
-    - name: Validate MySQL cleanup
-      shell: pgrep mysql || echo "MySQL is not running."
-
-    - name: Clean backup dirs
+    - name: Clean MySQL datadir before PXB restore
       file:
-        path: "/tmp/{{ item }}"
+        path: /var/lib/mysql
         state: absent
-      loop:
-        - backups
-        - backup_lz4
-        - backup_zstd
+      ignore_errors: true
+
+    - name: Restore PXB backup to datadir
+      shell: |
+        cp -R /tmp/backups/* /var/lib/mysql
+        chown -R mysql:mysql /var/lib/mysql
