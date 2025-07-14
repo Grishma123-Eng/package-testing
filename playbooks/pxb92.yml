@@ -161,13 +161,32 @@
         state: stopped
       ignore_errors: true
 
+
+    - name: Ensure /lib/mysql directory exists
+      file:
+        path: /lib/mysql
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: '0755'
+
     - name: Clean MySQL datadir before PXB restore
       file:
         path: /lib/mysql
         state: absent
       ignore_errors: true
 
+    - name: Re-create /lib/mysql directory after deletion
+      file:
+        path: /lib/mysql
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: '0755'
+
     - name: Restore PXB backup to datadir
       shell: |
         cp -R /tmp/backups/* /lib/mysql
         chown -R mysql:mysql /lib/mysql
+      args:
+        executable: /bin/bash
