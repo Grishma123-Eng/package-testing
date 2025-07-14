@@ -49,20 +49,15 @@
         path: /var/tmp/mysql_logs.zip
       register: zip_file_stat
 
-    - name: Fetch the logs archive on localhost
-      fetch:
-        src: /var/tmp/mysql_logs.zip
-        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_mysql_logs.zip"
-        flat: yes
-      when: zip_file_stat.stat.exists
-      become: true
-
     - name: Debug if no logs found to fetch
       debug:
         msg: "No log files found. Skipping fetch step."
       when: not zip_file_stat.stat.exists
       delegate_to: localhost
 ##
+    - name: PRINT WORKSPACE_VAR
+      debug:
+        msg: "WORKSPACE_VAR: {{ WORKSPACE_VAR }}"
 
     - name: Get the arch value from /etc/os-release
       shell: uname -m 
@@ -82,6 +77,7 @@
       set_fact:
         os_id: "{{ pretty_name_output.stdout | replace(' ', '-') | trim }}"
 
+
     - name: Debug the arch_output
       debug:
         msg: "The arch_output is {{ arch_output }}"
@@ -89,6 +85,14 @@
     - name: Debug the OS ID
       debug:
         msg: "The OS ID is {{ os_id }}"
+
+    - name: Fetch the logs archive on localhost
+      fetch:
+        src: /var/tmp/mysql_logs.zip
+        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_mysql_logs.zip"
+        flat: yes
+      when: zip_file_stat.stat.exists
+      become: true
 
  #   - name: Fetch the logs archive on localhost
   #    fetch:
