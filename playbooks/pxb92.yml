@@ -163,11 +163,11 @@
 
     - name: Clean MySQL datadir before PXB restore
       file:
-        path: /var/lib/mysql
+        path: /lib/mysql
         state: absent
       ignore_errors: true
 
     - name: Restore PXB backup to datadir
       shell: |
-        cp -R /tmp/backups/* /var/lib/mysql
-        chown -R mysql:mysql /var/lib/mysql
+        cp -R /tmp/backups/* /lib/mysql
+        chown -R mysql:mysql /lib/mysql
