@@ -1,26 +1,23 @@
-# This task install Percona XtraBackup {{ ms-innovation-ltsamajor_release_version_register }} on CentOS and Debian/Ubuntu
-#
-  
-  - name: install Percona XtraBackup new deb packages for pxb-{{ ms-innovation-ltsamajor_release_version_register }}
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ ms-innovation-ltsamajor_release_version_register }}
-      - percona-xtrabackup-test-{{ ms-innovation-ltsamajor_release_version_register }}
-      - percona-xtrabackup-dbg-{{ ms-innovation-ltsamajor_release_version_register }}
-    when: ansible_os_family == "Debian"
+- name: Install Percona XtraBackup new DEB packages for pxb-{{ major_release_version_register }}
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+      - "percona-xtrabackup-{{ major_release_version_register }}"
+      - "percona-xtrabackup-test-{{ major_release_version_register }}"
+      - "percona-xtrabackup-dbg-{{ major_release_version_register }}"
+  when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup new rpm packages for pxb-{{ ms-innovation-ltsamajor_release_version_register }}
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtrabackup-{{ ms-innovation-ltsamajor_release_version_register }}
-      - percona-xtrabackup-test-{{ ms-innovation-ltsamajor_release_version_register }}
-      - percona-xtrabackup-{{ ms-innovation-ltsamajor_release_version_register }}-debuginfo
-    when: ansible_os_family == "RedHat"
+- name: Install Percona XtraBackup new RPM packages for pxb-{{ major_release_version_register }}
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+      - "percona-xtrabackup-{{ major_release_version_register }}"
+      - "percona-xtrabackup-test-{{ major_release_version_register }}"
+      - "percona-xtrabackup-{{ major_release_version_register }}-debuginfo"
+  when: ansible_os_family == "RedHat"
