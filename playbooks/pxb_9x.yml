@@ -84,6 +84,18 @@
     when:
       - lookup('env', 'server_to_test') == "ms-innovation-lts"
 
+  - name: Download percona-release for Ubuntu
+    get_url:
+      url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+      dest: /tmp/percona-release.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-release for Ubuntu
+    apt:
+      deb: /tmp/percona-release.deb
+      state: present
+    when: ansible_os_family == "Debian" 
+
   - name: Enable PXB LTS testing repo
     command: percona-release enable-only pxb-lts-innovation experimental
     when: lookup('env', 'REPO_TYPE') != "PRO"
