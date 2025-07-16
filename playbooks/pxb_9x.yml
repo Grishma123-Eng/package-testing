@@ -97,7 +97,7 @@
     when: ansible_os_family == "Debian" 
 
   - name: Enable PXB LTS testing repo
-    command: percona-release enable-only pxb-lts-innovation experimental
+    command: percona-release enable-only pxb-9x-innovation experimental
     when: lookup('env', 'REPO_TYPE') != "PRO"
     
   - name: install Percona XtraBackup innovation packages
