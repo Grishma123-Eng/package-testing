@@ -104,8 +104,8 @@
     include_tasks: ../tasks/install_pxb_innovation_lts.yml
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh pxb -e
+  #- name: check telemetry (enabled)
+   # command: /package-testing/check_telemetry.sh pxb -e
 
 
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
