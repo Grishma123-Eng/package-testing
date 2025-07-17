@@ -120,10 +120,17 @@
     when: 
       - ansible_os_family == "Debian"
 
+  - name: Check if mysql service is available
+    shell: systemctl list-units --type=service | grep -E 'mysql|mysqld'
+    register: mysql_service_check
+    ignore_errors: true
 
-  - name: restart mysql service debian
-    service: name=mysql state=restarted
-    when: ansible_os_family == "Debian"
+  - name: Restart mysql service if found
+    service:
+      name: mysql
+      state: restarted
+    when: "'mysql.service' in mysql_service_check.stdout"
+
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
@@ -217,6 +224,11 @@
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
+
+
+  - name: restart mysql service debian
+    service: name=mysql state=restarted
+    when: ansible_os_family == "Debian"
     
   - name: remove Percona Server deb packages
     apt:
