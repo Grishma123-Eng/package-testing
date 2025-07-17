@@ -119,18 +119,30 @@
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
     when: 
       - ansible_os_family == "Debian"
+  
+  - name: Gather service facts
+    service_facts:
 
-  - name: Check if mysql service is available
-    shell: systemctl list-units --type=service | grep -E 'mysql|mysqld'
-    register: mysql_service_check
-    ignore_errors: true
+  - name: Detect MySQL service name dynamically
+    Set_fact:
+      mysql_service_name: >-
+        {% if 'mysql.service' in ansible_facts.services %}
+              mysql
+            {% elif 'mysqld.service' in ansible_facts.services %}
+              mysqld
+            {% else %}
+              mysql  # fallback
+            {% endif %} 
 
-  - name: Restart mysql service if found
-    service:
-      name: mysql
-      state: restarted
-    when: "'mysql.service' in mysql_service_check.stdout"
+  - name: Debug MySQL service name
+    debug:
+        msg: "Detected MySQL service name is: {{ mysql_service_name }}"
 
+  - name: Start the MySQL service
+    service: name=mysql state=started
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms-innovation-lts"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
