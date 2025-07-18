@@ -123,20 +123,25 @@
   - name: Gather service facts
     service_facts:
 
+
+
   - name: Detect MySQL service name dynamically
     set_fact:
       mysql_service_name: >-
         {% if 'mysql.service' in ansible_facts.services %}
-              mysql
-            {% elif 'mysqld.service' in ansible_facts.services %}
-              mysqld
-            {% else %}
-              mysql  # fallback
-            {% endif %} 
+          mysql
+        {% elif 'mysqld.service' in ansible_facts.services %}
+          mysqld
+        {% else %}
+          mysqld  # fallback
+        {% endif %}
 
-  - name: Debug MySQL service name
-    debug:
-      msg: "Detected MySQL service name is: {{ mysql_service_name }}"
+  - name: Start the MySQL service dynamically
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+    when:
+      - mysql_service_name is defined
 
   - name: Start the MySQL service
     service: name=mysql state=started
