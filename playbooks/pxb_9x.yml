@@ -124,7 +124,7 @@
     service_facts:
 
   - name: Detect MySQL service name dynamically
-    Set_fact:
+    set_fact:
       mysql_service_name: >-
         {% if 'mysql.service' in ansible_facts.services %}
               mysql
