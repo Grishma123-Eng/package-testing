@@ -136,7 +136,7 @@
 
   - name: Debug MySQL service name
     debug:
-        msg: "Detected MySQL service name is: {{ mysql_service_name }}"
+      msg: "Detected MySQL service name is: {{ mysql_service_name }}"
 
   - name: Start the MySQL service
     service: name=mysql state=started
