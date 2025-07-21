@@ -72,7 +72,7 @@
 
   - name: DEBUG  PXB version number
     debug:
-      msg: "PXB version number is {{ pxb_version_major }} {{ pxb_version_major_minor }}"
+      msg: "PXB version number is {{ pxb_version_major.stdout }} {{ pxb_version_major_minor.stdout }}"
 
 ###
       
