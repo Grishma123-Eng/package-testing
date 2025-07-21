@@ -120,21 +120,28 @@
     when: 
       - ansible_os_family == "Debian"
   
-  - name: Gather service facts
+  - name: Gather fresh service facts after MySQL install
     service_facts:
 
-
+  - name: Debug all discovered services (optional, for troubleshooting)
+    debug:
+      var: ansible_facts.services
 
   - name: Detect MySQL service name dynamically
     set_fact:
       mysql_service_name: >-
-        {% if 'mysql.service' in ansible_facts.services %}
+        {% set services = ansible_facts.services.keys() %}
+        {% if 'mysql.service' in services %}
           mysql
-        {% elif 'mysqld.service' in ansible_facts.services %}
+        {% elif 'mysqld.service' in services %}
           mysqld
         {% else %}
-          mysqld  # fallback
+          mysql  # fallback, change if needed
         {% endif %}
+
+  - name: Debug selected mysql_service_name
+    debug:
+      var: mysql_service_name
 
   - name: Start the MySQL service dynamically
     service:
@@ -142,12 +149,7 @@
       state: started
     when:
       - mysql_service_name is defined
-
-  - name: Start the MySQL service
-    service: name=mysql state=started
-    when: 
-      - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - mysql_service_name in ansible_facts.services
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
