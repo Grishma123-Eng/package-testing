@@ -47,7 +47,7 @@
 # INSTALL MS 
 
   - name: Extract PXB major and minor version number using shell commands
-    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_VER' | cut -d'=' -f2 | sed 's/"//g'
+    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
     register: pxb_version_major_minor
 
   - name: Extract PXB major version number using shell commands
