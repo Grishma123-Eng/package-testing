@@ -22,7 +22,7 @@ provisioner:
     destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
-    converge: ../../../../playbooks/pxb_9x.yml
+    converge: ../../../../playbooks/pxb9x.yml
 scenario:
   name: ubuntu-jammy
   destroy_sequence:
