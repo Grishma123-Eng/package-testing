@@ -82,7 +82,7 @@
       pxb_version_major: "{{ pxb_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
     when:
-      - lookup('env', 'server_to_test') == "ms-innovation-lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Download percona-release for Ubuntu
     get_url:
@@ -147,7 +147,7 @@
     service: name=mysql state=started
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms-innovation-lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
