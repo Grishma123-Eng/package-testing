@@ -48,11 +48,11 @@
 
   - name: Extract PXB major and minor version number using shell commands
     shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_VER' | cut -d'=' -f2 | sed 's/"//g'
-    register: pxb_version_major_minor_register
+    register: pxb_version_major_minor
 
   - name: Extract PXB major version number using shell commands
-    shell: cat /package-testing/VERSIONS | grep PXB84PXB_INN_LTS_VER_VER | awk -F'[=".]' '{print $3"."$4}'
-    register: pxb_version_major_register
+    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | awk -F'[=".]' '{print $3"."$4}'
+    register:  pxb_version_major
 
   - name: Extract version number using shell commands
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
@@ -64,15 +64,15 @@
 
   - name: Set pxb_version_major variable
     set_fact:
-      pxb_version_major_reg: "{{ pxb_version_major_register.stdout }}"
+      pxb_version_major_reg: "{{ pxb_version_major.stdout }}"
 
   - name: Set pxb_version_major_minor variable
     set_fact:
-      pxb_version_major_minor_reg: "{{ pxb_version_major_minor_register.stdout }}"
+      pxb_version_major_minor_reg: "{{ pxb_version_major_minor.stdout }}"
 
   - name: DEBUG  PXB version number
     debug:
-      msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
+      msg: "PXB version number is {{ pxb_version_major }} {{ pxb_version_major_minor }}"
 
 ###
       
