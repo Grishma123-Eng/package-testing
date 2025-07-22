@@ -239,21 +239,7 @@
   - name: restart mysql service debian
     service: name=mysql state=restarted
     when: ansible_os_family == "Debian"
-    
-  - name: remove Percona Server deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server*
-      - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') != "ms-80"
-      - lookup('env', 'server_to_test') != "ms-84"
-
+  
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
