@@ -174,12 +174,12 @@
       var: version_output.stdout_lines
 
   - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh PXB_INN_LTS_MAJ_VER
+    command: /package-testing/version_check.sh pxb91
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: check that Percona XtraBackup package versions are correct
-    command: /package-testing/package_check.sh PXB_INN_LTS_MAJ_VER
+    command: /package-testing/package_check.sh pxb91
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
