@@ -236,6 +236,92 @@
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
 
 
+  - name: Check xtrabackup log for errors (regular backup)
+    shell: grep -i 'error' /tmp/backups/xtrabackup.log || echo "No error found"
+    register: backup_log_check
+    failed_when: "'error' in backup_log_check.stdout and 'No error found' not in backup_log_check.stdout"
+
+  - name: Check xtrabackup log for errors (lz4 backup)
+    shell: grep -i 'error' /tmp/backup_l/xtrabackup.log || echo "No error found"
+    register: backup_log_check_lz4
+    failed_when: "'error' in backup_log_check_lz4.stdout and 'No error found' not in backup_log_check_lz4.stdout"
+      
+
+  - name: Check xtrabackup log for errors (zstd backup)
+    shell: grep -i 'error' /tmp/backup_z/xtrabackup.log || echo "No error found"
+    register: backup_log_check_zstd
+    failed_when: "'error' in backup_log_check_zstd.stdout and 'No error found' not in backup_log_check_zstd.stdout"
+
+
+  - name: Stop MySQL service before restore
+    service:
+      name: "{{ mysql_service_name }}"
+      state: stopped
+
+  - name: Move current datadir to backup
+    command: mv /var/lib/mysql /var/lib/mysql.bak
+    ignore_errors: yes
+
+  - name: Create new datadir
+    file:
+      path: /var/lib/mysql
+      state: directory
+      owner: mysql
+      group: mysql
+      mode: '0755'
+
+  - name: Copy backup contents to datadir
+    command: rsync -av /tmp/backups/ /var/lib/mysql/
+
+  - name: Set correct permissions on datadir
+    file:
+      path: /var/lib/mysql
+      state: directory
+      recurse: yes
+      owner: mysql
+      group: mysql
+
+  - name: Start MySQL after restore
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+
+  - name: Wait for MySQL to come up and verify
+    shell: mysqladmin ping -u root
+    register: mysql_status
+    retries: 5
+    delay: 3
+    until: "'mysqld is alive' in mysql_status.stdout"
+
+  - name: Print restore success
+    debug:
+      msg: "Restore from backup successful. MySQL is alive."
+
+    ### OPTIONAL CLEANUP: Revert to original datadir (if needed)
+  - name: Stop MySQL before restoring original data
+    service:
+      name: "{{ mysql_service_name }}"
+      state: stopped
+
+  - name: Remove restored datadir
+    file:
+      path: /var/lib/mysql
+      state: absent
+
+  - name: Restore original datadir
+    command: mv /var/lib/mysql.bak /var/lib/mysql
+    ignore_errors: yes
+
+  - name: Start MySQL again with original data
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+
+  - name: Print original data restored
+    debug:
+      msg: "Original datadir restored and MySQL restarted."
+     
+
   - name: restart mysql service debian
     service: name=mysql state=restarted
     when: ansible_os_family == "Debian"
