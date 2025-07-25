@@ -187,6 +187,15 @@
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
+  - name: Show xtrabackup log after regular backup
+    shell: cat /tmp/backups/xtrabackup.log
+    register: xtrabackup_regular_log
+    ignore_errors: yes
+
+  - name: xtrabackup regular backup log
+    debug:
+      msg: "{{ xtrabackup_regular_log.stdout_lines }}"
+
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
