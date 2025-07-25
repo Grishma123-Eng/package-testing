@@ -203,6 +203,15 @@
     debug:
       msg: "{{ xtrabackup_regular_log.stdout_lines }}"
 
+
+  - name: Check xtrabackup log for actual errors (regular backup)
+    shell: |
+      grep -i 'ERROR' /tmp/backups/xtrabackup.log | grep -v 'performance_schema/error_' || echo "No real error found"
+    register: backup_log_check
+    failed_when: >
+      ('ERROR' in backup_log_check.stdout and
+      'No real error found' not in backup_log_check.stdout')
+
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
