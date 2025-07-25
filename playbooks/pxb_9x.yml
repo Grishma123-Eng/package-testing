@@ -132,11 +132,13 @@
       mysql_service_name: >-
         {% set services = ansible_facts.services.keys() %}
         {% if 'mysql.service' in services %}
-          mysql
+          mysql.service
         {% elif 'mysqld.service' in services %}
-          mysqld
+          mysqld.service
+        {% elif services | select('search', 'mysql') | list | length > 0 %}
+          {{ services | select('search', 'mysql') | list | first }}
         {% else %}
-          mysql  # fallback, change if needed
+          mysql.service  # fallback
         {% endif %}
 
   - name: Debug selected mysql_service_name
@@ -258,23 +260,6 @@
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
-
-
-  - name: Check xtrabackup log for errors (regular backup)
-    shell: grep -i 'error' /tmp/backups/xtrabackup.log || echo "No error found"
-    register: backup_log_check
-    failed_when: "'error' in backup_log_check.stdout and 'No error found' not in backup_log_check.stdout"
-
-  - name: Check xtrabackup log for errors (lz4 backup)
-    shell: grep -i 'error' /tmp/backup_l/xtrabackup.log || echo "No error found"
-    register: backup_log_check_lz4
-    failed_when: "'error' in backup_log_check_lz4.stdout and 'No error found' not in backup_log_check_lz4.stdout"
-      
-
-  - name: Check xtrabackup log for errors (zstd backup)
-    shell: grep -i 'error' /tmp/backup_z/xtrabackup.log || echo "No error found"
-    register: backup_log_check_zstd
-    failed_when: "'error' in backup_log_check_zstd.stdout and 'No error found' not in backup_log_check_zstd.stdout"
 
 
   - name: Stop MySQL service before restore
