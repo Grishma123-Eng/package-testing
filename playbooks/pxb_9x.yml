@@ -135,11 +135,13 @@
           mysql.service
         {% elif 'mysqld.service' in services %}
           mysqld.service
-        {% elif services | select('search', 'mysql') | list | length > 0 %}
-          {{ services | select('search', 'mysql') | list | first }}
         {% else %}
-          mysql.service  # fallback
+          ""
         {% endif %}
+
+  - name: Strip whitespace from mysql_service_name
+    set_fact:
+      mysql_service_name: "{{ mysql_service_name | trim }}"
 
   - name: Debug selected mysql_service_name
     debug:
