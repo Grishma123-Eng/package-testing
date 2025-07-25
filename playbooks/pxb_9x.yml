@@ -185,7 +185,7 @@
 
 
   - name: run backup
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ > /tmp/backups/xtrabackup.log 2>&1
+    shell: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ > /tmp/backups/xtrabackup.log 2>&1
 
   - name: Show xtrabackup log after regular backup
     shell: cat /tmp/backups/xtrabackup.log
