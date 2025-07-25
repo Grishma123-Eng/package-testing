@@ -184,6 +184,13 @@
       - lookup('env', 'REPO_TYPE') != "PRO"
 
 
+  - name: Ensure /tmp/backups directory exists
+    file:
+      path: /tmp/backups
+      state: directory
+      mode: '0755'
+
+
   - name: run backup
     shell: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ > /tmp/backups/xtrabackup.log 2>&1
 
