@@ -20,63 +20,63 @@
   - name: include tasks for test env setup
     include_tasks: ../../../../tasks/test_prep.yml
 
-  - name: Extract version number using shell commands
-    shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
-    register: major_release_version
-
-  - name: Set major_release_version variable
-    set_fact:
-      major_release_version: "{{ major_release_version.stdout }}"
-
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PXC_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: pxc_inn_lts_repo_name
-
-  - name: Set pxc_inn_lts_repo_name variable
-    set_fact:
-      pxc_inn_lts_repo_name: "{{ pxc_inn_lts_repo_name.stdout }}"
-
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo
+  - name: include tasks for enabling test repo pxc80 non pro
     include_tasks: ../../../../tasks/enable_pxc_innovation_lts_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" 
+    when:
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo pxc80 non pro
     include_tasks: ../../../../tasks/enable_pxc_innovation_lts_main_repo.yml
-    when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo non pro
     include_tasks: ../../../../tasks/enable_pxc_innovation_lts_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
 
-  - name: install python3-libselinux 
-    yum:
-      name: "{{ packages }}"
-      state: present
-    vars:
-      packages:
-      - python3-libselinux
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  - name: Generate required locales
+    command: locale-gen "{{ item }}"
+    loop:
+      - en_US.UTF-8
+      - en_IN.utf8
+    args:
+      creates: "/usr/lib/locale/{{ item }}"
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
 
-  - name: allow all users to connect to mysql
-    shell: setsebool -P mysql_connect_any 1
-    when: ((ansible_os_family == "RedHat") and (ansible_distribution != "Amazon"))
+  - name: Ensure /etc/default/locale file is updated
+    lineinfile:
+      path: /etc/default/locale
+      create: yes
+      line: "{{ item }}"
+    loop:
+      - 'LANG="en_US.UTF-8"'
+      - 'LC_ALL="en_US.UTF-8"'
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
 
-  - name: flush iptables
-    iptables:
-      flush: yes
-    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
+  - name: Create empty usr.sbin.mysqld.in file to avoid AppArmor error
+    file:
+      path: /etc/apparmor.d/local/usr.sbin.mysqld.in
+      state: touch
+      mode: '0644'
+    when: 
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - ansible_os_family == "Debian"
 
-# resolving qpress error
-  - name: enable the pdpxc-80 main repo for qpress in noble
-    command: percona-release enable pdpxc-8.0 release
-    when: ansible_distribution_release == "noble"
 
-  - name: install PXC {{ major_release_version}} deb packages
+  - name: install PXC 8 deb packages arm64 debian non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -84,19 +84,25 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-toolkit
-    when: ansible_os_family == "Debian"
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 8 rpm packages
-    yum:
+      
+  - name: install PXC 8 deb packages amd64 non pro
+    apt:
       name: "{{ packages }}"
-      state: latest
+      update_cache: yes
     vars:
       packages:
       - percona-xtradb-cluster-full
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -129,51 +135,54 @@
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 
-  - name: attempt to bootstrap the cluster
-    block: 
-    - name: bootstrap cluster
-      command: systemctl start mysql@bootstrap.service
+  - name: register PXC version Molecule
+    shell: mysqld --version
+    register: pxc_version
 
-    rescue:
+  - name: print PXC version Molecule
+    debug: var=pxc_version
 
-    - name: Check the journal content
-      shell: |
-        journalctl -n 100 --no-pager
-      register: journal_content
+  - name: PRINT WSREP version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
+    register: wsrep_version
+  
+  - name: print WSREP version debug
+    debug: var=wsrep_version
 
-    - name: Print the journal
-      debug:
-        msg: "{{ journal_content }}"
+  - name: PRINT INNODB version
+    shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
+    register: innod_version
 
-    - name: Check mysql logs
-      shell: |
-        cat /var/log/mysqld.log
-      register: mysqld_log
+  - name: print INNODB version debug  
+    debug: var=innod_version
 
-    - name: Print mongod logs
-      debug:
-        msg: "{{ mongod_logs }}"
+  - name: Extract version number using shell commands
+    shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
+    register: major_release_version
 
-    - name: Fail
-      command: /bin/false
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
 
-  # set root password on centos
-  - name: set root password on centos
-    command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PXC_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxc_inn_lts_repo_name
 
-  - name: copy .my.cnf with credentials on centos
-    template: src=../../../../templates/my_57.j2
-              dest=/root/.my.cnf
-              mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
+  - name: Set pxc_inn_lts_repo_name variable
+    set_fact:
+      pxc_inn_lts_repo_name: "{{ pxc_inn_lts_repo_name.stdout }}"
 
-  - name: check PXC {{ major_release_version}} version Molecule
+  
+  - name: check PXC 8.0 version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-  
-#  - name: Perform PXC package prechecks
-#    shell: /package-testing/scripts/pxc-package-prechecks.sh pxc{{ major_release_version}}
-    
+
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: Sleep 60 seconds
     command: sleep 60
