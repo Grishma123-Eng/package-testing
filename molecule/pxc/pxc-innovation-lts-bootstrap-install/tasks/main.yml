@@ -142,6 +142,14 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
+  - name: Extract only the major.minor.patch version from mysqld --version
+    set_fact:
+      pxc_version_parsed: "{{ pxc_version.stdout | regex_search('Ver\\s+(\\d+\\.\\d+\\.\\d+)', '\\1') }}"
+    
+  - name: Print parsed PXC version
+    debug:
+      msg: "Parsed PXC version is: {{ pxc_version_parsed }}"
+
   - name: PRINT WSREP version
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
     register: wsrep_version
