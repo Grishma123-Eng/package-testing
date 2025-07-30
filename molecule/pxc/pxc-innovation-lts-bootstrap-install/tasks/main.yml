@@ -117,9 +117,6 @@
     debug:
       var: t_uuid_output
 
-  - name: stop mysql service with service command
-    command: systemctl stop mysql
-
   - name: copy pxc config on centos
     template: src=../../../../templates/my_rpm_80.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat"
@@ -163,6 +160,9 @@
 
   - name: print INNODB version debug  
     debug: var=innod_version
+
+  - name: stop mysql service with service command
+    command: systemctl stop mysql
 
   - name: Extract version number using shell commands
     shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
