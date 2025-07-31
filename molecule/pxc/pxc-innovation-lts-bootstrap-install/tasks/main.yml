@@ -126,10 +126,13 @@
       src: ../../../../support-files/certs/
       dest: /etc/mysql/certs/
 
-  - name: configure PXC on debian/ubuntu
-    template: src=../../../../templates/my_8.j2
-              dest=/etc/mysql/my.cnf
-              mode=0640 owner=mysql group=root
+  - name: Safely configure custom my.cnf for Debian/Ubuntu
+    template:
+      src: ../../../../templates/my_8.j2
+      dest: /etc/mysql/conf.d/custom.cnf
+      mode: '0644'
+      owner: root
+      group: root
     when: ansible_os_family == "Debian"
 
 
@@ -153,7 +156,7 @@
   - name: Print MySQL error log
     debug:
       var: mysql_error_log.stdout_lines
-      
+
   - name: Wait for MySQL socket to be ready
     wait_for:
       path: /var/run/mysqld/mysqld.sock
