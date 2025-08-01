@@ -264,49 +264,97 @@
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
 
 
-  - name: Stop MySQL service before restore
-    service:
-      name: "{{ mysql_service_name }}"
-      state: stopped
+  - name: Restore LZ4 backup using rsync method
+    block:
+      - name: Stop MySQL before LZ4 restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: stopped
 
-  - name: Move current datadir to backup
-    command: mv /var/lib/mysql /var/lib/mysql.bak
-    ignore_errors: yes
+      - name: Move datadir for LZ4 rsync restore
+        command: mv /var/lib/mysql /var/lib/mysql.lz4.rsync.bak
+        ignore_errors: yes
 
-  - name: Create new datadir
-    file:
-      path: /var/lib/mysql
-      state: directory
-      owner: mysql
-      group: mysql
-      mode: '0755'
+      - name: Create new datadir for LZ4 rsync restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          owner: mysql
+          group: mysql
+          mode: '0755'
 
-  - name: Copy backup contents to datadir
-    command: rsync -av /tmp/backups/ /var/lib/mysql/
+      - name: Rsync LZ4 backup to datadir
+        command: rsync -av /tmp/backup_l/ /var/lib/mysql/
 
-  - name: Set correct permissions on datadir
-    file:
-      path: /var/lib/mysql
-      state: directory
-      recurse: yes
-      owner: mysql
-      group: mysql
+      - name: Set ownership for datadir after LZ4 rsync restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          recurse: yes
+          owner: mysql
+          group: mysql
 
-  - name: Start MySQL after restore
-    service:
-      name: "{{ mysql_service_name }}"
-      state: started
+      - name: Start MySQL after LZ4 rsync restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: started
 
-  - name: Wait for MySQL to come up and verify
-    shell: mysqladmin ping -u root
-    register: mysql_status
-    retries: 5
-    delay: 3
-    until: "'mysqld is alive' in mysql_status.stdout"
+      - name: Wait for MySQL to come up after LZ4 rsync restore
+        shell: mysqladmin ping -u root
+        register: mysql_status_lz4_rsync
+        retries: 5
+        delay: 3
+        until: "'mysqld is alive' in mysql_status_lz4_rsync.stdout"
 
-  - name: Print restore success
-    debug:
-      msg: "Restore from backup successful. MySQL is alive."
+      - name: Confirm LZ4 rsync restore success
+        debug:
+          msg: "LZ4 rsync restore successful. MySQL is alive."
+
+  - name: Restore ZSTD backup using --copy-back method
+    block:
+      - name: Stop MySQL before ZSTD restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: stopped
+
+      - name: Move datadir for ZSTD copy-back restore
+        command: mv /var/lib/mysql /var/lib/mysql.zstd.copyback.bak
+        ignore_errors: yes
+
+      - name: Create new datadir for ZSTD copy-back restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          owner: mysql
+          group: mysql
+          mode: '0755'
+
+      - name: Restore ZSTD backup using --copy-back
+        command: /usr/bin/xtrabackup --copy-back --target-dir=/tmp/backup_z/
+
+      - name: Set ownership for datadir after copy-back
+        file:
+          path: /var/lib/mysql
+          state: directory
+          recurse: yes
+          owner: mysql
+          group: mysql
+
+      - name: Start MySQL after ZSTD copy-back restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: started
+
+      - name: Wait for MySQL to come up after ZSTD restore
+        shell: mysqladmin ping -u root
+        register: mysql_status_zstd_copyback
+        retries: 5
+        delay: 3
+        until: "'mysqld is alive' in mysql_status_zstd_copyback.stdout"
+
+      - name: Confirm ZSTD copy-back restore success
+        debug:
+          msg: "ZSTD copy-back restore successful. MySQL is alive."
 
     ### OPTIONAL CLEANUP: Revert to original datadir (if needed)
   - name: Stop MySQL before restoring original data
