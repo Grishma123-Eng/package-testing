@@ -24,7 +24,7 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml
 scenario:
-  name: rhel-9
+  name: rhel-10
   destroy_sequence:
     - destroy
   clenup_sequence:
