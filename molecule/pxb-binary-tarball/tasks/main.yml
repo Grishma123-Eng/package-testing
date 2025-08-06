@@ -123,11 +123,12 @@
       state: present
     when: os_version == "amzn:2023"
 
-  - name: Enable Percona Server 8.0 main repository PXB80
-    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
+  - name: Enable Percona Server 8.0 testing repository PXB80
+    include_tasks: ../../../tasks/enable_ps8_testing_repo.yml
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
+
 
   - name: include playbook for Install Percona Server 8.0 PXB80
     include_tasks: ../../../tasks/install_ps80.yml
