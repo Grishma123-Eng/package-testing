@@ -225,8 +225,8 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+      branch: "{{ lookup('env', 'rhe10-support') | default('master', true) }}"
+      git_account: "{{ lookup('env', 'grishma123-eng') | default('Percona-QA', true) }}"
 
   - name: install latest bats from github
     command: "{{ item }}"
