@@ -72,7 +72,7 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
   vars:
-    branch: "{{ lookup('env', 'TESTING_BRANCH') | default('[proxysql]') }}"
+    branch: "{{ lookup('env', 'TESTING_BRANCH') | default('proxysql') }}"
     git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
 - name: Ensure target directory exists
