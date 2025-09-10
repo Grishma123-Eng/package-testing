@@ -52,7 +52,7 @@
 
 - name: Set tarball url
   set_fact:  
-    TARBALL_URL: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ PROXYSQL_MAJOR_VERSION }}/{{ TARBALL_NAME }}"
+    TARBALL_URL: "https://www.percona.com/downloads-testings/proxysql-{{ PROXYSQL_MAJOR_VERSION }}/{{ TARBALL_NAME }}"
 
 - name: Set base dir
   set_fact:     
@@ -72,8 +72,8 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
   vars:
-    branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master') }}"
-    git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+    branch: "{{ lookup('env', 'TESTING_BRANCH') | default('[proxysql]') }}"
+    git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
 - name: Ensure target directory exists
   file:
