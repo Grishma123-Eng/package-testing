@@ -27,6 +27,15 @@
     include_tasks: ../tasks/enable_proxysql2_testing.yml
     when: lookup('env', 'install_repo') == "testing"
 
+  - name: Ensure glibc and dependencies are installed
+    yum:
+      name:
+        - glibc
+        - glibc-common
+        - glibc-langpack-en
+      state: present
+    when: ansible_os_family == "RedHat"
+
   - name: install proxysql new deb packages
     apt:
       name: "{{ packages }}"
