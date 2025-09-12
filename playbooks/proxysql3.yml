@@ -53,6 +53,12 @@
       allowerasing: yes
     when: ansible_os_family == "RedHat"
 
+  - name: Upgrade OpenSSL on RHEL- 9
+    yum:
+      name: openssl
+      state: latest
+    when: ansible_os_family == "RedHat"
+
   - name: start proxysql service
     service: name=proxysql state=started
 
