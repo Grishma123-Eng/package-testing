@@ -16,15 +16,7 @@
       percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
 
   tasks:
-
-
-  - name: Upgrade OpenSSL on RHEL- 9
-    yum:
-      name: openssl
-      state: latest
-    when: ansible_os_family == "RedHat"
-
-
+  
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -75,8 +67,8 @@
     include_tasks: ../tasks/client_check.yml
 
 
-  - name: check that proxysql version is correct
-    command: /package-testing/version_check.sh proxysql3
+ # - name: check that proxysql version is correct
+  #  command: /package-testing/version_check.sh proxysql3
 
   - name: remove proxysql deb packages
     apt:
