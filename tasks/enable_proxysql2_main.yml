@@ -60,7 +60,7 @@
 ## Enable Proxysql2 release repo 
 
   - name: enable proxysql main repo
-    command: percona-release enable proxysql release
+    command: percona-release enable proxysql 
 
   - name: clean and update yum cache
     shell: |
