@@ -44,6 +44,12 @@
   - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
     command: percona-release setup -y pxc-57 
 
+  - name: add an apt signing key to enable repo
+    apt_key:
+      url: https://percona.com/downloads/deb-percona-keyring.gpg
+    state: present
+    when: ansible_os_family == "Debian"
+
   - name: update deb cache
     apt:
       update_cache: yes
