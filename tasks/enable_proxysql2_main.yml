@@ -11,6 +11,12 @@
      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
+    when: ansible_os_family == "RedHat"
+
   - name: Receive GPG key 1
     command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
     environment:
