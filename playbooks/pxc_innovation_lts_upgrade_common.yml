@@ -37,7 +37,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtrabackup-84
       - percona-toolkit
     when: ansible_os_family == "Debian"
   

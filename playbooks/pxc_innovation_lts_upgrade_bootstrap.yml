@@ -44,7 +44,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtrabackup-84
       - percona-toolkit
       - percona-xtradb-cluster-server-debug
       - percona-xtradb-cluster-server
