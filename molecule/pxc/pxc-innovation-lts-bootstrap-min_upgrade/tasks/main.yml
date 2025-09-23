@@ -113,6 +113,9 @@
     command: percona-release enable-only pxc-9x-innovation experimental
     when: lookup('env', 'test_repo') == "experimental"
 
+  - name: add the experimental tools repo
+    command: percona-release enable tools experimental
+
   - name: upgrade PXC {{ major_release_version}} deb packages
     apt:
       name: "{{ packages }}"
@@ -120,9 +123,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-source
       - percona-toolkit
-      - percona-xtrabackup-{{ major_release_version}}
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
