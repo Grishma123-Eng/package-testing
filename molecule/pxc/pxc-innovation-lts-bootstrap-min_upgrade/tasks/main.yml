@@ -110,7 +110,7 @@
       dest: /etc/mysql/certs/
 
   - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_pxc_innovation_lts_experimental_repo.yml
+    command: percona-release enable-only pxc-9x-innovation experimental
     when: lookup('env', 'test_repo') == "experimental"
 
   - name: upgrade PXC {{ major_release_version}} deb packages
