@@ -92,9 +92,6 @@
   - name: print PXC version Side Effect
     debug: var=pxc_version
 
-  - name: install plugins
-    command: /package-testing/plugins_test_innovation_lts.sh pxc
-
   - name: register PXC version Side Effect
     shell: mysqld --version
     register: pxc_version
