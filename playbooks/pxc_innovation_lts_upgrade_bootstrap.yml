@@ -33,8 +33,7 @@
     when: lookup('env', 'test_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_pxc_innovation_lts_experimental_repo.yml
-    when: lookup('env', 'test_repo') == "experimental"
+    command: percona-release enable pxc-9x-innovation experimental
 
   - name: upgrade PXC {{ pxc_inn_lts_repo_name }} to new deb packages
     apt:

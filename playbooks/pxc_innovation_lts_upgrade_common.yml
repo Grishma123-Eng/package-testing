@@ -52,8 +52,8 @@
     command: percona-release enable pxc-9x-innovation experimental
 
   - name: upgrade PXC {{ pxc_inn_lts_repo_name }} to new deb packages
-    yum:
-      name: "{{ packages }}"
+    apt:
+      update_cache: yes
       state: latest
     vars:
       packages:
