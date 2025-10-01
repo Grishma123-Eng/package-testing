@@ -430,7 +430,9 @@
       name: iptables
       state: started
       enabled: true
-    when: ansible_facts['distribution'] == "RedHat"
+    when: 
+      - ansible_facts['distribution'] == "RedHat"
+      - ansible_facts['distribution_major_version'] | int != 10
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT 
     iptables:
