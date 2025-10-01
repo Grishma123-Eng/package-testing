@@ -56,10 +56,10 @@
       dnf:
         name: ca-certificates
         update_cache: yes
-        state: present
+        state: presents
       when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+      - ansible_facts['distribution_major_version'] | int >= 8 and ansible_distribution_major_version != "10"
 
     - name: setup epel release centos 7
       yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
