@@ -63,7 +63,10 @@
       - python3-pip
       - libtirpc
       - lsb_release
-    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023" and ansible_distribution_major_version | int != 10
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int != 10
+      - ansible_distribution_version != "2023"
     
   - name: Install required packages using dnf
     dnf:
