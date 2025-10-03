@@ -19,13 +19,28 @@ platforms:
       build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
+  log: True
   playbooks:
-    create: ../../../playbooks/create_noble.yml
-    destroy: ../../../playbooks/destroy_noble.yml
-    prepare: ../../../playbooks/prepare.yml
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
-    side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
-  inventory:
-    host_vars:
-      ${BUILD_NUMBER}-pxc1-84-bootstrap-rhel-10-install-${INSTALLTYPE}:
-        ip_env: "{{ ansible_host }}"
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "no"
+scenario:
+  name: rhel-10
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
