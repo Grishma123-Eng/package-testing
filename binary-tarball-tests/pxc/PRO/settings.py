@@ -151,7 +151,7 @@ if glibc_version == '2.35':
 else:
     pxc8x_symlinks = (
       #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
@@ -224,7 +224,7 @@ if glibc_version == '2.35':
 else:
     pxc80_symlinks = (
            #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.43'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.43'),('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
