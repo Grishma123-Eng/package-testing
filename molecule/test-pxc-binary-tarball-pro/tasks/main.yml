@@ -66,7 +66,31 @@
     when:
       - ansible_os_family == "RedHat"
       - ansible_distribution_version != "2023"
-    
+      - ansible_distribution_major_version | int != 10
+
+  
+
+  - name: Install needed packages for running tests with yum
+    package:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+        - wget
+        - unzip
+        - tar
+        - git
+        - python3
+        - python3-pip
+        - numactl
+        - gawk
+        - libaio
+        - libtirpc
+        - lsb_release
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int < 10
+
   - name: Install required packages using dnf
     dnf:
       name:
