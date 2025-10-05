@@ -225,7 +225,7 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('rhel10-support', true) }}"
+      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('rhe10-support', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
   - name: install latest bats from github
