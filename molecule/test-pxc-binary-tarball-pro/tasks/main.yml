@@ -65,7 +65,6 @@
       - lsb_release
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version | int != 10
       - ansible_distribution_version != "2023"
     
   - name: Install required packages using dnf
