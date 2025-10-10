@@ -15,9 +15,9 @@ PXC_VER_FULL = os.environ.get("PXC_VER_FULL")
 
 PXC_VER_UPSTREAM = PXC_VER_FULL.split('-')[0] # 8.0.34 OR 8.1.0 OR 5.7.43
 
-# Validate that full PXC version are passed (with build number): 8.1.0-1.1; 8.0.34-26.1; 5.7.43-31.65.1
+# Validate that full PXC version are passed (with build number): 8.4.0-1.1; 8.1.0-1.1; 8.0.34-26.1; 5.7.43-31.65.1
 if version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0"):
-    assert re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXC_VER_FULL), "PXC 8.0/8.1 version is not full. Expected pattern 8.1.0-1.1 " # 8.1.0-1.1 or  8.0.34-26.1
+    assert re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXC_VER_FULL), "PXC 8.0/8.1/8.4 version is not full. Expected pattern 8.4.0-1.1 " # 8.4.0-1.1, 8.1.0-1.1 or  8.0.34-26.1
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
     assert re.search(r'^\d+\.\d+\.\d+-\d+\.\d+\.\d+$', PXC_VER_FULL), "PXC 5.7 version is not full. Expected pattern '5.7.43-31.65.1'" # 5.7.43-31.65.1
 
@@ -29,7 +29,10 @@ DATA_VERSION=''.join(PXC_VER_FULL.split('.')[:2])
 BASE_PATH = f"https://downloads.percona.com/downloads/Percona-XtraDB-Cluster-{DATA_VERSION}/Percona-XtraDB-Cluster-{PXC_VER_UPSTREAM}"
 
 # Create list of supported software files and PXC 57 specific version numbers
-if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
+if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.4.0"):
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
+elif version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.4.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
     RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.1.0"):
@@ -59,7 +62,7 @@ def get_package_tuples():
         if "binary" in SOFTWARE_FILES:
             glibc_versions = ["2.35"] if version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0") else ["2.28", "2.31", "2.34", "2.35"]
             for glibc_version in glibc_versions:
-                if version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0"):
+                if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.0.0"):
                     for suffix in ["", "-minimal"]:
                         filename = [
                             f"Percona-XtraDB-Cluster_{PXC_VER_FULL}_Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz",
@@ -76,7 +79,7 @@ def get_package_tuples():
 
         # Check source tarballs
         elif software_file == 'source':
-            if version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0"):
+            if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.0.0"):
                 for filename in [
                     f"Percona-XtraDB-Cluster-" + PXC_VER_PERCONA + ".tar.gz" ,
                     f"percona-xtradb-cluster_" + PXC_VER_PERCONA + ".orig.tar.gz" ,
@@ -94,7 +97,7 @@ def get_package_tuples():
 
         # Test packages for every OS
         else:
-            if version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0"):
+            if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.0.0"):
                 if software_file in DEB_SOFTWARE_FILES:
                     pxc_deb_name_suffix=PXC_VER_PERCONA + "-" + PXC_BUILD_NUM + "." + software_file + "_amd64.deb"
                     deb_files = [

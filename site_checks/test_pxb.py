@@ -14,9 +14,9 @@ PXB_VERSION= re.sub(r'\.\d+$', '', PXB_VER_FULL)
 PXB_VER_UPSTREAM = PXB_VER_FULL.split('-')[0] # 8.0.34 OR 8.1.0 OR 2.4.28
 MAJOR_VERSION=''.join(PXB_VER_FULL.split('.')[:2]) # 80
 MAJOR_MINOR_VERSION = '.'.join(PXB_VER_UPSTREAM.split('.')[:2])  
-# Validate that full PXB version is passed (with build number): 2.4.28-1, 8.0.34-29.1; 8.1.0-1.1
+# Validate that full PXB version is passed (with build number): 2.4.28-1, 8.0.34-29.1; 8.1.0-1.1; 8.4.0-1.1
 if version.parse(PXB_VER_UPSTREAM) > version.parse("8.0.0"):
-    assert re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXB_VER_FULL), "PXB 8.0/8.1 version is not full. Pass '8.1.0-1.1' / '8.0.34-26.1'" # 8.1.0-1.1 or  8.0.34-26.1
+    assert re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXB_VER_FULL), "PXB 8.0/8.1/8.4 version is not full. Pass '8.1.0-1.1' / '8.0.34-26.1' / '8.4.0-1.1'" # 8.1.0-1.1 or  8.0.34-26.1 or 8.4.0-1.1
     PXB_VER = '.'.join(PXB_VER_FULL.split('.')[:-1]) #8.0.34-26
     PXB_BUILD_NUM = PXB_VER_FULL.split('.')[-1] # "1"
 elif version.parse(PXB_VER_UPSTREAM) > version.parse("2.0.0") and version.parse(PXB_VER_UPSTREAM) < version.parse("8.0.0"):
@@ -25,7 +25,10 @@ elif version.parse(PXB_VER_UPSTREAM) > version.parse("2.0.0") and version.parse(
     assert re.search(r'^\d+\.\d+\.\d+-\d+$', PXB_VER_FULL), "PXB 2.4 version is not full.  Pass '2.4.28-1'" # 2.4.28-26
 
 # Create list of supported software files
-if version.parse(PXB_VER) > version.parse("8.1.0"):
+if version.parse(PXB_VER) > version.parse("8.4.0"):
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
+elif version.parse(PXB_VER) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXB_VER) > version.parse("8.0.0") and version.parse(PXB_VER) < version.parse("8.1.0"):

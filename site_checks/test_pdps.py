@@ -48,7 +48,10 @@ PXB_BUILD_NUM = PXB_VER_FULL.split('.')[-1] # 1
 ORCH_VER = ORCH_VER_FULL.split('-')[0]
 
 # Create list of supported software files
-if version.parse(PS_VER) > version.parse("8.1.0"):
+if version.parse(PS_VER) > version.parse("8.4.0"):
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+elif version.parse(PS_VER) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
@@ -77,7 +80,7 @@ def get_package_tuples():
                         filename =  f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
 
-                    if glibc_version in ['2.34', '2.35'] and version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0"):
+                    if glibc_version in ['2.34', '2.35'] and (version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0") or version.parse(PS_VER) >= version.parse("8.4.0")):
                         for suffix in ["-zenfs", "-zenfs-minimal"]:
                             filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                             packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))

@@ -43,7 +43,10 @@ PXB_BUILD_NUM = PXB_VER_FULL.split('.')[-1] # 1
 
 # Create list of supported software files
 # note: 8.1 etc (innovation releases) are not supported by PXC yest bu added in this check script.
-if version.parse(PXC_VER_PERCONA) > version.parse("8.1.0"):
+if version.parse(PXC_VER_PERCONA) > version.parse("8.4.0"):
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
+elif version.parse(PXC_VER_PERCONA) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_PERCONA) > version.parse("8.0.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.1.0"):
