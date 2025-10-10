@@ -50,19 +50,19 @@ ORCH_VER = ORCH_VER_FULL.split('-')[0]
 # Create list of supported software files
 if version.parse(PS_VER) > version.parse("8.4.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'focal', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
     assert not version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"), "PS 5.7 is not suported"
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
 
-RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
+RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 
 BASE_PATH = f"https://downloads.percona.com/downloads/percona-distribution-mysql-ps/percona-distribution-mysql-ps-{PS_VER_UPSTREAM}"
 
@@ -80,7 +80,7 @@ def get_package_tuples():
                         filename =  f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                         packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
 
-                    if glibc_version in ['2.34', '2.35'] and (version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0") or version.parse(PS_VER) >= version.parse("8.4.0")):
+                    if glibc_version in ['2.34', '2.35'] and (version.parse("8.0.0") < version.parse(PS_VER) < version.parse("8.1.0") < version.parse(PS_VER) < version.parse("8.4.0")):
                         for suffix in ["-zenfs", "-zenfs-minimal"]:
                             filename = f"Percona-Server-{PS_VER}-Linux.x86_64.glibc{glibc_version}{suffix}.tar.gz"
                             packages.append(("binary", filename, f"{BASE_PATH}/binary/tarball/{filename}"))
