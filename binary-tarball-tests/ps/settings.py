@@ -2,6 +2,7 @@
 import os
 import re
 import pytest
+import subprocess
 
 def source_environment_file(filepath="/etc/environment"):
     """
@@ -27,6 +28,31 @@ def source_environment_file(filepath="/etc/environment"):
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
 
+def detect_fips_support():
+    """
+    Detect if FIPS is supported in the system by checking for FIPS module availability.
+    """
+    try:
+        # Check if FIPS module is available
+        result = subprocess.run(['openssl', 'version'], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            # Check if system has FIPS-capable OpenSSL
+            # Also check for FIPS module file
+            fips_module_paths = [
+                '/proc/sys/crypto/fips_enabled',
+                '/usr/lib/ssl/fipsmodule.cnf',
+                '/etc/ssl/fipsmodule.cnf'
+            ]
+            for path in fips_module_paths:
+                if os.path.exists(path):
+                    return True
+            # Check if openssl supports FIPS (some systems have it built-in)
+            if 'fips' in result.stdout.lower() or 'FIPS' in result.stdout:
+                return True
+    except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
+        print(f"FIPS detection check failed: {e}")
+    return False
+
 def set_pro_fips_vars():
     """
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
@@ -38,7 +64,26 @@ def set_pro_fips_vars():
 
     print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    fips_supported = os.getenv('FIPS_SUPPORTED', '').strip().lower() in {"yes", "true", "1"}
+    # Check FIPS_SUPPORTED from environment
+    fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
+    
+    # For non-pro packages: enable FIPS tests unless explicitly disabled
+    # For pro packages: use FIPS_SUPPORTED environment variable
+    if not pro:
+        # Non-pro packages: enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
+        if fips_env == "no":
+            fips_supported = False
+            print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests")
+        else:
+            # Try to detect FIPS support, but default to True to enable tests
+            detected = detect_fips_support()
+            fips_supported = detected if detected else True
+            print(f"Non-pro package: FIPS_SUPPORTED={fips_env}, detected={detected}, enabling FIPS tests: {fips_supported}")
+    else:
+        # Pro packages: use FIPS_SUPPORTED environment variable
+        fips_supported = fips_env in {"yes", "true", "1"}
+        print(f"Pro package: FIPS_SUPPORTED={fips_env}, fips_supported={fips_supported}")
+    
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
@@ -59,6 +104,8 @@ def set_pro_fips_vars():
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
+    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}")
+    
     return {
         'pro': pro,
         'debug': debug,
