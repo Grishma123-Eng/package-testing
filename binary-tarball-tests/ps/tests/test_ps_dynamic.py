@@ -29,11 +29,8 @@ def mysql_server(request,pro_fips_vars):
             break
         except subprocess.CalledProcessError:
             if i == max_retries - 1:
-                # If FIPS was enabled but server failed to start, it might be because FIPS isn't supported
-                if fips_supported:
-                    pytest.skip(f"MySQL server failed to start with FIPS enabled. This may indicate FIPS is not supported for this package.")
-                else:
-                    raise
+                # Server failed to start - raise error so tests fail rather than skip
+                raise Exception(f"MySQL server failed to start after {max_retries} retries. Check error log: {mysql_server.logfile}")
             time.sleep(2)
     
     yield mysql_server
