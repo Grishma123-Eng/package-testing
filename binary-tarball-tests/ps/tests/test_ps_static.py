@@ -114,25 +114,25 @@ def test_binaries_linked_libraries(host,pro_fips_vars):
 def test_pro_openssl_files_not_exist(host,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    base_dir = pro_fips_vars['base_dir']
     if pro:
-        for openssl_file in ps_openssl_files:
-            assert not host.file(base_dir+'/'+openssl_file).exists
+        base_dir = pro_fips_vars['base_dir']
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        base_dir = os.getenv('BASE_DIR')
+    for openssl_file in ps_openssl_files:
+        assert not host.file(base_dir+'/'+openssl_file).exists
 
 
 def test_pro_openssl_files_linked(host,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    base_dir = pro_fips_vars['base_dir']
     if pro:
-        for binary in ps_binaries:
-            shared_files = host.check_output('ldd ' + base_dir + '/' + binary)
-            for line in shared_files.splitlines():
-                for file_name in ['libcrypto.so', 'libssl.so']:
-                    if file_name in line:
-                        assert not base_dir in line
-                        assert not '=> not found' in line
+        base_dir = pro_fips_vars['base_dir']
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        base_dir = os.getenv('BASE_DIR')
+    for binary in ps_binaries:
+        shared_files = host.check_output('ldd ' + base_dir + '/' + binary)
+        for line in shared_files.splitlines():
+            for file_name in ['libcrypto.so', 'libssl.so']:
+                if file_name in line:
+                    assert not base_dir in line
+                    assert not '=> not found' in line
