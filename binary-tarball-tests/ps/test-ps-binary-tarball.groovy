@@ -224,7 +224,7 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+        git clone https://github.com/grishma123-eng/package-testing.git --branch support-debian113 --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"
