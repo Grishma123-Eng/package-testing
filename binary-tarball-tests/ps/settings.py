@@ -67,18 +67,18 @@ def set_pro_fips_vars():
     # Check FIPS_SUPPORTED from environment
     fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
     
-    # For non-pro packages: enable FIPS tests unless explicitly disabled
+    # For non-pro packages: always enable FIPS tests (unless explicitly disabled)
     # For pro packages: use FIPS_SUPPORTED environment variable
     if not pro:
-        # Non-pro packages: enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
+        # Non-pro packages: always enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
+        print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}")
         if fips_env == "no":
             fips_supported = False
             print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests")
         else:
-            # Try to detect FIPS support, but default to True to enable tests
-            detected = detect_fips_support()
-            fips_supported = detected if detected else True
-            print(f"Non-pro package: FIPS_SUPPORTED={fips_env}, detected={detected}, enabling FIPS tests: {fips_supported}")
+            # Always enable FIPS tests for non-pro packages
+            fips_supported = True
+            print(f"Non-pro package: FIPS_SUPPORTED={fips_env} (empty or not 'no'), FORCING fips_supported=True")
     else:
         # Pro packages: use FIPS_SUPPORTED environment variable
         fips_supported = fips_env in {"yes", "true", "1"}
@@ -104,7 +104,12 @@ def set_pro_fips_vars():
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
-    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}")
+    # Final safety check: ensure fips_supported is True for non-pro packages (unless explicitly disabled)
+    if not pro and fips_supported is False and fips_env != "no":
+        print(f"WARNING: Non-pro package but fips_supported=False. FORCING to True.")
+        fips_supported = True
+
+    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}")
     
     return {
         'pro': pro,
