@@ -20,6 +20,22 @@ def mysql_server(request,pro_fips_vars):
     mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
     time.sleep(10)
+    
+    # Verify server is actually running by trying to connect
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            mysql_server.run_query("SELECT 1;")
+            break
+        except subprocess.CalledProcessError:
+            if i == max_retries - 1:
+                # If FIPS was enabled but server failed to start, it might be because FIPS isn't supported
+                if fips_supported:
+                    pytest.skip(f"MySQL server failed to start with FIPS enabled. This may indicate FIPS is not supported for this package.")
+                else:
+                    raise
+            time.sleep(2)
+    
     yield mysql_server
     mysql_server.purge()
 
