@@ -111,28 +111,37 @@ def test_binaries_linked_libraries(host,pro_fips_vars):
     for binary in ps_binaries:
         assert '=> not found' not in host.check_output('ldd ' + base_dir + '/' + binary)
 
-def test_pro_openssl_files_not_exist(host,pro_fips_vars):
-    pro = pro_fips_vars['pro']
-    fips_supported = pro_fips_vars['fips_supported']
-    if pro:
-        base_dir = pro_fips_vars['base_dir']
-    else:
-        base_dir = os.getenv('BASE_DIR')
+def test_pro_openssl_files_not_exist(host, pro_fips_vars):
+    """
+    In FIPS mode, bundled OpenSSL libraries must NOT exist.
+    In non-FIPS mode, bundled OpenSSL libraries MUST exist.
+    """
+    base_dir = pro_fips_vars['base_dir']
+    fips_supported = pro_fips_vars["fips_supported"]
+
     for openssl_file in ps_openssl_files:
-        assert not host.file(base_dir+'/'+openssl_file).exists
+        file_exists = host.file(base_dir + '/' + openssl_file).exists
+        if fips_supported:
+            assert not file_exists, f"{openssl_file} must NOT exist in FIPS mode"
+        else:
+            assert file_exists, f"{openssl_file} must exist when NOT in FIPS mode"
 
 
-def test_pro_openssl_files_linked(host,pro_fips_vars):
-    pro = pro_fips_vars['pro']
-    fips_supported = pro_fips_vars['fips_supported']
-    if pro:
-        base_dir = pro_fips_vars['base_dir']
-    else:
-        base_dir = os.getenv('BASE_DIR')
+def test_pro_openssl_files_linked(host, pro_fips_vars):
+    """
+    In FIPS mode, linked OpenSSL libraries should come from system path.
+    In non-FIPS mode, linked OpenSSL libraries should reference bundled libs.
+    """
+    base_dir = pro_fips_vars['base_dir']
+    fips_supported = pro_fips_vars["fips_supported"]
+
     for binary in ps_binaries:
         shared_files = host.check_output('ldd ' + base_dir + '/' + binary)
         for line in shared_files.splitlines():
             for file_name in ['libcrypto.so', 'libssl.so']:
                 if file_name in line:
-                    assert not base_dir in line
-                    assert not '=> not found' in line
+                    if fips_supported:
+                        assert base_dir not in line, "Binary must NOT link bundled OpenSSL in FIPS mode"
+                        assert '=> not found' not in line
+                    else:
+                        assert base_dir in line, "Binary should link bundled OpenSSL in non-FIPS mode"
