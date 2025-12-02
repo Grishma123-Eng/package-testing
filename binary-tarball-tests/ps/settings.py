@@ -67,19 +67,23 @@ def set_pro_fips_vars():
     # Check FIPS_SUPPORTED from environment
     fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
     
-    # For non-pro packages: always enable FIPS tests (unless explicitly disabled)
+    # For non-pro packages: enable FIPS tests if FIPS is detected (unless explicitly disabled)
     # For pro packages: use FIPS_SUPPORTED environment variable
     import sys
     if not pro:
-        # Non-pro packages: always enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
+        # Non-pro packages: enable FIPS tests if FIPS is detected, unless FIPS_SUPPORTED is explicitly "no"
         print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}", file=sys.stderr)
         if fips_env == "no":
             fips_supported = False
             print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests", file=sys.stderr)
         else:
-            # Always enable FIPS tests for non-pro packages
-            fips_supported = True
-            print(f"Non-pro package: FIPS_SUPPORTED={fips_env} (empty or not 'no'), FORCING fips_supported=True", file=sys.stderr)
+            # Detect if FIPS is actually available on the system
+            detected = detect_fips_support()
+            fips_supported = detected
+            if detected:
+                print(f"Non-pro package: FIPS detected on system, enabling FIPS tests: {fips_supported}", file=sys.stderr)
+            else:
+                print(f"Non-pro package: FIPS not detected on system, disabling FIPS tests: {fips_supported}", file=sys.stderr)
     else:
         # Pro packages: use FIPS_SUPPORTED environment variable
         fips_supported = fips_env in {"yes", "true", "1"}
@@ -103,10 +107,7 @@ def set_pro_fips_vars():
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
-    # Final safety check: ensure fips_supported is True for non-pro packages (unless explicitly disabled)
-    if not pro and fips_supported is False and fips_env != "no":
-        print(f"WARNING: Non-pro package but fips_supported=False. FORCING to True.", file=sys.stderr)
-        fips_supported = True
+    # Note: We don't force fips_supported=True anymore - we only enable it if FIPS is actually detected
 
     print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}", file=sys.stderr)
     
