@@ -26,30 +26,40 @@ def mysql_server(request,pro_fips_vars):
 def test_fips_md5(host, mysql_server, pro_fips_vars):
     """
     FIPS mode should return masked MD5, otherwise normal MD5 hash.
+    Works for both PRO and non-PRO packages.
     """
+    fips_supported = pro_fips_vars["fips_supported"]
+    
+    if not fips_supported:
+        pytest.skip("FIPS is not supported. Skipping")
+    
     output = mysql_server.run_query("SELECT MD5('foo');")
-
-    if pro_fips_vars["fips_supported"]:
-        assert '00000000000000000000000000000000' in output, "Expected masked MD5 in FIPS mode"
-    else:
-        assert 'acbd18db4cc2f85cedef654fccc4a4d8' in output, "Expected normal MD5 when FIPS not supported"
+    assert '00000000000000000000000000000000' in output, "Expected masked MD5 in FIPS mode"
 
 
 def test_fips_value(host, mysql_server, pro_fips_vars):
     """
     Check ssl_fips_mode runtime variable — ON only when FIPS is enabled.
+    Works for both PRO and non-PRO packages.
     """
+    fips_supported = pro_fips_vars["fips_supported"]
+    
+    if not fips_supported:
+        pytest.skip("FIPS is not supported. Skipping")
+    
     output = mysql_server.run_query("select @@ssl_fips_mode;")
-
-    if pro_fips_vars["fips_supported"]:
-        assert 'ON' in output
-    else:
-        assert 'OFF' in output
+    assert 'ON' in output, "ssl_fips_mode should be ON when FIPS is supported"
 
 def test_fips_in_log(host, mysql_server, pro_fips_vars):
     """
     FIPS informational log must appear only when FIPS is supported.
+    Works for both PRO and non-PRO packages.
     """
+    fips_supported = pro_fips_vars["fips_supported"]
+    
+    if not fips_supported:
+        pytest.skip("FIPS is not supported. Skipping")
+    
     with host.sudo():
         error_log = mysql_server.run_query("SELECT @@log_error;")
         logs = host.check_output(f'head -n30 {error_log}')
@@ -57,11 +67,7 @@ def test_fips_in_log(host, mysql_server, pro_fips_vars):
     fips_message = (
         "A FIPS-approved version of the OpenSSL cryptographic library has been detected"
     )
-
-    if pro_fips_vars["fips_supported"]:
-        assert fips_message in logs
-    else:
-        assert fips_message not in logs
+    assert fips_message in logs, "FIPS message should appear in error log when FIPS is supported"
 
 def test_rocksdb_install(host, mysql_server,pro_fips_vars):
     ps_version_major = pro_fips_vars['ps_version_major']

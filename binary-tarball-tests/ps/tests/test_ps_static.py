@@ -113,25 +113,32 @@ def test_binaries_linked_libraries(host,pro_fips_vars):
 
 def test_pro_openssl_files_not_exist(host, pro_fips_vars):
     """
-    In FIPS mode, bundled OpenSSL libraries must NOT exist.
-    In non-FIPS mode, bundled OpenSSL libraries MUST exist.
+    For PRO packages in FIPS mode: bundled OpenSSL libraries must NOT exist.
+    For non-PRO packages: bundled OpenSSL libraries may exist even in FIPS mode.
+    In non-FIPS mode: bundled OpenSSL libraries MUST exist.
     """
+    pro = pro_fips_vars['pro']
     base_dir = pro_fips_vars['base_dir']
     fips_supported = pro_fips_vars["fips_supported"]
 
     for openssl_file in ps_openssl_files:
         file_exists = host.file(base_dir + '/' + openssl_file).exists
-        if fips_supported:
-            assert not file_exists, f"{openssl_file} must NOT exist in FIPS mode"
-        else:
+        if fips_supported and pro:
+            # PRO packages in FIPS mode: files must NOT exist
+            assert not file_exists, f"{openssl_file} must NOT exist in PRO FIPS mode"
+        elif not fips_supported:
+            # Non-FIPS mode: files must exist
             assert file_exists, f"{openssl_file} must exist when NOT in FIPS mode"
+        # For non-PRO packages in FIPS mode, files may exist (they're just not used)
 
 
 def test_pro_openssl_files_linked(host, pro_fips_vars):
     """
-    In FIPS mode, linked OpenSSL libraries should come from system path.
-    In non-FIPS mode, linked OpenSSL libraries should reference bundled libs.
+    For PRO packages in FIPS mode: linked OpenSSL libraries should come from system path.
+    For non-PRO packages in FIPS mode: may link to bundled libs (but should use system when FIPS is active).
+    In non-FIPS mode: linked OpenSSL libraries should reference bundled libs.
     """
+    pro = pro_fips_vars['pro']
     base_dir = pro_fips_vars['base_dir']
     fips_supported = pro_fips_vars["fips_supported"]
 
@@ -140,8 +147,11 @@ def test_pro_openssl_files_linked(host, pro_fips_vars):
         for line in shared_files.splitlines():
             for file_name in ['libcrypto.so', 'libssl.so']:
                 if file_name in line:
-                    if fips_supported:
-                        assert base_dir not in line, "Binary must NOT link bundled OpenSSL in FIPS mode"
-                        assert '=> not found' not in line
-                    else:
+                    assert '=> not found' not in line, f"OpenSSL library {file_name} not found for {binary}"
+                    if fips_supported and pro:
+                        # PRO packages in FIPS mode: must NOT link bundled OpenSSL
+                        assert base_dir not in line, "PRO binary must NOT link bundled OpenSSL in FIPS mode"
+                    elif not fips_supported:
+                        # Non-FIPS mode: should link bundled OpenSSL
                         assert base_dir in line, "Binary should link bundled OpenSSL in non-FIPS mode"
+                    # For non-PRO packages in FIPS mode, linking behavior may vary

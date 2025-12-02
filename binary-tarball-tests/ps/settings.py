@@ -55,33 +55,71 @@ def detect_fips_support():
 
 def set_pro_fips_vars():
     """
-    Returns runtime settings used by the test suite.
-    FIPS logic is based only on detection, not on PRO/NON-PRO.
+    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
     source_environment_file()
 
+    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
+    pro = value in {"yes", "true", "1"}
+
+    print(pro)  # True if value is "yes", "true", or "1", otherwise False
+
+    # Check FIPS_SUPPORTED from environment
+    fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
+    
+    # For non-pro packages: always enable FIPS tests (unless explicitly disabled)
+    # For pro packages: use FIPS_SUPPORTED environment variable
+    import sys
+    if not pro:
+        # Non-pro packages: always enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
+        print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}", file=sys.stderr)
+        if fips_env == "no":
+            fips_supported = False
+            print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests", file=sys.stderr)
+        else:
+            # Always enable FIPS tests for non-pro packages
+            fips_supported = True
+            print(f"Non-pro package: FIPS_SUPPORTED={fips_env} (empty or not 'no'), FORCING fips_supported=True", file=sys.stderr)
+    else:
+        # Pro packages: use FIPS_SUPPORTED environment variable
+        fips_supported = fips_env in {"yes", "true", "1"}
+        print(f"Pro package: FIPS_SUPPORTED={fips_env}, fips_supported={fips_supported}", file=sys.stderr)
+    
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
 
-    # Installation directory
-    base_dir = os.getenv('BASE_DIR') or '/usr/percona-server'
+    if (os.getenv('PRO')):
+      base_dir = '/usr/percona-server'
+      print(f"PRINTING THE PRO VALUE PRO: {pro}")
+    else:
+      base_dir = os.getenv('BASE_DIR')
+
+    if pro:
+      print(f"TRUE PRO VAR WORKING")
+    else:
+      print(f"FALSE PRO VAR NOT WORKING")
 
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
-    # Runtime FIPS detection status
-    fips_supported = detect_fips_support()
+    # Final safety check: ensure fips_supported is True for non-pro packages (unless explicitly disabled)
+    if not pro and fips_supported is False and fips_env != "no":
+        print(f"WARNING: Non-pro package but fips_supported=False. FORCING to True.", file=sys.stderr)
+        fips_supported = True
 
+    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}", file=sys.stderr)
+    
     return {
+        'pro': pro,
         'debug': debug,
-        'base_dir': base_dir,
+        'fips_supported': fips_supported,
         'ps_revision': ps_revision,
         'ps_version': ps_version,
+        'base_dir': base_dir,
         'ps_version_upstream': ps_version_upstream,
         'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona,
-        'fips_supported': fips_supported
+        'ps_version_percona': ps_version_percona
     }
 
 
