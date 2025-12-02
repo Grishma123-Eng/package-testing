@@ -27,6 +27,10 @@ def test_fips_md5(host, mysql_server,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     debug = pro_fips_vars['debug']
+    
+    # Debug output to see what values we're getting
+    print(f"\n=== DEBUG test_fips_md5: pro={pro}, fips_supported={fips_supported}, debug={debug} ===")
+    print(f"pro_fips_vars dict: {pro_fips_vars}")
 
     if fips_supported:
         query="SELECT MD5('foo');"

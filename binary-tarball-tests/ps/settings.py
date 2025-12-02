@@ -69,20 +69,21 @@ def set_pro_fips_vars():
     
     # For non-pro packages: always enable FIPS tests (unless explicitly disabled)
     # For pro packages: use FIPS_SUPPORTED environment variable
+    import sys
     if not pro:
         # Non-pro packages: always enable FIPS tests unless FIPS_SUPPORTED is explicitly "no"
-        print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}")
+        print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}", file=sys.stderr)
         if fips_env == "no":
             fips_supported = False
-            print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests")
+            print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests", file=sys.stderr)
         else:
             # Always enable FIPS tests for non-pro packages
             fips_supported = True
-            print(f"Non-pro package: FIPS_SUPPORTED={fips_env} (empty or not 'no'), FORCING fips_supported=True")
+            print(f"Non-pro package: FIPS_SUPPORTED={fips_env} (empty or not 'no'), FORCING fips_supported=True", file=sys.stderr)
     else:
         # Pro packages: use FIPS_SUPPORTED environment variable
         fips_supported = fips_env in {"yes", "true", "1"}
-        print(f"Pro package: FIPS_SUPPORTED={fips_env}, fips_supported={fips_supported}")
+        print(f"Pro package: FIPS_SUPPORTED={fips_env}, fips_supported={fips_supported}", file=sys.stderr)
     
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
@@ -105,11 +106,12 @@ def set_pro_fips_vars():
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
     # Final safety check: ensure fips_supported is True for non-pro packages (unless explicitly disabled)
+    import sys
     if not pro and fips_supported is False and fips_env != "no":
-        print(f"WARNING: Non-pro package but fips_supported=False. FORCING to True.")
+        print(f"WARNING: Non-pro package but fips_supported=False. FORCING to True.", file=sys.stderr)
         fips_supported = True
 
-    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}")
+    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}", file=sys.stderr)
     
     return {
         'pro': pro,
@@ -128,7 +130,12 @@ def pro_fips_vars():
     """
     Fixture that provides environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
-    return set_pro_fips_vars()
+    import sys
+    result = set_pro_fips_vars()
+    # Force output to stderr so it's visible
+    print(f"\n=== FIXTURE pro_fips_vars called: fips_supported={result['fips_supported']}, pro={result['pro']} ===", file=sys.stderr)
+    print(f"Full result: {result}", file=sys.stderr)
+    return result
 
 
 source_environment_file()
@@ -304,7 +311,7 @@ ps8x_openssl_files = (
 
 #####
 
-if re.match(r'^8\.[1-9]$', ps_version_major):
+if re.match(r'^8\.[1-9]', ps_version_major):  # Match 8.1, 8.2, ..., 8.9, 8.10, etc.
     ps_binaries = ps8x_binaries
     ps_executables = ps8x_executables
     ps_plugins = ps8x_plugins
@@ -329,6 +336,7 @@ elif ps_version_major == '5.7':
     ps_functions = ps57_functions
     ps_files = ps57_files
     ps_symlinks = ps57_symlinks
+    ps_openssl_files = ps80_openssl_files  # Use same OpenSSL files list for 5.7
 elif ps_version_major == '5.6':
     ps_binaries = ps56_binaries
     ps_executables = ps56_executables
@@ -336,3 +344,7 @@ elif ps_version_major == '5.6':
     ps_functions = ps56_functions
     ps_files = ps56_files
     ps_symlinks = ps56_symlinks
+    ps_openssl_files = ps80_openssl_files  # Use same OpenSSL files list for 5.6
+else:
+    # Default fallback for any other version
+    ps_openssl_files = ps80_openssl_files
