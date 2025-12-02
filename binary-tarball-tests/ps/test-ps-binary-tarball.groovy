@@ -34,12 +34,12 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        rm -rf package-testing-master package-testing
-                        rm -f master.zip
-                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
-                        unzip -o master.zip
-                        rm -f master.zip
-                        mv package-testing-master package-testing
+                       rm -rf package-testing-support-debian113 package-testing
+                       rm -f package-testing.zip
+                       wget -O package-testing.zip https://github.com/grishma123-eng/package-testing/archive/refs/heads/support-debian113.zip
+                       unzip -o package-testing.zip
+                       rm -f package-testing.zip
+                       mv package-testing-support-debian113 package-testing
                     '''
 
                     def VERSION = sh(
