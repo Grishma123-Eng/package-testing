@@ -67,19 +67,23 @@ def set_pro_fips_vars():
     # Check FIPS_SUPPORTED from environment
     fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
     
-    # For non-pro packages: enable FIPS by default (unless explicitly disabled)
+    # For non-pro packages: enable FIPS if detected (unless explicitly disabled)
     # For pro packages: use FIPS_SUPPORTED environment variable
     import sys
     if not pro:
-        # Non-pro packages: enable FIPS by default unless FIPS_SUPPORTED is explicitly "no"
+        # Non-pro packages: enable FIPS if detected, unless FIPS_SUPPORTED is explicitly "no"
         print(f"DEBUG: Non-pro package detected. PRO={value}, fips_env={fips_env}", file=sys.stderr)
         if fips_env == "no":
             fips_supported = False
             print("Non-pro package: FIPS_SUPPORTED is explicitly 'no', disabling FIPS tests", file=sys.stderr)
         else:
-            # Enable FIPS for non-pro packages by default (let tests run and fail if not supported)
-            fips_supported = True
-            print(f"Non-pro package: Enabling FIPS tests by default (FIPS_SUPPORTED={fips_env})", file=sys.stderr)
+            # Try to detect FIPS support - only enable if actually available
+            detected = detect_fips_support()
+            fips_supported = detected
+            if detected:
+                print(f"Non-pro package: FIPS detected, enabling FIPS tests", file=sys.stderr)
+            else:
+                print(f"Non-pro package: FIPS not detected, tests will run in non-FIPS mode", file=sys.stderr)
     else:
         # Pro packages: use FIPS_SUPPORTED environment variable
         fips_supported = fips_env in {"yes", "true", "1"}
