@@ -32,64 +32,14 @@ def mysql_server(request,pro_fips_vars):
             break
         except subprocess.CalledProcessError as e:
             if i == max_retries - 1:
-                # Server failed to start with FIPS - try without FIPS for non-pro packages
-                if fips_supported and not pro:
-                    # For non-pro packages, if FIPS fails, try without FIPS
-                    print(f"MySQL server failed to start with FIPS enabled (attempt {i+1}/{max_retries}). Trying without FIPS...", file=sys.stderr)
-                    # Kill any mysqld processes that might be hanging
-                    try:
-                        subprocess.check_call(['pkill', '-9', '-f', f'{base_dir}/bin/mysqld'], 
-                                             stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                    except subprocess.CalledProcessError:
-                        pass  # No process to kill
-                    time.sleep(2)
-                    # Clean up completely
-                    subprocess.call(['rm','-Rf', mysql_server.datadir], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.logfile], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.pidfile], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.socket], stderr=subprocess.DEVNULL)
-                    time.sleep(1)
-                    # Create new MySQL instance without FIPS
-                    print(f"Creating new MySQL instance without FIPS...", file=sys.stderr)
-                    try:
-                        mysql_server = mysql.MySQL(base_dir, [])
-                        print(f"Starting MySQL server without FIPS...", file=sys.stderr)
-                        mysql_server.start()
-                        time.sleep(10)
-                        # Try to connect again
-                        for j in range(max_retries):
-                            try:
-                                mysql_server.run_query("SELECT 1;")
-                                server_started = True
-                                # Update fips_supported since we're running without FIPS
-                               # pro_fips_vars['fips_supported'] = False
-                                print(f"MySQL server started successfully without FIPS. Tests will run in non-FIPS mode.", file=sys.stderr)
-                                break
-                            except subprocess.CalledProcessError as e2:
-                                if j == max_retries - 1:
-                                    # Read error log for debugging
-                                    try:
-                                        with open(mysql_server.logfile, 'r') as f:
-                                            log_content = f.read()
-                                        print(f"Error log content:\n{log_content[-2000:]}", file=sys.stderr)
-                                    except:
-                                        pass
-                                    raise Exception(f"MySQL server failed to start even without FIPS after {max_retries} retries. Check error log: {mysql_server.logfile}")
-                                time.sleep(2)
-                        break
-                    except Exception as e3:
-                        print(f"Failed to create/start MySQL instance without FIPS: {e3}", file=sys.stderr)
-                        raise
-                else:
-                    # For pro packages or if FIPS wasn't enabled, raise error
-                    # Read error log for debugging
-                    try:
-                        with open(mysql_server.logfile, 'r') as f:
-                            log_content = f.read()
-                        print(f"Error log content:\n{log_content[-2000:]}", file=sys.stderr)
-                    except:
-                        pass
-                    raise Exception(f"MySQL server failed to start after {max_retries} retries. Check error log: {mysql_server.logfile}")
+                # Read error log for debugging
+                try:
+                    with open(mysql_server.logfile, 'r') as f:
+                        log_content = f.read()
+                    print(f"Error log content:\n{log_content[-2000:]}", file=sys.stderr)
+                except:
+                    pass
+                raise Exception(f"MySQL server failed to start after {max_retries} retries. Check error log: {mysql_server.logfile}")
             time.sleep(2)
     
     yield mysql_server
