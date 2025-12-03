@@ -2,6 +2,7 @@
 import pytest
 import subprocess
 import sys
+import os
 import testinfra
 import time
 import mysql
@@ -25,21 +26,36 @@ def mysql_server(request,pro_fips_vars):
     # Verify server is actually running by trying to connect
     max_retries = 5
     server_started = False
+    error_log_content = ""
     for i in range(max_retries):
         try:
             mysql_server.run_query("SELECT 1;")
             server_started = True
             break
         except subprocess.CalledProcessError as e:
-            if i == max_retries - 1:
-                # Read error log for debugging
-                try:
+            # Check if server process is still running
+            try:
+                # Try to read the error log to see what went wrong
+                if os.path.exists(mysql_server.logfile):
                     with open(mysql_server.logfile, 'r') as f:
-                        log_content = f.read()
-                    print(f"Error log content:\n{log_content[-2000:]}", file=sys.stderr)
-                except:
-                    pass
-                raise Exception(f"MySQL server failed to start after {max_retries} retries. Check error log: {mysql_server.logfile}")
+                        error_log_content = f.read()
+            except:
+                pass
+            
+            if i == max_retries - 1:
+                # Check if it's a FIPS-related error
+                fips_error_indicators = ['fips', 'FIPS', 'ssl-fips', 'SSL FIPS']
+                is_fips_error = any(indicator in error_log_content for indicator in fips_error_indicators)
+                
+                error_msg = f"MySQL server failed to start after {max_retries} retries."
+                if fips_supported and is_fips_error:
+                    error_msg += f" FIPS-related error detected. This may indicate that FIPS is not properly configured in the system."
+                error_msg += f" Check error log: {mysql_server.logfile}"
+                
+                if error_log_content:
+                    print(f"Error log content:\n{error_log_content[-2000:]}", file=sys.stderr)
+                
+                raise Exception(error_msg)
             time.sleep(2)
     
     yield mysql_server
