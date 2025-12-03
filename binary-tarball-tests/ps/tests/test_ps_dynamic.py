@@ -62,7 +62,7 @@ def mysql_server(request,pro_fips_vars):
                                 mysql_server.run_query("SELECT 1;")
                                 server_started = True
                                 # Update fips_supported since we're running without FIPS
-                                pro_fips_vars['fips_supported'] = False
+                               # pro_fips_vars['fips_supported'] = False
                                 print(f"MySQL server started successfully without FIPS. Tests will run in non-FIPS mode.", file=sys.stderr)
                                 break
                             except subprocess.CalledProcessError as e2:
