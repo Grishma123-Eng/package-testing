@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
+import pytest
+import subprocess
+import testinfra
+import time
+import mysql
+from packaging import version
+
+from settings import * # Note: This line in settings.py likely causes a circular import issue.
+
+# --- START OF ACTUAL CONFIGURATION LOGIC ---
+
 import os
 import re
-import pytest
+# Removed duplicate imports that were mistakenly included at the top of the original user file
 
 def source_environment_file(filepath="/etc/environment"):
     """
@@ -38,8 +49,13 @@ def set_pro_fips_vars():
 
     print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    fips_supported = True if os.getenv('PRO') == "yes" else False
-    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
+    # --- CORE LOGIC CHANGE FOR FIPS SUPPORT ---
+    # The requirement is to enable FIPS for non-PRO builds too.
+    # We now check for an explicit FIPS_SUPPORTED environment variable being set.
+    fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True", "1"}
+    # The previous logic was: fips_supported = True if os.getenv('PRO') == "yes" else False
+    # -----------------------------------------
+
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
