@@ -15,7 +15,7 @@ def mysql_server(request,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     features=[]
-    if pro and fips_supported:
+    if fips_supported:
         features.append('fips')
     mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
