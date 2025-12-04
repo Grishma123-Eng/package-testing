@@ -52,7 +52,8 @@ def set_pro_fips_vars():
     # --- CORE LOGIC CHANGE FOR FIPS SUPPORT ---
     # The requirement is to enable FIPS for non-PRO builds too.
     # We now check for an explicit FIPS_SUPPORTED environment variable being set.
-    fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True", "1"}
+    env_fips = os.getenv('FIPS_SUPPORTED', '').strip().lower()
+    fips_supported = pro or (env_fips in {"yes", "true", "1"})
     # The previous logic was: fips_supported = True if os.getenv('PRO') == "yes" else False
     # -----------------------------------------
 

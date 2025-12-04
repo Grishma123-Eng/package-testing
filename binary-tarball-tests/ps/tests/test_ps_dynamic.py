@@ -24,10 +24,8 @@ def mysql_server(request,pro_fips_vars):
     mysql_server.purge()
 
 def test_fips_md5(host, mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     debug = pro_fips_vars['debug']
-
     # CHECK CHANGE: Condition uses only fips_supported
     if fips_supported:
         query="SELECT MD5('foo');"
@@ -37,9 +35,7 @@ def test_fips_md5(host, mysql_server,pro_fips_vars):
         pytest.skip("This test is only for FIPS-supported environments. Skipping")
 
 def test_fips_value(host,mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    
     # CHECK CHANGE: Removed 'pro and' condition
     if fips_supported:
         query="select @@ssl_fips_mode;"
@@ -49,9 +45,7 @@ def test_fips_value(host,mysql_server,pro_fips_vars):
         pytest.skip("This test is only for FIPS-supported environments. Skipping")
 
 def test_fips_in_log(host, mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
-    fips_supported = pro_fips_vars['fips_supported']
-    
+    fips_supported = pro_fips_vars['fips_supported'] 
     # CHECK CHANGE: Removed 'pro and' condition
     if fips_supported:
         with host.sudo():
