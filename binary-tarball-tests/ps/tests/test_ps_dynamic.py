@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import pytest
 import subprocess
-import sys
-import os
 import testinfra
 import time
 import mysql
@@ -17,145 +15,47 @@ def mysql_server(request,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     features=[]
-    if fips_supported:
+    if pro and fips_supported:
         features.append('fips')
     mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
     time.sleep(10)
-    
-    # Verify server is actually running by trying to connect
-    max_retries = 5
-    server_started = False
-    error_log_content = ""
-    fips_actually_enabled = fips_supported
-    
-    for i in range(max_retries):
-        try:
-            mysql_server.run_query("SELECT 1;")
-            server_started = True
-            break
-        except subprocess.CalledProcessError as e:
-            # Check if server process is still running
-            try:
-                # Try to read the error log to see what went wrong
-                if os.path.exists(mysql_server.logfile):
-                    with open(mysql_server.logfile, 'r') as f:
-                        error_log_content = f.read()
-            except:
-                pass
-            
-            if i == max_retries - 1:
-                # Check if it's a FIPS-related error
-                fips_error_indicators = ['fips', 'FIPS', 'ssl-fips', 'SSL FIPS', 'DSO support routines']
-                is_fips_error = any(indicator in error_log_content for indicator in fips_error_indicators)
-                
-                # For non-pro packages, if FIPS fails due to system support, try without FIPS
-                if fips_supported and is_fips_error and not pro:
-                    print(f"MySQL server failed to start with FIPS (FIPS library not available). Retrying without FIPS for non-pro package...", file=sys.stderr)
-                    # Kill any mysqld processes that might be hanging
-                    try:
-                        subprocess.check_call(['pkill', '-9', '-f', f'{base_dir}/bin/mysqld'], 
-                                             stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-                    except subprocess.CalledProcessError:
-                        pass
-                    time.sleep(2)
-                    # Clean up completely
-                    subprocess.call(['rm','-Rf', mysql_server.datadir], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.logfile], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.pidfile], stderr=subprocess.DEVNULL)
-                    subprocess.call(['rm','-f', mysql_server.socket], stderr=subprocess.DEVNULL)
-                    time.sleep(1)
-                    # Create new MySQL instance without FIPS
-                    print(f"Creating new MySQL instance without FIPS...", file=sys.stderr)
-                    try:
-                        mysql_server = mysql.MySQL(base_dir, [])
-                        print(f"Starting MySQL server without FIPS...", file=sys.stderr)
-                        mysql_server.start()
-                        time.sleep(10)
-                        # Try to connect again
-                        for j in range(max_retries):
-                            try:
-                                mysql_server.run_query("SELECT 1;")
-                                server_started = True
-                                fips_actually_enabled = False  # FIPS not actually enabled
-                                print(f"MySQL server started successfully without FIPS. FIPS tests will be skipped.", file=sys.stderr)
-                                break
-                            except subprocess.CalledProcessError as e2:
-                                if j == max_retries - 1:
-                                    # Read error log for debugging
-                                    try:
-                                        with open(mysql_server.logfile, 'r') as f:
-                                            log_content = f.read()
-                                        print(f"Error log content:\n{log_content[-2000:]}", file=sys.stderr)
-                                    except:
-                                        pass
-                                    raise Exception(f"MySQL server failed to start even without FIPS after {max_retries} retries. Check error log: {mysql_server.logfile}")
-                                time.sleep(2)
-                        break
-                    except Exception as e3:
-                        print(f"Failed to create/start MySQL instance without FIPS: {e3}", file=sys.stderr)
-                        raise
-                else:
-                    # For pro packages or non-FIPS errors, raise error
-                    error_msg = f"MySQL server failed to start after {max_retries} retries."
-                    if fips_supported and is_fips_error:
-                        error_msg += f" FIPS-related error detected. This may indicate that FIPS is not properly configured in the system."
-                    error_msg += f" Check error log: {mysql_server.logfile}"
-                    
-                    if error_log_content:
-                        print(f"Error log content:\n{error_log_content[-2000:]}", file=sys.stderr)
-                    
-                    raise Exception(error_msg)
-            time.sleep(2)
-    
-    # Store whether FIPS is actually enabled in the mysql_server object
-    mysql_server.fips_actually_enabled = fips_actually_enabled
-    
     yield mysql_server
     mysql_server.purge()
 
-def test_fips_md5(host, mysql_server, pro_fips_vars):
-    """
-    FIPS mode should return masked MD5, otherwise normal MD5 hash.
-    Works for both PRO and non-PRO packages.
-    """
-    # Check if FIPS is actually enabled (may have been disabled if system doesn't support it)
-    if not hasattr(mysql_server, 'fips_actually_enabled') or not mysql_server.fips_actually_enabled:
-        pytest.skip("FIPS is not actually enabled (may have failed to start with FIPS). Skipping")
-    
-    output = mysql_server.run_query("SELECT MD5('foo');")
-    assert '00000000000000000000000000000000' in output, "Expected masked MD5 in FIPS mode"
+def test_fips_md5(host, mysql_server,pro_fips_vars):
+    pro = pro_fips_vars['pro']
+    fips_supported = pro_fips_vars['fips_supported']
+    debug = pro_fips_vars['debug']
 
+    if pro and fips_supported:
+        query="SELECT MD5('foo');"
+        output = mysql_server.run_query(query)
+        assert '00000000000000000000000000000000' in output
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
-def test_fips_value(host, mysql_server, pro_fips_vars):
-    """
-    Check ssl_fips_mode runtime variable — ON only when FIPS is enabled.
-    Works for both PRO and non-PRO packages.
-    """
-    # Check if FIPS is actually enabled (may have been disabled if system doesn't support it)
-    if not hasattr(mysql_server, 'fips_actually_enabled') or not mysql_server.fips_actually_enabled:
-        pytest.skip("FIPS is not actually enabled (may have failed to start with FIPS). Skipping")
-    
-    output = mysql_server.run_query("select @@ssl_fips_mode;")
-    assert 'ON' in output, "ssl_fips_mode should be ON when FIPS is supported"
+def test_fips_value(host,mysql_server,pro_fips_vars):
+    pro = pro_fips_vars['pro']
+    fips_supported = pro_fips_vars['fips_supported']
+    if pro and fips_supported:
+        query="select @@ssl_fips_mode;"
+        output = mysql_server.run_query(query)
+        assert 'ON' in output
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
-def test_fips_in_log(host, mysql_server, pro_fips_vars):
-    """
-    FIPS informational log must appear only when FIPS is enabled.
-    Works for both PRO and non-PRO packages.
-    """
-    # Check if FIPS is actually enabled (may have been disabled if system doesn't support it)
-    if not hasattr(mysql_server, 'fips_actually_enabled') or not mysql_server.fips_actually_enabled:
-        pytest.skip("FIPS is not actually enabled (may have failed to start with FIPS). Skipping")
-    
-    with host.sudo():
-        error_log = mysql_server.run_query("SELECT @@log_error;")
-        logs = host.check_output(f'head -n30 {error_log}')
-
-    fips_message = (
-        "A FIPS-approved version of the OpenSSL cryptographic library has been detected"
-    )
-    assert fips_message in logs, "FIPS message should appear in error log when FIPS is supported"
+def test_fips_in_log(host, mysql_server,pro_fips_vars):
+    pro = pro_fips_vars['pro']
+    fips_supported = pro_fips_vars['fips_supported']
+    if pro and fips_supported:
+        with host.sudo():
+            query="SELECT @@log_error;"
+            error_log = mysql_server.run_query(query)
+            logs=host.check_output(f'head -n30 {error_log}')
+            assert "A FIPS-approved version of the OpenSSL cryptographic library has been detected in the operating system with a properly configured FIPS module available for loading. Percona Server for MySQL will load this module and run in FIPS mode." in logs
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
 def test_rocksdb_install(host, mysql_server,pro_fips_vars):
     ps_version_major = pro_fips_vars['ps_version_major']

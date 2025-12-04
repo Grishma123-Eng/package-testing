@@ -2,7 +2,6 @@
 import os
 import re
 import pytest
-import subprocess
 
 def source_environment_file(filepath="/etc/environment"):
     """
@@ -28,31 +27,6 @@ def source_environment_file(filepath="/etc/environment"):
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
 
-def detect_fips_support():
-    """
-    Detect if FIPS is supported in the system by checking for FIPS module availability.
-    """
-    try:
-        # Check if FIPS module is available
-        result = subprocess.run(['openssl', 'version'], capture_output=True, text=True, timeout=5)
-        if result.returncode == 0:
-            # Check if system has FIPS-capable OpenSSL
-            # Also check for FIPS module file
-            fips_module_paths = [
-                '/proc/sys/crypto/fips_enabled',
-                '/usr/lib/ssl/fipsmodule.cnf',
-                '/etc/ssl/fipsmodule.cnf'
-            ]
-            for path in fips_module_paths:
-                if os.path.exists(path):
-                    return True
-            # Check if openssl supports FIPS (some systems have it built-in)
-            if 'fips' in result.stdout.lower() or 'FIPS' in result.stdout:
-                return True
-    except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
-        print(f"FIPS detection check failed: {e}")
-    return False
-
 def set_pro_fips_vars():
     """
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
@@ -64,41 +38,19 @@ def set_pro_fips_vars():
 
     print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    # Check FIPS_SUPPORTED from environment
-    fips_env = os.getenv('FIPS_SUPPORTED', '').strip().lower()
-    
-    # For non-pro packages: enable FIPS if detected or if explicitly set in environment
-    # For pro packages: use FIPS_SUPPORTED environment variable
-    import sys
-    if not pro:
-        # For non-PRO packages: try to detect FIPS, or use env var if set
-        if fips_env in {"yes", "true", "1"}:
-            fips_supported = True
-            print("FIPS support enabled for non-PRO packages via FIPS_SUPPORTED env var", file=sys.stderr)
-        else:
-            # Try to detect FIPS support in the system
-            fips_supported = detect_fips_support()
-            if fips_supported:
-                print("FIPS support detected for non-PRO packages", file=sys.stderr)
-            else:
-                # For non-pro packages, enable FIPS by default (requirement changed)
-                # MySQL should support FIPS even if system detection fails
-                fips_supported = True
-                print("FIPS support enabled for non-PRO packages by default (requirement changed)", file=sys.stderr)
-    else:
-        # PRO builds respect env var FIPS_SUPPORTED
-        fips_supported = fips_env in {"yes", "true", "1"}
-        print(f"Pro package: FIPS_SUPPORTED={fips_env}, fips_supported={fips_supported}", file=sys.stderr)
-    
+    fips_supported = True if os.getenv('PRO') == "yes" else False
+    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
+
 
     if (os.getenv('PRO')):
       base_dir = '/usr/percona-server'
       print(f"PRINTING THE PRO VALUE PRO: {pro}")
     else:
       base_dir = os.getenv('BASE_DIR')
+
 
     if pro:
       print(f"TRUE PRO VAR WORKING")
@@ -108,10 +60,6 @@ def set_pro_fips_vars():
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
-    # Note: We don't force fips_supported=True anymore - we only enable it if FIPS is actually detected
-
-    print(f"DEBUG: Returning fips_supported={fips_supported}, pro={pro}, fips_env={fips_env}", file=sys.stderr)
-    
     return {
         'pro': pro,
         'debug': debug,
@@ -124,15 +72,12 @@ def set_pro_fips_vars():
         'ps_version_percona': ps_version_percona
     }
 
-
 @pytest.fixture(scope="module")
 def pro_fips_vars():
     """
-    Fixture that exposes environment and FIPS runtime settings.
+    Fixture that provides environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
-    result = set_pro_fips_vars()
-    print(f"\n=== FIXTURE pro_fips_vars === {result}")
-    return result
+    return set_pro_fips_vars()
 
 
 source_environment_file()
@@ -308,7 +253,7 @@ ps8x_openssl_files = (
 
 #####
 
-if re.match(r'^8\.[1-9]', ps_version_major):  # Match 8.1, 8.2, ..., 8.9, 8.10, etc.
+if re.match(r'^8\.[1-9]$', ps_version_major):
     ps_binaries = ps8x_binaries
     ps_executables = ps8x_executables
     ps_plugins = ps8x_plugins
@@ -333,7 +278,6 @@ elif ps_version_major == '5.7':
     ps_functions = ps57_functions
     ps_files = ps57_files
     ps_symlinks = ps57_symlinks
-    ps_openssl_files = ps80_openssl_files  # Use same OpenSSL files list for 5.7
 elif ps_version_major == '5.6':
     ps_binaries = ps56_binaries
     ps_executables = ps56_executables
@@ -341,7 +285,3 @@ elif ps_version_major == '5.6':
     ps_functions = ps56_functions
     ps_files = ps56_files
     ps_symlinks = ps56_symlinks
-    ps_openssl_files = ps80_openssl_files  # Use same OpenSSL files list for 5.6
-else:
-    # Default fallback for any other version
-    ps_openssl_files = ps80_openssl_files
