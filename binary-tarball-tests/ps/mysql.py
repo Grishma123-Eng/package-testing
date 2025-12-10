@@ -17,6 +17,12 @@ class MySQL:
         self.pidfile = base_dir+'/mysql.pid'
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
         self.features=features
+        self.env = os.environ.copy()
+        self.env.pop('LD_LIBRARY_PATH', None)
+        self.env.pop('LD_PRELOAD', None)
+        self.env.setdefault('OPENSSL_CONF', '/etc/ssl/openssl.cnf')
+        self.env.setdefault('OPENSSL_MODULES', '/usr/lib64/ossl-modules')
+
 
         if 'fips' in self.features:
             self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']

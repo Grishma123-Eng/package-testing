@@ -45,17 +45,35 @@ def set_pro_fips_vars():
     ps_version = os.getenv('PS_VERSION')
 
 
-    if pro:
-    base_dir = '/usr/percona-server'
-      print(f"PRINTING THE PRO VALUE PRO: {pro}")
-    else:
-      base_dir = os.getenv('BASE_DIR')
+    def is_fips_enabled_os():
+        # RHEL / Rocky / Alma kernel flag
+        if os.path.exists("/proc/sys/crypto/fips_enabled"):
+            try:
+                with open("/proc/sys/crypto/fips_enabled") as f:
+                    if f.read().strip() == "1":
+                        return True
+            except:
+                pass
 
+        # RHEL / Rocky / Alma crypto policies (OpenSSL3 FIPS)
+        if os.path.exists("/etc/crypto-policies/back-ends/opensslcnf-fips.config"):
+            return True
 
+        # If neither condition is true → FIPS not active
+        return False
+
+    fips_supported = is_fips_enabled_os()
+    print(f"FIPS supported: {fips_supported}")
+
+    # -------------------------------
+    # BASE DIR LOGIC
+    # -------------------------------
     if pro:
-      print(f"TRUE PRO VAR WORKING")
+        base_dir = '/usr/percona-server'
+        print("Using PRO base_dir: ", base_dir)
     else:
-      print(f"FALSE PRO VAR NOT WORKING")
+        base_dir = os.getenv('BASE_DIR')
+        print("Using non-PRO base_dir: ", base_dir)
 
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
