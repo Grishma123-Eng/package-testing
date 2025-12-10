@@ -45,8 +45,8 @@ def set_pro_fips_vars():
     ps_version = os.getenv('PS_VERSION')
 
 
-    if (os.getenv('PRO')):
-      base_dir = '/usr/percona-server'
+    if pro:
+    base_dir = '/usr/percona-server'
       print(f"PRINTING THE PRO VALUE PRO: {pro}")
     else:
       base_dir = os.getenv('BASE_DIR')
