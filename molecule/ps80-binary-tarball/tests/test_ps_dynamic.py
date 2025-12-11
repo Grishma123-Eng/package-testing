@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 import sys
 import os
-sys.path.insert(0, '/package-testing/binary-tarball-tests/ps')
+# Add path for both local (test collection) and remote (test execution) scenarios
+local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
+remote_path = '/package-testing/binary-tarball-tests/ps'
+local_path_abs = os.path.abspath(local_path)
+if os.path.exists(local_path_abs):
+    sys.path.insert(0, local_path_abs)
+else:
+    sys.path.insert(0, remote_path)
 import pytest
 import subprocess
 import testinfra
