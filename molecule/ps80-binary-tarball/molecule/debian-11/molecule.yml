@@ -4,9 +4,9 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: debian12-${BUILD_NUMBER}-${JOB_NAME}
+  - name: debian11-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
-    image: ami-01ce1f232a5e4adc2
+    image: ami-02d0122d25353b012
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: admin
@@ -33,7 +33,7 @@ verifier:
     FIPS_SUPPORTED: "yes"
     ANSIBLE_SSH_TRANSFER_METHOD: piped
 scenario:
-  name: debian-12
+  name: debian-11
   destroy_sequence:
     - destroy
   test_sequence:
