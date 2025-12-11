@@ -22,8 +22,8 @@ from settings import *
 
 @pytest.fixture(scope='module')
 def mysql_server(request,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
+    base_dir = pro_fips_vars['base_dir']
     features=[]
     if fips_supported:
         features.append('fips')
@@ -34,29 +34,24 @@ def mysql_server(request,pro_fips_vars):
     mysql_server.purge()
 
 def test_fips_md5(host, mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    debug = pro_fips_vars['debug']
-
     if fips_supported:
         query="SELECT MD5('foo');"
         output = mysql_server.run_query(query)
         assert '00000000000000000000000000000000' in output
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        pytest.skip("This test requires FIPS support. Skipping")
 
 def test_fips_value(host,mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     if  fips_supported:
         query="select @@ssl_fips_mode;"
         output = mysql_server.run_query(query)
         assert 'ON' in output
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        pytest.skip("This test requires FIPS support. Skipping")
 
 def test_fips_in_log(host, mysql_server,pro_fips_vars):
-    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     if fips_supported:
         with host.sudo():
@@ -65,7 +60,7 @@ def test_fips_in_log(host, mysql_server,pro_fips_vars):
             logs=host.check_output(f'head -n30 {error_log}')
             assert "A FIPS-approved version of the OpenSSL cryptographic library has been detected in the operating system with a properly configured FIPS module available for loading. Percona Server for MySQL will load this module and run in FIPS mode." in logs
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        pytest.skip("This test requires FIPS support. Skipping")
 
 def test_rocksdb_install(host, mysql_server,pro_fips_vars):
     ps_version_major = pro_fips_vars['ps_version_major']
@@ -103,6 +98,7 @@ def test_install_plugin(mysql_server):
 
 def test_audit_log_v2(mysql_server,pro_fips_vars):
     ps_version_major = pro_fips_vars['ps_version_major']
+    base_dir = pro_fips_vars['base_dir']
     if ps_version_major in ['8.0']:
         query='source {}/share/audit_log_filter_linux_install.sql;'.format(base_dir)
         mysql_server.run_query(query)
