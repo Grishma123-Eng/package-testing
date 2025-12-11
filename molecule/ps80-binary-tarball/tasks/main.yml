@@ -132,17 +132,67 @@
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
       mode: '0644'
 
-  - name: Unpack regular tarball
-    unarchive:
-      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: /
-      remote_src: yes
-      extra_opts:
-      - --transform
-      - 's,^/*[^/]*,/usr/percona-server,S'
+  - name: Check if mysqld already exists
+    stat:
+      path: /usr/percona-server/bin/mysqld
+    register: mysqld_check
+
+  - name: Remove existing /usr/percona-server if it exists
+    file:
+      path: /usr/percona-server
+      state: absent
+    when: not mysqld_check.stat.exists
+
+  - name: Create /usr/percona-server directory
+    file:
+      path: /usr/percona-server
+      state: directory
+      mode: '0755'
+    when: not mysqld_check.stat.exists
+
+  - name: Extract tarball and move to /usr/percona-server
+    shell: |
+      cd /tmp
+      # Clean up any previous extraction
+      rm -rf percona-server-* || true
+      # Extract tarball
+      tar -xzf percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      # Find the extracted directory (it might be percona-server-VERSION or just the contents)
+      EXTRACTED_DIR=$(tar -tzf percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz | head -1 | cut -d'/' -f1 | sort -u | head -1)
+      if [ -n "$EXTRACTED_DIR" ] && [ -d "$EXTRACTED_DIR" ]; then
+        # Move contents from extracted directory to /usr/percona-server
+        mv $EXTRACTED_DIR/* /usr/percona-server/ 2>/dev/null || true
+        # Try to move hidden files (ignore errors if none exist)
+        shopt -s dotglob
+        mv $EXTRACTED_DIR/.* /usr/percona-server/ 2>/dev/null || true
+        rmdir $EXTRACTED_DIR 2>/dev/null || true
+      else
+        # If no top-level directory, check if files were extracted directly
+        if [ -f "bin/mysqld" ] || [ -d "bin" ]; then
+          mv * /usr/percona-server/ 2>/dev/null || true
+        fi
+      fi
+    when: not mysqld_check.stat.exists
+
+  - name: Verify mysqld exists
+    stat:
+      path: /usr/percona-server/bin/mysqld
+    register: mysqld_stat
+
+  - name: Fail if mysqld not found
+    fail:
+      msg: "Failed to extract tarball - /usr/percona-server/bin/mysqld does not exist. Tarball structure may be unexpected."
+    when: not mysqld_stat.stat.exists
+
+  - name: Set permissions on /usr/percona-server
+    file:
+      path: /usr/percona-server
+      state: directory
+      mode: '0755'
+      recurse: yes
 
 
   - name: Default FIPS_SUPPORTED fact to "no"
@@ -172,5 +222,6 @@
     with_items:
       - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
-      - "PRO={{ lookup('env', 'PRO') }}"
+      - "PRO={{ lookup('env', 'PRO') | default('', true) }}"
       - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+      - "BASE_DIR=/usr/percona-server"
