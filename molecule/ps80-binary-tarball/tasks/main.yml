@@ -126,8 +126,8 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
-      git_account: "{{ lookup('env', 'grishma123-eng') | default('tarball-fips', true) }}"
+      branch: "{{ lookup('env', 'tarball-fips') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
