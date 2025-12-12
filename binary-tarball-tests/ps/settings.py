@@ -50,6 +50,9 @@ def set_pro_fips_vars():
       print(f"PRINTING THE PRO VALUE PRO: {pro}")
     else:
       base_dir = os.getenv("BASE_DIR")
+      # Default to /usr/percona-server if BASE_DIR is not set
+      if not base_dir:
+        base_dir = "/usr/percona-server"
       print(f"Non-PRO build. BASE_DIR = {base_dir}")
 
 # Debug print
@@ -85,6 +88,9 @@ source_environment_file()
 
 
 base_dir = os.getenv('BASE_DIR')
+# Default to /usr/percona-server if BASE_DIR is not set
+if not base_dir:
+    base_dir = "/usr/percona-server"
 ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
