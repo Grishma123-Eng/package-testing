@@ -1,5 +1,12 @@
 ---
 # tasks file for tarball tests
+
+  - name: Ensure SSH access for Molecule-managed VM
+    authorized_key:
+      user: "{{ ansible_user }}"
+      key: "{{ lookup('file', 'public_keys') }}"
+      state: present
+
   - name: Display OS Name
     debug:
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
@@ -38,7 +45,7 @@
 
   - name: CHECK VARIABLES
     debug:
-      msg: "PS_VERSION is {{ PS_VERSION }} PS_REVISION is {{ PS_REVISION }} PATH is {{ PATH }} BUILD_TYPE_MINIMAL is {{ BUILD_TYPE_MINIMAL }}"
+      msg: "PS_VERSION is {{ PS_VERSION }} PS_REVISION is {{ PS_REVISION }} PATH is {{ PATH }} "
 
   - name: install needed packages for running tests with yum
     yum:
