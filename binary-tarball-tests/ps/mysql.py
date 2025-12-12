@@ -23,9 +23,19 @@ class MySQL:
         else:
             self.extra_param=[]
 
+        # Verify base_dir exists and mysqld is accessible
+        if not os.path.exists(self.basedir):
+            raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
+        if not os.path.exists(self.mysqld):
+            raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
+        if not os.access(self.mysqld, os.X_OK):
+            raise PermissionError(f"mysqld binary is not executable: {self.mysqld}")
+        
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])
-        subprocess.call(['mkdir','-p',self.basedir+'/log'])
+        # Create log directory if it doesn't exist (it should already exist from Ansible)
+        if not os.path.exists(self.basedir+'/log'):
+            subprocess.call(['mkdir','-p',self.basedir+'/log'])
         output = subprocess.check_output([self.mysqld, '--version'],universal_newlines=True)
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()

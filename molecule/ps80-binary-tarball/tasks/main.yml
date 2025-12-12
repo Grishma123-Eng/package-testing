@@ -200,7 +200,7 @@
       chmod +x /usr/percona-server/bin/mysqld
     become: yes
 
-  - name: Set permissions on /usr/percona-server
+  - name: Set permissions on /usr/percona-server to allow test user access
     file:
       path: /usr/percona-server
       state: directory
@@ -214,6 +214,26 @@
       state: directory
       mode: '1777'
     become: yes
+
+  - name: Verify mysqld is accessible and executable
+    shell: |
+      test -f /usr/percona-server/bin/mysqld && test -x /usr/percona-server/bin/mysqld && echo "mysqld is accessible and executable" || echo "ERROR: mysqld is not accessible or not executable"
+    register: mysqld_access_check
+    changed_when: false
+
+  - name: Display mysqld access check
+    debug:
+      var: mysqld_access_check.stdout
+
+  - name: Test mysqld execution
+    shell: /usr/percona-server/bin/mysqld --version
+    register: mysqld_version_test
+    changed_when: false
+    failed_when: false
+
+  - name: Display mysqld version test result
+    debug:
+      var: mysqld_version_test
 
   - name: Set BASE_DIR for non-PRO tarball installs
     lineinfile:

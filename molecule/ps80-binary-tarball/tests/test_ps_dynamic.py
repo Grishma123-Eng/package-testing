@@ -21,13 +21,13 @@ from settings import *
 
 
 @pytest.fixture(scope='module')
-def mysql_server(request,pro_fips_vars):
+def mysql_server(request, pro_fips_vars, host):  # Add host parameter
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
     features=[]
     if fips_supported:
         features.append('fips')
-    mysql_server = mysql.MySQL(base_dir, features)
+    mysql_server = mysql.MySQL(base_dir, features, host=host)  # Pass host object
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
