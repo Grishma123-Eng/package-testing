@@ -71,16 +71,16 @@
     when: BUILD_TYPE_MINIMAL == True
 
   - name: download package-testing repo branch with wget
-    shell: "{{ item }}"
+    command: "{{ item }}"
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
     - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ branch }}" /package-testing
+    - mv "package-testing-{{ branch }}" package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips') }}"
+      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
   - name: Download {{ TARBALL_NAME }}
