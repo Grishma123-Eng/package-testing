@@ -141,6 +141,23 @@
       extra_opts:
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
+    become: yes
+    become_user: root
+
+  - name: Set BASE_DIR for non-PRO tarball installs
+    lineinfile:
+      path: /etc/environment
+      line: "BASE_DIR=/usr/percona-server"
+      state: present
+
+  - name: Verify MySQL binary exists
+    stat:
+      path: /usr/percona-server/bin/mysqld
+    register: mysqld_stat
+
+  - debug:
+      msg: "mysqld exists: {{ mysqld_stat.stat.exists }}"
+
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:

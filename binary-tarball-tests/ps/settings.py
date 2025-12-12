@@ -45,17 +45,18 @@ def set_pro_fips_vars():
     ps_version = os.getenv('PS_VERSION')
 
 
-    if (os.getenv('PRO')):
-      base_dir = '/usr/percona-server'
+    if pro:
+      base_dir = "/usr/percona-server"
       print(f"PRINTING THE PRO VALUE PRO: {pro}")
     else:
-      base_dir = os.getenv('BASE_DIR')
+      base_dir = os.getenv("BASE_DIR")
+      print(f"Non-PRO build. BASE_DIR = {base_dir}")
 
-
+# Debug print
     if pro:
-      print(f"TRUE PRO VAR WORKING")
+        print("TRUE PRO VAR WORKING")
     else:
-      print(f"FALSE PRO VAR NOT WORKING")
+        print("FALSE PRO VAR NOT WORKING")
 
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
