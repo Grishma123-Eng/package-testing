@@ -1,15 +1,14 @@
 ---
 # tasks file for tarball tests
-  - name: Setup SSH keys for Oracle Linux or Amazon
-    authorized_key:
-      user: ec2-user
-      key: "{{ lookup('file', 'public_keys') }}"
-      state: present
-      exclusive: False
+  - name: Display OS Name
+    debug:
+      msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
-  - name: CHECK IF ENV ARE PASSED
-    debug: 
-      msg: "PS_VERSION is {{ lookup('env', 'PS_VERSION') }}"
+  - name: Add epel-release
+    package:
+      state: present
+      name: epel-release
+    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
 
   - name: SET PS_VERSION VAR
     set_fact:
@@ -78,7 +77,7 @@
     - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ branch }}" package-testing
+    - mv "package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
