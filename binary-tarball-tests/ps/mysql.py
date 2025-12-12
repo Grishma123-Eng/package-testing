@@ -5,7 +5,7 @@ import os
 import shlex
 
 class MySQL:
-    def __init__(self, base_dir, features=[]):
+    def __init__(self, base_dir, features=[], host=None):
         self.basedir = base_dir
         self.port = '3306'
         self.datadir = base_dir+'/data'
@@ -17,49 +17,85 @@ class MySQL:
         self.pidfile = base_dir+'/mysql.pid'
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
         self.features=features
+        self.host = host  # Store host object for testinfra access
 
         if 'fips' in self.features:
             self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
         else:
             self.extra_param=[]
 
-        # Verify base_dir exists and mysqld is accessible
-        if not os.path.exists(self.basedir):
-            raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
-        if not os.path.exists(self.mysqld):
-            raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
-        if not os.access(self.mysqld, os.X_OK):
-            raise PermissionError(f"mysqld binary is not executable: {self.mysqld}")
+        # Use host  object if available (testinfra), otherwise fall back to subprocess
+        if self.host:
+            # Use testinfra host (runs via Ansible, can access root files)
+            if not self.host.file(self.basedir).exists:
+                raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
+            if not self.host.file(self.mysqld).exists:
+                raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
+            
+            self.host.run(f'rm -Rf {self.datadir}')
+            self.host.run(f'rm -f {self.logfile}')
+            if not self.host.file(self.basedir+'/log').exists:
+                self.host.run(f'mkdir -p {self.basedir}/log')
+            
+            output = self.host.check_output(f'{self.mysqld} --version')
+        else:
+            # Original subprocess code (for backward compatibility)
+            if not os.path.exists(self.basedir):
+                raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
+            if not os.path.exists(self.mysqld):
+                raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
+            if not os.access(self.mysqld, os.X_OK):
+                raise PermissionError(f"mysqld binary is not executable: {self.mysqld}")
+
+            subprocess.call(['rm','-Rf',self.datadir])
+            subprocess.call(['rm','-f',self.logfile])
+            if not os.path.exists(self.basedir+'/log'):
+                subprocess.call(['mkdir','-p',self.basedir+'/log'])
+            output = subprocess.check_output([self.mysqld, '--version'],universal_newlines=True)
         
-        subprocess.call(['rm','-Rf',self.datadir])
-        subprocess.call(['rm','-f',self.logfile])
-        # Create log directory if it doesn't exist (it should already exist from Ansible)
-        if not os.path.exists(self.basedir+'/log'):
-            subprocess.call(['mkdir','-p',self.basedir+'/log'])
-        output = subprocess.check_output([self.mysqld, '--version'],universal_newlines=True)
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
+        
         if self.major_version == "5.6":
             os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
             self.psadmin = base_dir+'/bin/ps_tokudb_admin'
-            subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir='+self.basedir,'--datadir='+self.datadir])
+            if self.host:
+                self.host.check_output(f'{self.mysql_install_db} --no-defaults --basedir={self.basedir} --datadir={self.datadir}')
+            else:
+                subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir='+self.basedir,'--datadir='+self.datadir])
         elif self.major_version == "5.7":
             os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
             self.psadmin = base_dir+'/bin/ps-admin'
-            subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+            if self.host:
+                self.host.check_output(f'{self.mysqld} --no-defaults --initialize-insecure --basedir={self.basedir} --datadir={self.datadir}')
+            else:
+                subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
         else:
             os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1'
             self.psadmin = base_dir+'/bin/ps-admin'
-            subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+            if self.host:
+                 self.host.check_output(f'{self.mysqld} --no-defaults --initialize-insecure --basedir={self.basedir} --datadir={self.datadir}')
+            else:
+                subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
 
     def start(self):
         self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
-        subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
-        subprocess.call(['sleep','5'])
+        if self.host:
+            # Use host.run() for background process
+            cmd = ' '.join([self.mysqld] + self.basic_param + self.extra_param)
+            self.host.run(f'{cmd} &')
+            self.host.run('sleep 5')
+        else:
+            subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
+            subprocess.call(['sleep','5'])
 
     def stop(self):
-        subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'shutdown'])
-        subprocess.call(['sleep','5'])
+        if self.host:
+            self.host.check_output(f'{self.mysqladmin} -uroot -S{self.socket} shutdown')
+            self.host.run('sleep 5')
+        else:
+            subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'shutdown'])
+            subprocess.call(['sleep','5'])
 
     def restart(self):
         self.stop()
@@ -67,12 +103,19 @@ class MySQL:
 
     def purge(self):
         self.stop()
-        subprocess.call(['rm','-Rf',self.datadir])
-        subprocess.call(['rm','-f',self.logfile])
+        if self.host:
+            self.host.run(f'rm -Rf {self.datadir}')
+            self.host.run(f'rm -f {self.logfile}')
+        else:
+            subprocess.call(['rm','-Rf',self.datadir])
+            subprocess.call(['rm','-f',self.logfile])
 
     def run_query(self,query):
         command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+shlex.quote(query)
-        return subprocess.check_output(command,shell=True,universal_newlines=True)
+        if self.host:
+            return self.host.check_output(command)
+        else:
+            return subprocess.check_output(command,shell=True,universal_newlines=True)
 
     def install_function(self, fname, soname, return_type):
         query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname,return_type,soname)
