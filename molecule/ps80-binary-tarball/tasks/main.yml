@@ -1,91 +1,22 @@
 ---
 # tasks file for tarball tests
-
-  - name: Display OS Name
-    debug:
-      msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
-
-  - name: Add epel-release
-    package:
+  - name: Setup SSH keys for Oracle Linux or Amazon
+    authorized_key:
+      user: ec2-user
+      key: "{{ lookup('file', 'public_keys') }}"
       state: present
-      name: epel-release
-    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+      exclusive: False
 
-  - name: install needed packages for running tests with apt
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - git
-      - unzip
-      - wget
-      - python3
-      - python3-pip
-      - libnuma1
-      - tar
-      - gawk
-    register: result
-    until: result is not failed
-    when: ansible_os_family == "Debian"
+  - name: CHECK IF ENV ARE PASSED
+    debug: 
+      msg: "PS_VERSION is {{ lookup('env', 'PS_VERSION') }}"
 
-  - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - libaio1 
-    register: result
-    until: result is not failed
-    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04"
-
-  - name: install needed packages for running tests with yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - git
-      - unzip
-      - wget
-      - tar
-      - libaio
-      - numactl
-      - gawk
-      - python3
-      - python3-pip
-      - libtirpc
-      - lsb_release
-    when: 
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-    - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: Install required packages using dnf
-    dnf:
-      name:
-        - git
-        - unzip
-        - wget
-        - tar
-        - libaio
-        - numactl
-        - gawk
-        - python3
-        - python3-pip
-        - libtirpc
-      state: present
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
-#      - openldap // this package causes issue on OL-9
-
-#  - name: get GLIBC_VERSION
-#    set_fact:
-#      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+  - name: SET PS_VERSION VAR
+    set_fact:
+      PS_VERSION: "{{ lookup('env', 'PS_VERSION') }}"
+      PS_REVISION: "{{ lookup('env', 'PS_REVISION') }}"
+      PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+      BUILD_TYPE_MINIMAL: "{{ lookup('env', 'BUILD_TYPE_MINIMAL') }}"
 
   - name: get GLIBC_VERSION
     set_fact:
@@ -102,195 +33,122 @@
     set_fact:
       GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
 
-  - name: get TARBALL_NAME
+  - name: CHECK OS
+    debug:
+      msg: "OS is {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+  - name: CHECK VARIABLES
+    debug:
+      msg: "PS_VERSION is {{ PS_VERSION }} PS_REVISION is {{ PS_REVISION }} PATH is {{ PATH }} BUILD_TYPE_MINIMAL is {{ BUILD_TYPE_MINIMAL }}"
+
+  - name: install needed packages for running tests with yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - libaio
+      - numactl
+      - tar
+      - gawk
+      - python3
+      - python3-pip
+      - libtirpc
+      - openldap
+    when: ansible_os_family == "RedHat"
+
+  - name: Set REGULAR as TARBALL_NAME
     set_fact:
       TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+    when: BUILD_TYPE_MINIMAL != True
 
-  # # - name: get main repo TARBALL_LINK
-  # #   set_fact:
-  # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
-
-  - name: get testing repo TARBALL_LINK
+  - name: Set MINIMAL as TARBALL_NAME
     set_fact:
-      TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+      TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}-minimal.tar.gz"
+    when: BUILD_TYPE_MINIMAL == True
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/grishma123-eng/package-testing/archive/tarball-fips.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ branch }}" package-testing
+    - mv "package-testing-tarball-fips" /package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-  - name: Download regular {{ TARBALL_NAME }}
+  - name: Download {{ TARBALL_NAME }}
     get_url:
-      url: '{{ TARBALL_LINK }}'
-      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      url: https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}
+      dest: /package-testing/molecule/ps80-binary-tarball/{{ TARBALL_NAME }}
       mode: '0644'
 
-  - name: Debug tarball structure
-    shell: tar -tzf /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz | head -20
-    register: tarball_list
-    changed_when: false
-
-  - name: Display tarball structure
-    debug:
-      var: tarball_list.stdout_lines
-
-  - name: Remove existing /usr/percona-server if it exists
-    file:
-      path: /usr/percona-server
-      state: absent
-    become: yes
-
-  - name: Create /usr/percona-server directory
-    file:
-      path: /usr/percona-server
-      state: directory
-      mode: '0755'
-    become: yes
-
-  - name: Extract tarball to temporary location
-    unarchive:
-      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: /tmp
-      remote_src: yes
-    become: yes
-
-  - name: Find extracted directory name
-    shell: |
-      cd /tmp
-      EXTRACTED_DIR=$(tar -tzf /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz | head -1 | cut -d'/' -f1 | sort -u | head -1)
-      echo "$EXTRACTED_DIR"
-    register: extracted_dir_name
-    changed_when: false
-
-  - name: Display extracted directory name
-    debug:
-      var: extracted_dir_name.stdout
-
-  - name: Move extracted contents to /usr/percona-server
-    shell: |
-      cd /tmp
-      EXTRACTED_DIR="{{ extracted_dir_name.stdout }}"
-      if [ -d "$EXTRACTED_DIR" ]; then
-        # Use cp and then remove to ensure all files are moved correctly
-        cp -a "$EXTRACTED_DIR"/* /usr/percona-server/ 2>/dev/null || true
-        shopt -s dotglob nullglob
-        for file in "$EXTRACTED_DIR"/.*; do
-          [ "$file" != "$EXTRACTED_DIR/." ] && [ "$file" != "$EXTRACTED_DIR/.." ] && cp -a "$file" /usr/percona-server/ 2>/dev/null || true
-        done
-        rm -rf "$EXTRACTED_DIR" 2>/dev/null || true
-      fi
-      # Verify mysqld was copied
-      if [ ! -f "/usr/percona-server/bin/mysqld" ]; then
-        echo "ERROR: mysqld not found after copy"
-        echo "Contents of /usr/percona-server:"
-        ls -la /usr/percona-server/ || true
-        echo "Contents of /usr/percona-server/bin:"
-        ls -la /usr/percona-server/bin/ 2>/dev/null || echo "bin directory does not exist"
-        exit 1
-      fi
-      # Ensure mysqld is executable
-      chmod +x /usr/percona-server/bin/mysqld
-    become: yes
-
-  - name: Set permissions on /usr/percona-server to allow test user access
-    file:
-      path: /usr/percona-server
-      state: directory
-      mode: '0755'
-      recurse: yes
-    become: yes
-
-  - name: Create log directory for mysql tests
-    file:
-      path: /usr/percona-server/log
-      state: directory
-      mode: '1777'
-    become: yes
-
-  - name: Verify mysqld is accessible and executable
-    shell: |
-      test -f /usr/percona-server/bin/mysqld && test -x /usr/percona-server/bin/mysqld && echo "mysqld is accessible and executable" || echo "ERROR: mysqld is not accessible or not executable"
-    register: mysqld_access_check
-    changed_when: false
-
-  - name: Display mysqld access check
-    debug:
-      var: mysqld_access_check.stdout
-
-  - name: Test mysqld execution
-    shell: /usr/percona-server/bin/mysqld --version
-    register: mysqld_version_test
-    changed_when: false
-    failed_when: false
-
-  - name: Display mysqld version test result
-    debug:
-      var: mysqld_version_test
-
-  - name: Set BASE_DIR for non-PRO tarball installs
-    lineinfile:
-      path: /etc/environment
-      line: "BASE_DIR=/usr/percona-server"
+  - name: Install required packages on RedHat/CentOS
+    when: ansible_facts['os_family'] == "RedHat"
+    yum:
+      name:
+        - libaio
+        - numactl
+        - openssl
+        - socat
+        - lsof
+        - perl-Data-Dumper
+        - libev
+        - python3
+        - python3-pip
       state: present
-    become: yes
 
-  - name: List contents of /usr/percona-server to verify extraction
-    shell: ls -la /usr/percona-server/ | head -20
-    register: percona_server_contents
-    changed_when: false
+  - name: Install pytest and pytest-testinfra using pip3
+    command: pip3 install pytest pytest-testinfra
 
-  - name: Display /usr/percona-server contents
-    debug:
-      var: percona_server_contents.stdout_lines
-
-  - name: Check if bin directory exists
-    stat:
-      path: /usr/percona-server/bin
-    register: bin_dir_stat
-
-  - name: List bin directory contents
-    shell: ls -la /usr/percona-server/bin/ | head -20
-    register: bin_contents
-    when: bin_dir_stat.stat.exists
-    changed_when: false
-
-  - name: Display bin directory contents
-    debug:
-      var: bin_contents.stdout_lines
-    when: bin_dir_stat.stat.exists
-
-  - name: Verify MySQL binary exists
-    stat:
-      path: /usr/percona-server/bin/mysqld
-    register: mysqld_stat
-
-  - name: Check mysqld permissions
-    shell: ls -la /usr/percona-server/bin/mysqld
-    register: mysqld_perms
-    when: mysqld_stat.stat.exists
-    changed_when: false
-
-  - name: Display mysqld permissions
-    debug:
-      var: mysqld_perms.stdout
-    when: mysqld_stat.stat.exists
-
-  - name: Fail if mysqld not found
+  - name: Ensure PS_VERSION is set
     fail:
-      msg: "Failed to extract tarball - /usr/percona-server/bin/mysqld does not exist. Tarball structure may be unexpected."
-    when: not mysqld_stat.stat.exists
+      msg: "PS_VERSION environment variable needs to be set!"
+    when: PS_VERSION is not defined
 
-  - debug:
-      msg: "mysqld exists: {{ mysqld_stat.stat.exists }}"
+  - name: Ensure PS_REVISION is set
+    fail:
+      msg: "PS_REVISION environment variable needs to be set!"
+    when: PS_REVISION is not defined
 
+  - name: Run tests
+    command: ./run.sh
+    environment:
+      PS_VERSION: "{{ PS_VERSION }}"
+      PS_REVISION: "{{ PS_REVISION }}"
+    args:
+      chdir: "/package-testing/molecule/ps80-binary-tarball/"
+
+  - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
+    shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
+
+  - name: Set the primary IPv4 address
+    set_fact:
+      ipv4_address: "{{ ansible_facts.all_ipv4_addresses[0] }}"
+
+  - name: Set the primary IPv4 address path
+    set_fact:
+      ipv4_address_path: "/tmp/{{ ipv4_address }}.tar.gz"
+
+  - name: Create a tar.gz archive of the logs using command
+    command: tar -czf {{ ipv4_address_path }} /var/log/yum-list-output.log
+    register: archive_command_result
+
+  - name: Debug the tar command result
+    debug:
+      var: archive_command_result
+
+  - name: Fetch the tar.gz file from the remote host
+    ansible.builtin.fetch:
+      src: "{{ ipv4_address_path }}"
+      dest: "{{ lookup('env', 'WORKSPACE') }}/{{ ipv4_address }}.tar.gz"
+      flat: yes
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
@@ -298,7 +156,7 @@
 
   - name: Set FIPS_SUPPORTED fact for Debian 12 (Bookworm)
     set_fact:
-      FIPS_SUPPORTED: "no"
+      FIPS_SUPPORTED: "yes"
     when: ansible_distribution == "Debian" and ansible_distribution_release == "bookworm"
 
   - name: Set FIPS_SUPPORTED fact for Ubuntu 22.04 (Jammy)
