@@ -179,13 +179,25 @@
       cd /tmp
       EXTRACTED_DIR="{{ extracted_dir_name.stdout }}"
       if [ -d "$EXTRACTED_DIR" ]; then
-        mv "$EXTRACTED_DIR"/* /usr/percona-server/ 2>/dev/null || true
+        # Use cp and then remove to ensure all files are moved correctly
+        cp -a "$EXTRACTED_DIR"/* /usr/percona-server/ 2>/dev/null || true
         shopt -s dotglob nullglob
         for file in "$EXTRACTED_DIR"/.*; do
-          [ "$file" != "$EXTRACTED_DIR/." ] && [ "$file" != "$EXTRACTED_DIR/.." ] && mv "$file" /usr/percona-server/ 2>/dev/null || true
+          [ "$file" != "$EXTRACTED_DIR/." ] && [ "$file" != "$EXTRACTED_DIR/.." ] && cp -a "$file" /usr/percona-server/ 2>/dev/null || true
         done
-        rmdir "$EXTRACTED_DIR" 2>/dev/null || true
+        rm -rf "$EXTRACTED_DIR" 2>/dev/null || true
       fi
+      # Verify mysqld was copied
+      if [ ! -f "/usr/percona-server/bin/mysqld" ]; then
+        echo "ERROR: mysqld not found after copy"
+        echo "Contents of /usr/percona-server:"
+        ls -la /usr/percona-server/ || true
+        echo "Contents of /usr/percona-server/bin:"
+        ls -la /usr/percona-server/bin/ 2>/dev/null || echo "bin directory does not exist"
+        exit 1
+      fi
+      # Ensure mysqld is executable
+      chmod +x /usr/percona-server/bin/mysqld
     become: yes
 
   - name: Set permissions on /usr/percona-server
@@ -210,10 +222,46 @@
       state: present
     become: yes
 
+  - name: List contents of /usr/percona-server to verify extraction
+    shell: ls -la /usr/percona-server/ | head -20
+    register: percona_server_contents
+    changed_when: false
+
+  - name: Display /usr/percona-server contents
+    debug:
+      var: percona_server_contents.stdout_lines
+
+  - name: Check if bin directory exists
+    stat:
+      path: /usr/percona-server/bin
+    register: bin_dir_stat
+
+  - name: List bin directory contents
+    shell: ls -la /usr/percona-server/bin/ | head -20
+    register: bin_contents
+    when: bin_dir_stat.stat.exists
+    changed_when: false
+
+  - name: Display bin directory contents
+    debug:
+      var: bin_contents.stdout_lines
+    when: bin_dir_stat.stat.exists
+
   - name: Verify MySQL binary exists
     stat:
       path: /usr/percona-server/bin/mysqld
     register: mysqld_stat
+
+  - name: Check mysqld permissions
+    shell: ls -la /usr/percona-server/bin/mysqld
+    register: mysqld_perms
+    when: mysqld_stat.stat.exists
+    changed_when: false
+
+  - name: Display mysqld permissions
+    debug:
+      var: mysqld_perms.stdout
+    when: mysqld_stat.stat.exists
 
   - name: Fail if mysqld not found
     fail:
