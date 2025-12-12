@@ -133,27 +133,92 @@
       dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
       mode: '0644'
 
-  - name: Unpack regular tarball
+  - name: Debug tarball structure
+    shell: tar -tzf /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz | head -20
+    register: tarball_list
+    changed_when: false
+
+  - name: Display tarball structure
+    debug:
+      var: tarball_list.stdout_lines
+
+  - name: Remove existing /usr/percona-server if it exists
+    file:
+      path: /usr/percona-server
+      state: absent
+    become: yes
+
+  - name: Create /usr/percona-server directory
+    file:
+      path: /usr/percona-server
+      state: directory
+      mode: '0755'
+    become: yes
+
+  - name: Extract tarball to temporary location
     unarchive:
       src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: /
+      dest: /tmp
       remote_src: yes
-      extra_opts:
-      - --transform
-      - 's,^/*[^/]*,/usr/percona-server,S'
     become: yes
-    become_user: root
+
+  - name: Find extracted directory name
+    shell: |
+      cd /tmp
+      EXTRACTED_DIR=$(tar -tzf /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz | head -1 | cut -d'/' -f1 | sort -u | head -1)
+      echo "$EXTRACTED_DIR"
+    register: extracted_dir_name
+    changed_when: false
+
+  - name: Display extracted directory name
+    debug:
+      var: extracted_dir_name.stdout
+
+  - name: Move extracted contents to /usr/percona-server
+    shell: |
+      cd /tmp
+      EXTRACTED_DIR="{{ extracted_dir_name.stdout }}"
+      if [ -d "$EXTRACTED_DIR" ]; then
+        mv "$EXTRACTED_DIR"/* /usr/percona-server/ 2>/dev/null || true
+        shopt -s dotglob nullglob
+        for file in "$EXTRACTED_DIR"/.*; do
+          [ "$file" != "$EXTRACTED_DIR/." ] && [ "$file" != "$EXTRACTED_DIR/.." ] && mv "$file" /usr/percona-server/ 2>/dev/null || true
+        done
+        rmdir "$EXTRACTED_DIR" 2>/dev/null || true
+      fi
+    become: yes
+
+  - name: Set permissions on /usr/percona-server
+    file:
+      path: /usr/percona-server
+      state: directory
+      mode: '0755'
+      recurse: yes
+    become: yes
+
+  - name: Create log directory for mysql tests
+    file:
+      path: /usr/percona-server/log
+      state: directory
+      mode: '1777'
+    become: yes
 
   - name: Set BASE_DIR for non-PRO tarball installs
     lineinfile:
       path: /etc/environment
       line: "BASE_DIR=/usr/percona-server"
       state: present
+    become: yes
 
   - name: Verify MySQL binary exists
     stat:
       path: /usr/percona-server/bin/mysqld
     register: mysqld_stat
+
+  - name: Fail if mysqld not found
+    fail:
+      msg: "Failed to extract tarball - /usr/percona-server/bin/mysqld does not exist. Tarball structure may be unexpected."
+    when: not mysqld_stat.stat.exists
 
   - debug:
       msg: "mysqld exists: {{ mysqld_stat.stat.exists }}"
