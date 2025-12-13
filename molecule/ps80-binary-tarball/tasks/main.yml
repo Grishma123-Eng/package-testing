@@ -136,6 +136,21 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
+  - name: Move package-testing repo to /package-testing
+    shell: |
+      # Find package-testing directory (could be in home or current dir)
+      if [ -d "{{ ansible_env.HOME }}/package-testing" ]; then
+        REPO_DIR="{{ ansible_env.HOME }}/package-testing"
+      elif [ -d "./package-testing" ]; then
+        REPO_DIR="./package-testing"
+      else
+        echo "Error: package-testing directory not found"
+        exit 1
+      fi
+      sudo rm -rf /package-testing
+      sudo mv "$REPO_DIR" /package-testing
+      sudo chown -R $USER:$USER /package-testing
+
   - name: Create directory for tarball download
     file:
       path: /package-testing/molecule/ps80-binary-tarball
