@@ -5,7 +5,7 @@ driver:
   name: ec2
 platforms:
   - name: debian12-${BUILD_NUMBER}-${JOB_NAME}
-    region: us-west-2
+    region: us-west-1
     image:  ami-0dbd0b6509fe8f301
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.medium

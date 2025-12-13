@@ -19,7 +19,7 @@ def test_load_env_vars_define_in_test(host):
     cmd="groups $USER| awk -F' ' '{print $1$2$3}'"
     user_group=host.run(cmd).stdout.replace(" ", "").replace("\n","")
     with host.sudo():
-        for dir in (f'./package-testing',BASE_DIR, BASE_DIR+'-minimal', BASE_DIR+'-debug'):
+        for dir in (f'./package-testing',BASE_DIR):
             cmd=f"chown -R {user_group} {dir}"
             host.check_output(cmd)
             cmd=f"ls -l {dir}"

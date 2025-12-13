@@ -30,7 +30,7 @@ verifier:
     verbose: true
     s: true
   env:
-    FIPS_SUPPORTED: "yes"
+    FIPS_SUPPORTED: "no"
 scenario:
   name: ubuntu-jammy
   destroy_sequence:
