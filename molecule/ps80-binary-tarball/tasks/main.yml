@@ -136,6 +136,12 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
+  - name: Create directory for tarball download
+    file:
+      path: /package-testing/molecule/ps80-binary-tarball
+      state: directory
+      mode: '0755'
+
   - name: Download {{ TARBALL_NAME }}
     get_url:
       url: https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}
