@@ -191,6 +191,15 @@
       msg: "PS_REVISION environment variable needs to be set!"
     when: PS_REVISION is not defined
 
+  - name: Ensure binary-tarball-tests/ps directory exists
+    file:
+      path: /package-testing/binary-tarball-tests/ps
+      state: directory
+      mode: '0755'
+
+  - name: Copy tarball to binary-tarball-tests directory
+    command: cp /package-testing/molecule/ps80-binary-tarball/{{ TARBALL_NAME }} /package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}
+
   - name: Run tests
     command: ./run.sh
     environment:
