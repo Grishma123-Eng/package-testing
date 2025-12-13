@@ -1,12 +1,6 @@
 ---
 # tasks file for tarball tests
 
-  - name: Ensure SSH access for Molecule-managed VM
-    authorized_key:
-      user: "{{ ansible_user }}"
-      key: "{{ lookup('file', 'public_keys') }}"
-      state: present
-
   - name: Display OS Name
     debug:
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
@@ -17,12 +11,76 @@
       name: epel-release
     when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
 
-  - name: SET PS_VERSION VAR
-    set_fact:
-      PS_VERSION: "{{ lookup('env', 'PS_VERSION') }}"
-      PS_REVISION: "{{ lookup('env', 'PS_REVISION') }}"
-      PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
-      BUILD_TYPE_MINIMAL: "{{ lookup('env', 'BUILD_TYPE_MINIMAL') }}"
+  - name: install needed packages for running tests with apt
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - python3
+      - python3-pip
+      - libnuma1
+      - tar
+      - gawk
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian"
+  
+  - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - libaio1 
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04"
+
+  - name: install needed packages for running tests with yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - tar
+      - libaio
+      - numactl
+      - gawk
+      - python3
+      - python3-pip
+      - libtirpc
+      - lsb_release
+    when: 
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: Install required packages using dnf
+    dnf:
+      name:
+        - git
+        - unzip
+        - wget
+        - tar
+        - libaio
+        - numactl
+        - gawk
+        - python3
+        - python3-pip
+        - libtirpc
+      state: present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
 
   - name: get GLIBC_VERSION
     set_fact:
@@ -39,6 +97,14 @@
     set_fact:
       GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
 
+  - name: SET PS_VERSION VAR
+    set_fact:
+      PS_VERSION: "{{ lookup('env', 'PS_VERSION') }}"
+      PS_REVISION: "{{ lookup('env', 'PS_REVISION') }}"
+      PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+      BUILD_TYPE_MINIMAL: "{{ lookup('env', 'BUILD_TYPE_MINIMAL') }}"
+
+
   - name: CHECK OS
     debug:
       msg: "OS is {{ ansible_distribution }} {{ ansible_distribution_version }}"
@@ -46,25 +112,6 @@
   - name: CHECK VARIABLES
     debug:
       msg: "PS_VERSION is {{ PS_VERSION }} PS_REVISION is {{ PS_REVISION }} PATH is {{ PATH }} "
-
-  - name: install needed packages for running tests with yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - git
-      - unzip
-      - wget
-      - libaio
-      - numactl
-      - tar
-      - gawk
-      - python3
-      - python3-pip
-      - libtirpc
-      - openldap
-    when: ansible_os_family == "RedHat"
 
   - name: Set REGULAR as TARBALL_NAME
     set_fact:
@@ -78,15 +125,13 @@
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
-    args:
-      chdir: "/package-testing/molecule/ps80-binary-tarball/"
     with_items:
-      - rm -rf package-testing
-      - rm -f master.zip
-      - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-      - unzip master.zip
-      - rm -f master.zip
-      - mv "package-testing-{{ branch }}" ../package-testing
+    - rm -rf package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
