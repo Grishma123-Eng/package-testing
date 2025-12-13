@@ -182,7 +182,7 @@
       PS_VERSION: "{{ PS_VERSION }}"
       PS_REVISION: "{{ PS_REVISION }}"
     args:
-      chdir: "/package-testing/molecule/ps80-binary-tarball/"
+      chdir: "/package-testing/binary-tarball-tests/ps/"
 
   - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
     shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
