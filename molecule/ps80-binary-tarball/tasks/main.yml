@@ -29,7 +29,7 @@
     register: result
     until: result is not failed
     when: ansible_os_family == "Debian"
-  
+
   - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
     apt:
       name: "{{ packages }}"
@@ -81,6 +81,11 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
+#      - openldap // this package causes issue on OL-9
+
+#  - name: get GLIBC_VERSION
+#    set_fact:
+#      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
 
   - name: get GLIBC_VERSION
     set_fact:
@@ -97,31 +102,18 @@
     set_fact:
       GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
 
-  - name: SET PS_VERSION VAR
-    set_fact:
-      PS_VERSION: "{{ lookup('env', 'PS_VERSION') }}"
-      PS_REVISION: "{{ lookup('env', 'PS_REVISION') }}"
-      PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
-      BUILD_TYPE_MINIMAL: "{{ lookup('env', 'BUILD_TYPE_MINIMAL') }}"
-
-
-  - name: CHECK OS
-    debug:
-      msg: "OS is {{ ansible_distribution }} {{ ansible_distribution_version }}"
-
-  - name: CHECK VARIABLES
-    debug:
-      msg: "PS_VERSION is {{ PS_VERSION }} PS_REVISION is {{ PS_REVISION }} PATH is {{ PATH }} "
-
-  - name: Set REGULAR as TARBALL_NAME
+  - name: get TARBALL_NAME
     set_fact:
       TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
-    when: BUILD_TYPE_MINIMAL != True
 
-  - name: Set MINIMAL as TARBALL_NAME
+  
+  # # - name: get main repo TARBALL_LINK
+  # #   set_fact:
+  # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
+
+  - name: get testing repo TARBALL_LINK
     set_fact:
-      TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}-minimal.tar.gz"
-    when: BUILD_TYPE_MINIMAL == True
+      TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
@@ -134,181 +126,37 @@
     - mv "package-testing-{{ branch }}" package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-  - name: Move package-testing repo to /package-testing
-    shell: |
-      # Find package-testing directory (could be in home or current dir)
-      if [ -d "{{ ansible_env.HOME }}/package-testing" ]; then
-        REPO_DIR="{{ ansible_env.HOME }}/package-testing"
-      elif [ -d "./package-testing" ]; then
-        REPO_DIR="./package-testing"
-      else
-        echo "Error: package-testing directory not found"
-        exit 1
-      fi
-      sudo rm -rf /package-testing
-      sudo mv "$REPO_DIR" /package-testing
-      sudo chown -R $USER:$USER /package-testing
-
-  - name: Patch mysql.py to fix MySQL startup
-    shell: |
-      python3 << 'EOF'
-      import re
-      
-      file_path = '/package-testing/binary-tarball-tests/ps/mysql.py'
-      
-      # Read the file
-      with open(file_path, 'r') as f:
-          content = f.read()
-      
-      # Add time import if missing
-      if 'import time' not in content:
-          content = content.replace('import shlex', 'import shlex\nimport time')
-      
-      # Replace the start() method's host.run section
-      old_pattern = r"(            self\.host\.run\(f'\{cmd\} &'\)\s+self\.host\.run\('sleep 5'\))"
-      new_code = """            # Use nohup and redirect output to keep process alive
-            self.host.run(f'nohup {cmd} > {self.logfile} 2>&1 &')
-            # Wait for socket to be created (max 30 seconds)
-            max_wait = 30
-            wait_time = 0
-            while wait_time < max_wait:
-                self.host.run('sleep 1')
-                wait_time += 1
-                if self.host.file(self.socket).exists:
-                    # Socket exists, wait a bit more for MySQL to be ready
-                    self.host.run('sleep 2')
-                    # Try to connect to verify MySQL is ready
-                    try:
-                        self.host.check_output(f'{self.mysqladmin} -uroot -S{self.socket} ping')
-                        break
-                    except:
-                        continue
-            if not self.host.file(self.socket).exists:
-                # Check error log for issues
-                if self.host.file(self.logfile).exists:
-                    error_log = self.host.file(self.logfile).content_string
-                    raise RuntimeError(f"MySQL failed to start. Error log:\\n{error_log}")
-                else:
-                    raise RuntimeError("MySQL failed to start and no error log found")"""
-      
-      content = re.sub(old_pattern, new_code, content)
-      
-      # Also update the subprocess section
-      old_subprocess = r"(subprocess\.Popen\(\[self\.mysqld\]\+ self\.basic_param \+ self\.extra_param, env=os\.environ\)\s+subprocess\.call\(\['sleep','5'\]\)\))"
-      new_subprocess = """subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
-            # Wait for socket to be created
-            max_wait = 30
-            wait_time = 0
-            while wait_time < max_wait:
-                time.sleep(1)
-                wait_time += 1
-                if os.path.exists(self.socket):
-                    time.sleep(2)
-                    # Try to connect to verify MySQL is ready
-                    try:
-                        subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'ping'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        break
-                    except:
-                        continue
-            if not os.path.exists(self.socket):
-                if os.path.exists(self.logfile):
-                    with open(self.logfile, 'r') as f:
-                        error_log = f.read()
-                    raise RuntimeError(f"MySQL failed to start. Error log:\\n{error_log}")
-                else:
-                    raise RuntimeError("MySQL failed to start and no error log found")"""
-      
-      content = re.sub(old_subprocess, new_subprocess, content)
-      
-      # Write the file back
-      with open(file_path, 'w') as f:
-          f.write(content)
-      EOF
-    when: ansible_facts['os_family'] != "Windows"
-
-  - name: Create directory for tarball download
-    file:
-      path: /package-testing/molecule/ps80-binary-tarball
-      state: directory
-      mode: '0755'
-
-  - name: Download {{ TARBALL_NAME }}
+  - name: Download regular {{ TARBALL_NAME }}
     get_url:
-      url: https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}
-      dest: /package-testing/molecule/ps80-binary-tarball/{{ TARBALL_NAME }}
+      url: '{{ TARBALL_LINK }}'
+      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
       mode: '0644'
 
-  - name: Install required packages on RedHat/CentOS
-    when: ansible_facts['os_family'] == "RedHat"
-    yum:
-      name:
-        - libaio
-        - numactl
-        - openssl
-        - socat
-        - lsof
-        - perl-Data-Dumper
-        - libev
-        - python3
-        - python3-pip
-      state: present
+  - name: Unpack regular tarball
+    unarchive:
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: /
+      remote_src: yes
+      extra_opts:
+      - --transform
+      - 's,^/*[^/]*,/usr/percona-server,S'
 
-  - name: Install pytest and pytest-testinfra using pip3
-    command: pip3 install pytest pytest-testinfra
+  - name: Download debug {{ DEBUG_TARBALL_NAME }}
+    get_url:
+      url: '{{ DEBUG_TARBALL_LINK }}'
+      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      mode: '0644'
 
-  - name: Ensure PS_VERSION is set
-    fail:
-      msg: "PS_VERSION environment variable needs to be set!"
-    when: PS_VERSION is not defined
-
-  - name: Ensure PS_REVISION is set
-    fail:
-      msg: "PS_REVISION environment variable needs to be set!"
-    when: PS_REVISION is not defined
-
-  - name: Ensure binary-tarball-tests/ps directory exists
-    file:
-      path: /package-testing/binary-tarball-tests/ps
-      state: directory
-      mode: '0755'
-
-  - name: Copy tarball to binary-tarball-tests directory
-    command: cp /package-testing/molecule/ps80-binary-tarball/{{ TARBALL_NAME }} /package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}
-
-  - name: Run tests
-    command: ./run.sh
-    environment:
-      PS_VERSION: "{{ PS_VERSION }}"
-      PS_REVISION: "{{ PS_REVISION }}"
-    args:
-      chdir: "/package-testing/binary-tarball-tests/ps/"
-
-  - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
-    shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
-
-  - name: Set the primary IPv4 address
-    set_fact:
-      ipv4_address: "{{ ansible_facts.all_ipv4_addresses[0] }}"
-
-  - name: Set the primary IPv4 address path
-    set_fact:
-      ipv4_address_path: "/tmp/{{ ipv4_address }}.tar.gz"
-
-  - name: Create a tar.gz archive of the logs using command
-    command: tar -czf {{ ipv4_address_path }} /var/log/yum-list-output.log
-    register: archive_command_result
-
-  - name: Debug the tar command result
-    debug:
-      var: archive_command_result
-
-  - name: Fetch the tar.gz file from the remote host
-    ansible.builtin.fetch:
-      src: "{{ ipv4_address_path }}"
-      dest: "{{ lookup('env', 'WORKSPACE') }}/{{ ipv4_address }}.tar.gz"
-      flat: yes
+  - name: Unpack debug tarball
+    unarchive:
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      dest: /
+      remote_src: yes
+      extra_opts:
+      - --transform
+      - 's,^/*[^/]*,/usr/percona-server-debug,S'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
@@ -316,18 +164,13 @@
 
   - name: Set FIPS_SUPPORTED fact for Debian 12 (Bookworm)
     set_fact:
-      FIPS_SUPPORTED: "yes"
+      FIPS_SUPPORTED: "no"
     when: ansible_distribution == "Debian" and ansible_distribution_release == "bookworm"
 
   - name: Set FIPS_SUPPORTED fact for Ubuntu 22.04 (Jammy)
     set_fact:
-      FIPS_SUPPORTED: "no"
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
-
-  - name: Set FIPS_SUPPORTED fact for Oracle-9
-    set_fact:
       FIPS_SUPPORTED: "yes"
-    when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "9"
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
 
   - name: Append values to /etc/environment file
     lineinfile:
