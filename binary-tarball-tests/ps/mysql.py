@@ -3,6 +3,7 @@ import subprocess
 import re
 import os
 import shlex
+import time
 
 class MySQL:
     def __init__(self, base_dir, features=[], host=None):
@@ -81,13 +82,55 @@ class MySQL:
     def start(self):
         self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
         if self.host:
-            # Use host.run() for background process
+            # Use host.run() for background process with nohup to keep it alive
             cmd = ' '.join([self.mysqld] + self.basic_param + self.extra_param)
-            self.host.run(f'{cmd} &')
-            self.host.run('sleep 5')
+            # Use nohup and redirect output to keep process alive
+            self.host.run(f'nohup {cmd} > {self.logfile} 2>&1 &')
+            # Wait for socket to be created (max 30 seconds)
+            max_wait = 30
+            wait_time = 0
+            while wait_time < max_wait:
+                self.host.run('sleep 1')
+                wait_time += 1
+                if self.host.file(self.socket).exists:
+                    # Socket exists, wait a bit more for MySQL to be ready
+                    self.host.run('sleep 2')
+                    # Try to connect to verify MySQL is ready
+                    try:
+                        self.host.check_output(f'{self.mysqladmin} -uroot -S{self.socket} ping')
+                        break
+                    except:
+                        continue
+            if not self.host.file(self.socket).exists:
+                # Check error log for issues
+                if self.host.file(self.logfile).exists:
+                    error_log = self.host.file(self.logfile).content_string
+                    raise RuntimeError(f"MySQL failed to start. Error log:\n{error_log}")
+                else:
+                    raise RuntimeError("MySQL failed to start and no error log found")
         else:
             subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
-            subprocess.call(['sleep','5'])
+            # Wait for socket to be created
+            max_wait = 30
+            wait_time = 0
+            while wait_time < max_wait:
+                time.sleep(1)
+                wait_time += 1
+                if os.path.exists(self.socket):
+                    time.sleep(2)
+                    # Try to connect to verify MySQL is ready
+                    try:
+                        subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'ping'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        break
+                    except:
+                        continue
+            if not os.path.exists(self.socket):
+                if os.path.exists(self.logfile):
+                    with open(self.logfile, 'r') as f:
+                        error_log = f.read()
+                    raise RuntimeError(f"MySQL failed to start. Error log:\n{error_log}")
+                else:
+                    raise RuntimeError("MySQL failed to start and no error log found")
 
     def stop(self):
         if self.host:
