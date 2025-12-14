@@ -131,10 +131,10 @@
     set_fact:
       TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
-  - name: download package-testing repo branch with wget
+  - name: download package-testing repo branch with wget to /package-testing
     command: "{{ item }}"
     args:
-      chdir: "{{ ansible_env.HOME }}"
+      chdir: /
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -145,6 +145,13 @@
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+
+  - name: Create symlink from home directory to /package-testing for test_regular_tarball
+    file:
+      src: /package-testing
+      dest: "{{ ansible_env.HOME }}/package-testing"
+      state: link
+    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
 
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
