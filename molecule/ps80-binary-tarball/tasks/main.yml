@@ -11,6 +11,19 @@
       name: epel-release
     when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
 
+  - name: Remove any line containing 'backports' in sources.list for Debian 11
+    lineinfile:
+      path: /etc/apt/sources.list
+      regexp: '.*backports.*'
+      state: absent
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
+  - name: Remove backports repository files in sources.list.d for Debian 11
+    shell: |
+      find /etc/apt/sources.list.d/ -type f -name "*backports*" -delete || true
+      find /etc/apt/sources.list.d/ -type f -exec sed -i '/backports/d' {} \; || true
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ packages }}"
@@ -40,7 +53,7 @@
       - libaio1 
     register: result
     until: result is not failed
-    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04"
+    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04" and ansible_distribution_version != "13"
 
   - name: install needed packages for running tests with yum
     yum:
