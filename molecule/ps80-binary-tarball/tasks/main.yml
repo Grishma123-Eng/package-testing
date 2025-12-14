@@ -133,6 +133,8 @@
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
+    args:
+      chdir: "{{ ansible_env.HOME }}"
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -159,6 +161,20 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
+  - name: Ensure test directory exists
+    file:
+      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps"
+      state: directory
+      mode: '0755'
+    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
+
+  - name: Copy tarball to test directory for run.sh script
+    copy:
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
+      remote_src: yes
+      mode: '0644'
+    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
