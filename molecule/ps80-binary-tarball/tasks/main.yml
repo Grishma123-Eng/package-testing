@@ -146,13 +146,6 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-  - name: Create symlink from home directory to /package-testing for test_regular_tarball
-    file:
-      src: /package-testing
-      dest: "{{ ansible_env.HOME }}/package-testing"
-      state: link
-    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
-
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
@@ -168,20 +161,17 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
-  - name: Ensure test directory exists
+  - name: Ensure tarball directory exists
     file:
-      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps"
+      path: /package-testing/binary-tarball-tests/ps
       state: directory
-      mode: '0755'
-    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
+      mode: "0755"
 
-  - name: Copy tarball to test directory for run.sh script
+  - name: Copy tarball into binary-tarball-tests/ps directory for run.sh
     copy:
       src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
-      remote_src: yes
+      dest: /package-testing/binary-tarball-tests/ps/
       mode: '0644'
-    when: lookup('env', 'PRO') | default('false', true) | lower != 'true'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
