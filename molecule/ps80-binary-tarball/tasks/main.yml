@@ -133,8 +133,6 @@
 
   - name: download package-testing repo branch with wget to /package-testing
     command: "{{ item }}"
-    args:
-      chdir: /
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -160,7 +158,7 @@
       extra_opts:
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
-      
+
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
@@ -189,4 +187,3 @@
       - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
-      - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
