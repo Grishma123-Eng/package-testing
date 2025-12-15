@@ -160,16 +160,7 @@
       extra_opts:
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
-
-  - name: Ensure tarball directory exists
-    file:
-      path: /package-testing/binary-tarball-tests/ps
-      state: directory
-      mode: "0755"
-
-  - name: Copy tarball into binary-tarball-tests/ps directory for run.sh
-    command: cp /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz /package-testing/binary-tarball-tests/ps/
-
+      
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
