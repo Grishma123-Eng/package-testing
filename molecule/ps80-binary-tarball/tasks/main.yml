@@ -138,8 +138,6 @@
 
   - name: download package-testing repo branch with wget to /package-testing
     command: "{{ item }}"
-    args:
-      chdir: /
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -166,20 +164,12 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
-  - name: Copy tarball into run.sh directory
-    copy:
-      src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
-      dest: "/package-testing/binary-tarball-tests/ps/"
-      mode: "0644"
-      remote_src: yes
-
   - name: DEBUG — Find package-testing folder
     shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
     register: pkg_debug
 
   - debug:
       var: pkg_debug.stdout_lines
-
 
   - name: DEBUG — Find run.sh
     shell: find / -maxdepth 5 -name "run.sh" 2>/dev/null
