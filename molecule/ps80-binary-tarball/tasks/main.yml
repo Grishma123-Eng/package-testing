@@ -1,6 +1,5 @@
 ---
 # tasks file for tarball tests
-
   - name: Display OS Name
     debug:
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
@@ -131,8 +130,16 @@
     set_fact:
       TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
+  - name: Remove Molecule's accidental home dir copy
+    file:
+      path: /home/ec2-user/package-testing
+      state: absent
+    ignore_errors: yes
+
   - name: download package-testing repo branch with wget to /package-testing
     command: "{{ item }}"
+    args:
+      chdir: /
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -188,7 +195,7 @@
 
   - debug:
       var: tar_debug.stdout_lines
-      
+
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
