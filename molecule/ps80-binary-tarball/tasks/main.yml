@@ -159,6 +159,13 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
+  - name: Copy tarball into run.sh directory
+    copy:
+      src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
+      dest: "/package-testing/binary-tarball-tests/ps/"
+      mode: "0644"
+      remote_src: yes
+
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
