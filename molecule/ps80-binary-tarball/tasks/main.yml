@@ -131,20 +131,18 @@
     set_fact:
       TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
-  - name: Download package-testing repo into /package-testing
-    shell: |
-      rm -rf /package-testing
-      cd /
-      wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-      unzip master.zip
-      mv package-testing-{{ branch }} package-testing
-      rm -f master.zip
-    args:
-      executable: /bin/bash
+  - name: download package-testing repo branch with wget to /package-testing
+    command: "{{ item }}"
+    with_items:
+    - rm -rf package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
-
 
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
@@ -168,6 +166,29 @@
       mode: "0644"
       remote_src: yes
 
+  - name: DEBUG — Find package-testing folder
+    shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
+    register: pkg_debug
+
+  - debug:
+      var: pkg_debug.stdout_lines
+
+
+  - name: DEBUG — Find run.sh
+    shell: find / -maxdepth 5 -name "run.sh" 2>/dev/null
+    register: runsh_debug
+
+  - debug:
+      var: runsh_debug.stdout_lines
+
+
+  - name: DEBUG — Find tar.gz files
+    shell: find / -maxdepth 4 -name "*.tar.gz" 2>/dev/null
+    register: tar_debug
+
+  - debug:
+      var: tar_debug.stdout_lines
+      
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
