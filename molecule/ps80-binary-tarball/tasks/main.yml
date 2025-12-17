@@ -233,3 +233,4 @@
   - name: Run tests
     command: ./run.sh
     args:
+      chdir: /package-testing/package-testing/binary-tarball-tests/ps
