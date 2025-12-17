@@ -223,7 +223,7 @@
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
 
-#  - name: Run tests
-  #  command: ./run.sh
-   # args:
-    #  chdir: "/package-testing/molecule/ps80-binary-tarball/"
+  - name: Run tests
+    command: ./run.sh
+    args:
+      chdir: "/package-testing/molecule/ps80-binary-tarball/"
