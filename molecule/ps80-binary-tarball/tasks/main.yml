@@ -134,31 +134,21 @@
       tarball_test_root: "/package-testing/molecule/ps80-binary-tarball"
       base_dir: "/package-testing/molecule/ps80-binary-tarball/percona-server"
 
-  - name: Ensure package-testing root exists
-    file:
-      path: /package-testing
-      state: directory
-      mode: "0755"
-
-  - name: Ensure tarball test root exists
-    file:
-      path: "{{ tarball_test_root }}"
-      state: directory
-      mode: "0755"
-
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
-    - rm -rf package-testing
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-    - unzip master.zip
-    - rm -f master.zip
-    - mv "package-testing-{{ branch }}" package-testing
+    - rm -rf /package-testing
+    - rm -f /tmp/package-testing.zip
+    - wget --no-check-certificate -O /tmp/package-testing.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip /tmp/package-testing.zip -d /tmp
+    - rm -f /tmp/package-testing.zip
+    - mv "/tmp/package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+    args:
+      chdir: /
   
 
   - name: Download regular {{ TARBALL_NAME }}
@@ -233,4 +223,3 @@
   - name: Run tests
     command: ./run.sh
     args:
-      chdir: /package-testing/package-testing/binary-tarball-tests/ps

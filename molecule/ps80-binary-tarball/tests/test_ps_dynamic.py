@@ -3,16 +3,13 @@ import sys
 import os
 
 # Prefer the local molecule copy of settings.py first, then fall back to the shared binary-tests path for mysql.py, etc.
-tests_dir = os.path.dirname(__file__)
-molecule_root = os.path.abspath(os.path.join(tests_dir, '..'))
-shared_binary_path = os.path.abspath(os.path.join(molecule_root, '..', '..', 'binary-tarball-tests', 'ps'))
-remote_shared_path = '/package-testing/binary-tarball-tests/ps'
-
-sys.path.insert(0, molecule_root)  # picks up molecule/ps80-binary-tarball/settings.py
-if os.path.exists(shared_binary_path):
-    sys.path.insert(1, shared_binary_path)
+local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
+remote_path = '/package-testing/binary-tarball-tests/ps'
+local_path_abs = os.path.abspath(local_path)
+if os.path.exists(local_path_abs):
+    sys.path.insert(0, local_path_abs)
 else:
-    sys.path.insert(1, remote_shared_path)
+    sys.path.insert(0, remote_path)
 
 import pytest
 import subprocess
