@@ -19,6 +19,7 @@ class MySQL:
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
         self.features=features
         self.host = host  # Store host object for testinfra access
+        self.run_user = os.getenv("MYSQL_RUN_USER", "mysql")
 
         if 'fips' in self.features:
             self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
@@ -81,7 +82,12 @@ class MySQL:
 
     def start(self):
         self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
+        if self.run_user:
+            self.basic_param.append(f'--user={self.run_user}')
         if self.host:
+            # Ensure run user exists and owns the base dir
+            self.host.run(f'id {self.run_user} || useradd -r -s /sbin/nologin {self.run_user}')
+            self.host.run(f'chown -R {self.run_user}:{self.run_user} {self.basedir}')
             # Use host.run() for background process with nohup to keep it alive
             cmd = ' '.join([self.mysqld] + self.basic_param + self.extra_param)
             # Use nohup and redirect output to keep process alive
