@@ -1,6 +1,4 @@
----
 # tasks file for tarball tests
-
   - name: Display OS Name
     debug:
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
@@ -31,14 +29,14 @@
       state: latest
     vars:
       packages:
-        - git
-        - unzip
-        - wget
-        - python3
-        - python3-pip
-        - libnuma1
-        - tar
-        - gawk
+      - git
+      - unzip
+      - wget
+      - python3
+      - python3-pip
+      - libnuma1
+      - tar
+      - gawk
     register: result
     until: result is not failed
     when: ansible_os_family == "Debian"
@@ -50,11 +48,11 @@
       state: latest
     vars:
       packages:
-        - libaio1
+      - libaio1 
     register: result
     until: result is not failed
     when: >
-      ansible_os_family == "Debian"
+      ansible_os_family == "Debian" 
       and ansible_distribution_version != "24.04"
       and not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
 
@@ -64,20 +62,20 @@
       state: latest
     vars:
       packages:
-        - git
-        - unzip
-        - wget
-        - tar
-        - libaio
-        - numactl
-        - gawk
-        - python3
-        - python3-pip
-        - libtirpc
-        - lsb_release
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
+      - git
+      - unzip
+      - wget
+      - tar
+      - libaio
+      - numactl
+      - gawk
+      - python3
+      - python3-pip
+      - libtirpc
+      - lsb_release
+    when: 
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Install required packages using dnf
     dnf:
@@ -97,18 +95,12 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
-  ########################################################################
-  # FIX 1 — Ensure mysql user exists
-  ########################################################################
-  - name: Ensure mysql user exists
-    user:
-      name: mysql
-      system: yes
-      shell: /sbin/nologin
+#      - openldap // this package causes issue on OL-9
 
-  ########################################################################
-  # GLIBC VERSION + TARBALL NAME
-  ########################################################################
+#  - name: get GLIBC_VERSION
+#    set_fact:
+#      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+
   - name: get GLIBC_VERSION
     set_fact:
       GLIBC_VERSION: >-
@@ -128,82 +120,65 @@
     set_fact:
       TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
+
+  # # - name: get main repo TARBALL_LINK
+  # #   set_fact:
+  # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
+
   - name: get testing repo TARBALL_LINK
     set_fact:
       TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
-  ########################################################################
-  # DOWNLOAD PACKAGE-TESTING
-  ########################################################################
-  - name: download package-testing repo branch with wget to /
+  - name: Set unified test paths
+    set_fact:
+      tarball_test_root: "/package-testing/molecule/ps80-binary-tarball"
+      base_dir: "/package-testing/molecule/ps80-binary-tarball/percona-server"
+
+  - name: Ensure package-testing root exists
+    file:
+      path: /package-testing
+      state: directory
+      mode: "0755"
+
+  - name: Ensure tarball test root exists
+    file:
+      path: "{{ tarball_test_root }}"
+      state: directory
+      mode: "0755"
+
+
+  - name: download package-testing repo branch with wget to /package-testing
     command: "{{ item }}"
-    args:
-      chdir: /
     with_items:
-      - rm -rf package-testing
-      - rm -f master.zip
-      - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-      - unzip master.zip
-      - rm -f master.zip
-      - mv "package-testing-{{ branch }}" package-testing
+    - rm -rf /package-testing
+    - rm -f /tmp/package-testing.zip
+    - wget --no-check-certificate -O /tmp/package-testing.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip /tmp/package-testing.zip -d /tmp
+    - rm -f /tmp/package-testing.zip
+    - mv "/tmp/package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+    args:
+      chdir: /
 
-  ########################################################################
-  # DOWNLOAD + UNPACK TARBALL
-  ########################################################################
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: "{{ tarball_test_root }}/{{ TARBALL_NAME }}"
       mode: '0644'
 
-  - name: Unpack regular tarball
+  - name: Unpack regular tarball into unified base_dir
     unarchive:
-      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: /
+      src: "{{ tarball_test_root }}/{{ TARBALL_NAME }}"
+      dest: "{{ tarball_test_root }}"
       remote_src: yes
       extra_opts:
-        - --transform
-        - 's,^/*[^/]*,/usr/percona-server,S'
+      - --transform
+      - 's,^[^/]*/,percona-server/,'
+      creates: "{{ base_dir }}/bin/mysqld"
 
-  ########################################################################
-  # FIX 2 — FIX PERMISSIONS FOR MYSQL STARTUP
-  ########################################################################
-  - name: Fix permissions on extracted MySQL directory
-    file:
-      path: "/usr/percona-server"
-      state: directory
-      recurse: yes
-      owner: mysql
-      group: mysql
 
-  - name: Create MySQL runtime directories
-    file:
-      path: "{{ item }}"
-      state: directory
-      owner: mysql
-      group: mysql
-      mode: "0755"
-    with_items:
-      - "/usr/percona-server/log"
-      - "/usr/percona-server/tmp"
-      - "/usr/percona-server/data"
-
-  ########################################################################
-  # COPY TARBALL INTO run.sh PATH
-  ########################################################################
-  - name: Copy tarball into run.sh directory
-    copy:
-      src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
-      dest: "/package-testing/binary-tarball-tests/ps/"
-      mode: "0644"
-      remote_src: yes
-
-  ########################################################################
-  # DEBUG INFO
-  ########################################################################
   - name: DEBUG — Find package-testing folder
     shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
     register: pkg_debug
@@ -212,22 +187,20 @@
       var: pkg_debug.stdout_lines
 
   - name: DEBUG — Find run.sh
-    shell: find / -maxdepth 6 -name "run.sh" 2>/dev/null
+    shell: find / -maxdepth 5 -name "run.sh" 2>/dev/null
     register: runsh_debug
 
-  - debug:
+  - debug:  
       var: runsh_debug.stdout_lines
 
+
   - name: DEBUG — Find tar.gz files
-    shell: find / -maxdepth 5 -name "*.tar.gz" 2>/dev/null
+    shell: find / -maxdepth 4 -name "*.tar.gz" 2>/dev/null
     register: tar_debug
 
   - debug:
       var: tar_debug.stdout_lines
 
-  ########################################################################
-  # FIPS FLAGS
-  ########################################################################
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
       FIPS_SUPPORTED: "no"
@@ -247,9 +220,6 @@
       FIPS_SUPPORTED: "yes"
     when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "9"
 
-  ########################################################################
-  # APPEND ENVIRONMENT VARS
-  ########################################################################
   - name: Append values to /etc/environment file
     lineinfile:
       path: /etc/environment
@@ -259,3 +229,8 @@
       - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
+      - "BASE_DIR={{ base_dir }}"
+
+  - name: Run tests
+    command: ./run.sh
+    args:
