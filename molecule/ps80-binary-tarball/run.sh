@@ -108,7 +108,7 @@ fi
 # ---------------------------------------------------------
 #  BASE_DIR setup
 # ---------------------------------------------------------
-BASE_DIR_DEFAULT="${BASE_DIR:-${SCRIPT_DIR}/percona-server}"
+BASE_DIR_DEFAULT="${SCRIPT_DIR}/percona-server"
 TARBALL_NAME=$(find "${SCRIPT_DIR}" -maxdepth 1 -name '*.tar.gz' | head -n1)
 
 if [ -z "${TARBALL_NAME}" ]; then

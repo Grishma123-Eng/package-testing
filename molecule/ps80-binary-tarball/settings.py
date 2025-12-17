@@ -8,7 +8,7 @@ def resolve_base_dir():
     Determine the base directory for the extracted tarball.
     Priority:
     1) BASE_DIR env var (exported by run.sh / Ansible)
-    2) Local repo path (developer run)
+    2) Local molecule path next to this file (percona-server)
     3) Remote Molecule path
     """
     env_base = os.getenv("BASE_DIR")

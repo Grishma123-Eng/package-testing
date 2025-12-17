@@ -3,6 +3,26 @@ import os
 import re
 import pytest
 
+def resolve_base_dir():
+    """
+    Determine the base directory for the extracted tarball.
+    Priority:
+    1) BASE_DIR env var (exported by run.sh / Ansible)
+    2) Local repo path (for developer runs)
+    3) Remote Molecule path
+    """
+    env_base = os.getenv("BASE_DIR")
+    if env_base:
+        return env_base
+
+    local_repo_base = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'molecule', 'ps80-binary-tarball', 'percona-server')
+    )
+    if os.path.exists(local_repo_base):
+        return local_repo_base
+
+    return "/package-testing/molecule/ps80-binary-tarball/percona-server"
+
 def source_environment_file(filepath="/etc/environment"):
     """
     Loads environment variables from a given file into os.environ.
@@ -44,16 +64,8 @@ def set_pro_fips_vars():
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
 
-
-    if pro:
-      base_dir = "/usr/percona-server"
-      print(f"PRINTING THE PRO VALUE PRO: {pro}")
-    else:
-      base_dir = os.getenv("BASE_DIR")
-      # Default to /usr/percona-server if BASE_DIR is not set
-      if not base_dir:
-        base_dir = "/usr/percona-server"
-      print(f"Non-PRO build. BASE_DIR = {base_dir}")
+    base_dir = resolve_base_dir()
+    print(f"BASE_DIR resolved to {base_dir}")
 
 # Debug print
     if pro:
@@ -86,11 +98,7 @@ def pro_fips_vars():
 
 source_environment_file()
 
-
-base_dir = os.getenv('BASE_DIR')
-# Default to /usr/percona-server if BASE_DIR is not set
-if not base_dir:
-    base_dir = "/usr/percona-server"
+base_dir = resolve_base_dir()
 ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
