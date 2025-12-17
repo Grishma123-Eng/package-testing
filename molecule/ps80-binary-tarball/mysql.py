@@ -87,11 +87,12 @@ class MySQL:
         if self.host:
             # Ensure run user exists and owns the base dir
             self.host.run(f'id {self.run_user} || useradd -r -s /sbin/nologin {self.run_user}')
+            self.host.run(f'mkdir -p {self.basedir}/log {self.basedir}/data')
             self.host.run(f'chown -R {self.run_user}:{self.run_user} {self.basedir}')
             # Use host.run() for background process with nohup to keep it alive
             cmd = ' '.join([self.mysqld] + self.basic_param + self.extra_param)
-            # Use nohup and redirect output to keep process alive
-            self.host.run(f'nohup {cmd} > {self.logfile} 2>&1 &')
+            # Use nohup; redirect bootstrap output away from mysqld log_error to avoid root-owned file
+            self.host.run(f'nohup {cmd} > /tmp/mysqld-start.log 2>&1 &')
             # Wait for socket to be created (max 30 seconds)
             max_wait = 30
             wait_time = 0
