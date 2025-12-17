@@ -164,6 +164,14 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
+  - name: Copy tarball into run.sh directory
+    copy:
+      src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
+      dest: "/package-testing/binary-tarball-tests/ps/"
+      mode: "0644"
+      remote_src: yes
+
+
   - name: DEBUG — Find package-testing folder
     shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
     register: pkg_debug
@@ -175,7 +183,7 @@
     shell: find / -maxdepth 5 -name "run.sh" 2>/dev/null
     register: runsh_debug
 
-  - debug:
+  - debug:  
       var: runsh_debug.stdout_lines
 
 
@@ -214,3 +222,8 @@
       - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
+
+#  - name: Run tests
+  #  command: ./run.sh
+   # args:
+    #  chdir: "/package-testing/molecule/ps80-binary-tarball/"
