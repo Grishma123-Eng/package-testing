@@ -165,6 +165,14 @@
         - --transform
         - 's,^/*[^/]*,/usr/percona-server,S'
 
+    - name: Debug contents of base_dir
+      command: ls -R "{{ base_dir }}"
+      register: base_dir_ls
+      failed_when: false
+
+    - debug:
+        var: base_dir_ls.stdout_lines
+
     - name: Copy tarball into run.sh directory
       copy:
         src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
