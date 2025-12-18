@@ -1,41 +1,20 @@
 #!/usr/bin/env python3
-import sys
-import os
-
-# Prefer the local molecule copy of settings.py first, then fall back to the shared binary-tests path for mysql.py, etc.
-local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'molecule', 'ps80-binary-tarball')
-remote_path = '/package-testing/molecule/ps80-binary-tarball/'
-local_path_abs = os.path.abspath(local_path)
-if os.path.exists(local_path_abs):
-    sys.path.insert(0, local_path_abs)
-else:
-    sys.path.insert(0, remote_path)
-
 import pytest
 import subprocess
 import testinfra
 import time
-import getpass
 import mysql
 from packaging import version
+
 from settings import *
 
-
-
 @pytest.fixture(scope='module')
-def mysql_server(request, pro_fips_vars, host):
+def mysql_server(request, pro_fips_vars):
+    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    base_dir = pro_fips_vars['base_dir']
-
-    # Debug who/where is running the MySQL helper
-    print("DEBUG mysql_server fixture: user =", getpass.getuser())
-    print("DEBUG mysql_server fixture: cwd  =", os.getcwd())
-    print("DEBUG mysql_server fixture: base_dir =", base_dir)
-
-    features = []
+    features=[]
     if fips_supported:
         features.append("fips")
-
     # The mysql.MySQL helper currently only takes (base_dir, features)
     # and does not accept a 'host' keyword argument.
     mysql_server = mysql.MySQL(base_dir, features)
@@ -46,16 +25,14 @@ def mysql_server(request, pro_fips_vars, host):
 
 
 def test_fips_md5(host, mysql_server, pro_fips_vars):
-    if pro_fips_vars['fips_supported']:
-        try:
-            output = mysql_server.run_query("SELECT MD5('foo');")
-            print("DEBUG test_fips_md5: query output:", output)
-        except Exception as e:
-            print("DEBUG test_fips_md5: run_query raised:", repr(e))
-            raise
+    fips_supported = pro_fips_vars['fips_supported']
+    debug = pro_fips_vars['debug']
+    if fips_supported:
+        query="SELECT MD5('foo');"
+        output = mysql_server.run_query(query)
         assert '00000000000000000000000000000000' in output
     else:
-        pytest.skip("FIPS not supported")
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
 
 def test_fips_value(host, mysql_server, pro_fips_vars):

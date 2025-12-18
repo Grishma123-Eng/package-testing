@@ -54,9 +54,7 @@ def set_pro_fips_vars():
     source_environment_file()
 
     value = os.getenv('PRO', '').strip().lower()  # Normalize the input
-    pro = value in {"yes", "true", "1"}
-
-    print(pro)  # True if value is "yes", "true", or "1", otherwise False
+   # True if value is "yes", "true", or "1", otherwise False
 
    # fips_supported = True if os.getenv('PRO') == "yes" else False
     fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}

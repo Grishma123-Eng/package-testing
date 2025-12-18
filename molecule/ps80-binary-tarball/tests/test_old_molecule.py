@@ -6,8 +6,8 @@ import os
 import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
-
-BASE_DIR='/package-testing/molecule/ps80-binary-tarball/percona-server'
+    
+BASE_DIR='/usr/percona-server'
 
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
