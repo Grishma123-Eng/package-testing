@@ -91,30 +91,39 @@ class MySQL:
         # FIPS PRE-FLIGHT CHECK
         # --------------------------------------------------
         self.extra_param = []
+
         if "fips" in self.features:
-            if self._fips_preflight():
-                self.extra_param = [
-                    "--ssl-fips-mode=ON",
-                    "--log-error-verbosity=3",
-                ]
-            else:
-                print("WARNING: FIPS requested but preflight failed. Running without FIPS.")
+            if not self._fips_preflight():
+                raise RuntimeError(
+                    "FIPS requested but OS crypto is NOT in FIPS mode "
+                    "(/proc/sys/crypto/fips_enabled != 1)"
+                )
+
+            self.extra_param = [
+                "--ssl-fips-mode=ON",
+                "--log-error-verbosity=3",
+            ]
+
 
     # ------------------------------------------------------
     # FIPS PRECHECK
     # ------------------------------------------------------
     def _fips_preflight(self):
-        try:
-            if self.host:
-                self.host.check_output(f"{self.mysqld} --no-defaults --help")
-            else:
-                subprocess.check_output(
-                    [self.mysqld, "--no-defaults", "--help"],
-                    stderr=subprocess.DEVNULL,
-                )
-            return True
-        except Exception:
-            return False
+    """
+    Returns True ONLY if the OS crypto layer is in FIPS mode.
+    """
+    try:
+        if self.host:
+            val = self.host.check_output(
+                "cat /proc/sys/crypto/fips_enabled"
+            ).strip()
+        else:
+            with open("/proc/sys/crypto/fips_enabled") as f:
+                val = f.read().strip()
+
+        return val == "1"
+    except Exception:
+        return False
 
     # ------------------------------------------------------
     # START MYSQL

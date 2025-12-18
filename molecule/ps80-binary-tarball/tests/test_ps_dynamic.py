@@ -20,14 +20,27 @@ from packaging import version
 from settings import *
 
 
+
+
+
 @pytest.fixture(scope='module')
 def mysql_server(request, pro_fips_vars, host):
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
 
+    def os_fips_enabled(host):
+    try:
+        return host.check_output(
+            "cat /proc/sys/crypto/fips_enabled"
+        ).strip() == "1"
+    except Exception:
+        return False
     features = []
-    if fips_supported:
+
+    if pro_fips_vars["fips_supported"] and os_fips_enabled():
         features.append("fips")
+    elif pro_fips_vars["fips_supported"]:
+        pytest.skip("OS supports FIPS but kernel is not in FIPS mode")
 
     mysql_server = mysql.MySQL(base_dir, features, host=host)
     mysql_server.start()
