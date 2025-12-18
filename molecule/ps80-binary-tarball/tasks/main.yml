@@ -233,3 +233,7 @@
       command: ./run.sh
       args:
         chdir: "{{ tarball_test_root }}"
+      # Run tests as the regular SSH user (e.g. ec2-user), not as root.
+      # MySQL refuses to run as root, which causes all dynamic tests to fail
+      # with "Fatal error: ... how to run mysqld as root!" and connection errors.
+      become: false
