@@ -9,7 +9,11 @@ class MySQL:
     def __init__(self, base_dir, features=[], host=None):
         self.basedir = base_dir
         self.port = '3306'
-        self.datadir = base_dir+'/data'
+        # Use a writable data directory when running via testinfra/Ansible backend
+        if host:
+            self.datadir = '/tmp/mysql-data'
+        else:
+            self.datadir = base_dir + '/data'
         self.socket = '/tmp/mysql.sock'
         self.logfile = base_dir+'/log/master.err'
         self.mysql = base_dir+'/bin/mysql'
