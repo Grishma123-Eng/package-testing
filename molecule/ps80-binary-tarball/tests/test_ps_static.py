@@ -84,14 +84,26 @@ def test_pro_openssl_files_not_exist(host,pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
+    ps_version_major = pro_fips_vars['ps_version_major']
     if pro:
         # For PRO builds, openssl files should NOT exist (using system openssl)
         for openssl_file in ps_openssl_files:
             assert not host.file(base_dir+'/'+openssl_file).exists
     else:
-        # For non-PRO builds, openssl files SHOULD exist (bundled openssl)
-        for openssl_file in ps_openssl_files:
-            assert host.file(base_dir+'/'+openssl_file).exists
+        # For non-PRO builds:
+        # - For 8.0–8.3 we expect bundled OpenSSL libs in the tarball
+        # - For 8.4+ tarballs use system OpenSSL, so these files may not exist
+        if re.match(r'^8\.[0-3]$', ps_version_major):
+            for openssl_file in ps_openssl_files:
+                assert host.file(base_dir + '/' + openssl_file).exists
+        else:
+            # 8.4+ non-PRO: accept either bundled or system OpenSSL; just ensure libs are resolvable
+            for binary in ps_binaries:
+                shared_files = host.check_output('ldd ' + base_dir + '/' + binary)
+                for line in shared_files.splitlines():
+                    for file_name in ['libcrypto.so', 'libssl.so']:
+                        if file_name in line:
+                            assert '=> not found' not in line
 
 
 def test_pro_openssl_files_linked(host,pro_fips_vars):

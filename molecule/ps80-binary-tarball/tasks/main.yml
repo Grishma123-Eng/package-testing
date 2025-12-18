@@ -219,6 +219,7 @@
       - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
       - "PRO={{ lookup('env', 'PRO') }}"
       - "BASE_DIR={{ base_dir }}"
+      - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
 
   - name: Run tests
     command: ./run.sh
