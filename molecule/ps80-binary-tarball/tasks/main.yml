@@ -130,8 +130,13 @@
       set_fact:
         TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
-
-    - name: download package-testing repo branch with wget
+    - name: Remove Molecule's accidental home dir copy
+      file:
+        path: /home/ec2-user/package-testing
+        state: absent
+      ignore_errors: yes
+   
+    - name: download package-testing repo branch with wget to /package-testing
       command: "{{ item }}"
       with_items:
       - rm -rf package-testing
@@ -144,20 +149,28 @@
         branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
         git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
+
     - name: Download regular {{ TARBALL_NAME }}
       get_url:
         url: '{{ TARBALL_LINK }}'
-        dest: /usr/percona-server-{{ TARBALL_NAME }}
+        dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
         mode: '0644'
 
-    - name: Unpack regular tarball into unified base_dir
+    - name: Unpack regular tarball
       unarchive:
-        src: /usr/percona-server-{{ TARBALL_NAME }}
+        src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
         dest: /
         remote_src: yes
         extra_opts:
         - --transform
         - 's,^/*[^/]*,/usr/percona-server,S'
+
+    - name: Copy tarball into run.sh directory
+      copy:
+        src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
+        dest: "/package-testing/molecule/ps80-binary-tarball/"
+        mode: "0644"
+        remote_src: yes
 
 
     - name: DEBUG — Find package-testing folder
@@ -210,4 +223,4 @@
         - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
         - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
         - "PRO={{ lookup('env', 'PRO') }}"
-        - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+ #       - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"

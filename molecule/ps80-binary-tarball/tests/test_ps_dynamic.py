@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+
+import sys
+import os
+
+local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
+remote_path = '/package-testing/binary-tarball-tests/ps'
+local_path_abs = os.path.abspath(local_path)
+if os.path.exists(local_path_abs):
+    sys.path.insert(0, local_path_abs)
+else:
+    sys.path.insert(0, remote_path)
+
 import pytest
 import subprocess
 import testinfra
@@ -9,15 +21,15 @@ from packaging import version
 from settings import *
 
 @pytest.fixture(scope='module')
-def mysql_server(request, pro_fips_vars):
-    pro = pro_fips_vars['pro']
+def mysql_server(request, pro_fips_vars, host):
     fips_supported = pro_fips_vars['fips_supported']
-    features=[]
+    base_dir = pro_fips_vars['base_dir']
+
+    features = []
     if fips_supported:
         features.append("fips")
-    # The mysql.MySQL helper currently only takes (base_dir, features)
-    # and does not accept a 'host' keyword argument.
-    mysql_server = mysql.MySQL(base_dir, features)
+
+    mysql_server = mysql.MySQL(base_dir, features, host=host)
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
@@ -25,14 +37,11 @@ def mysql_server(request, pro_fips_vars):
 
 
 def test_fips_md5(host, mysql_server, pro_fips_vars):
-    fips_supported = pro_fips_vars['fips_supported']
-    debug = pro_fips_vars['debug']
-    if fips_supported:
-        query="SELECT MD5('foo');"
-        output = mysql_server.run_query(query)
+    if pro_fips_vars['fips_supported']:
+        output = mysql_server.run_query("SELECT MD5('foo');")
         assert '00000000000000000000000000000000' in output
     else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
+        pytest.skip("FIPS not supported")
 
 
 def test_fips_value(host, mysql_server, pro_fips_vars):
@@ -44,7 +53,7 @@ def test_fips_value(host, mysql_server, pro_fips_vars):
 
 
 def test_fips_in_log(host, mysql_server, pro_fips_vars):
-    if not pro_fips_vars['FIPS_SUPPORTED']:
+    if not pro_fips_vars['fips_supported']:
         pytest.skip("FIPS not supported")
 
     with host.sudo():
