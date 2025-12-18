@@ -168,7 +168,7 @@
     - name: Copy tarball into run.sh directory
       copy:
         src: "/usr/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
-        dest: "/package-testing/molecule/ps80-binary-tarball/"
+        dest: "/package-testing/binary-tarball-tests/ps/"
         mode: "0644"
         remote_src: yes
 

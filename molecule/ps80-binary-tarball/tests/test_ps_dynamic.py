@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
-
 import sys
 import os
 
-local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
-remote_path = '/package-testing/binary-tarball-tests/ps'
-local_path_abs = os.path.abspath(local_path)
-if os.path.exists(local_path_abs):
-    sys.path.insert(0, local_path_abs)
-else:
-    sys.path.insert(0, remote_path)
+# Always use the remote path because Molecule places package-testing in /
+PS_TEST_DIR = "/package-testing/binary-tarball-tests/ps"
+
+if PS_TEST_DIR not in sys.path:
+    sys.path.insert(0, PS_TEST_DIR)
 
 import pytest
 import subprocess
@@ -17,8 +14,8 @@ import testinfra
 import time
 import mysql
 from packaging import version
-
 from settings import *
+
 
 @pytest.fixture(scope='module')
 def mysql_server(request, pro_fips_vars, host):
