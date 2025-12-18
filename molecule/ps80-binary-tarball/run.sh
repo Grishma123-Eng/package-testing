@@ -108,6 +108,7 @@ fi
 # ---------------------------------------------------------
 #  BASE_DIR setup
 # ---------------------------------------------------------
+echo "Setting unified BASE_DIR under ${SCRIPT_DIR}"
 BASE_DIR_DEFAULT="${SCRIPT_DIR}/percona-server"
 TARBALL_NAME=$(find "${SCRIPT_DIR}" -maxdepth 1 -name '*.tar.gz' | head -n1)
 

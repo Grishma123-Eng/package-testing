@@ -8,14 +8,16 @@ def resolve_base_dir():
     Determine the base directory for the extracted tarball.
     Priority:
     1) BASE_DIR env var (exported by run.sh / Ansible)
-    2) Local molecule path next to this file (percona-server)
+    2) Local repo path (for developer runs)
     3) Remote Molecule path
     """
     env_base = os.getenv("BASE_DIR")
     if env_base:
         return env_base
 
-    local_repo_base = os.path.abspath(os.path.join(os.path.dirname(__file__), 'percona-server'))
+    local_repo_base = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'molecule', 'ps80-binary-tarball', 'percona-server')
+    )
     if os.path.exists(local_repo_base):
         return local_repo_base
 
@@ -62,7 +64,6 @@ def set_pro_fips_vars():
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
 
-
     base_dir = resolve_base_dir()
     print(f"BASE_DIR resolved to {base_dir}")
 
@@ -96,7 +97,6 @@ def pro_fips_vars():
 
 
 source_environment_file()
-
 
 base_dir = resolve_base_dir()
 ps_version = os.getenv('PS_VERSION')

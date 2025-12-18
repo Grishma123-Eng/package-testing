@@ -3,8 +3,8 @@ import sys
 import os
 
 # Prefer the local molecule copy of settings.py first, then fall back to the shared binary-tests path for mysql.py, etc.
-local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
-remote_path = '/package-testing/binary-tarball-tests/ps'
+local_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'molecule', 'ps80-binary-tarball')
+remote_path = '/package-testing/molecule/ps80-binary-tarball/'
 local_path_abs = os.path.abspath(local_path)
 if os.path.exists(local_path_abs):
     sys.path.insert(0, local_path_abs)
@@ -18,8 +18,6 @@ import time
 import mysql
 from packaging import version
 from settings import *
-
-
 
 
 
