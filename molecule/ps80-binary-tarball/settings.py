@@ -76,10 +76,12 @@ def set_pro_fips_vars():
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
+    # Expose both a lowercase and uppercase key for FIPS support to match
+    # existing tests that expect 'FIPS_SUPPORTED' in the mapping.
     return {
         'pro': pro,
         'debug': debug,
-        'fips_supported': fips_supported,
+        'FIPS_SUPPORTED': fips_supported,
         'ps_revision': ps_revision,
         'ps_version': ps_version,
         'base_dir': base_dir,
