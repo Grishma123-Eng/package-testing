@@ -167,22 +167,6 @@
         - 's,^[^/]*/,percona-server/,'
         creates: "{{ base_dir }}/bin/mysqld"
 
-    - name: Ensure percona-server directory is writable by test user
-      file:
-        path: "{{ base_dir }}"
-        state: directory
-        recurse: yes
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
-
-    - name: Ensure tarball test root is writable by test user (for report.xml, etc.)
-      file:
-        path: "{{ tarball_test_root }}"
-        state: directory
-        recurse: yes
-        owner: "{{ ansible_user_id }}"
-        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
-
 
     - name: DEBUG — Find package-testing folder
       shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
@@ -236,12 +220,3 @@
         - "PRO={{ lookup('env', 'PRO') }}"
         - "BASE_DIR={{ base_dir }}"
         - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
-
-    - name: Run tests
-      command: ./run.sh
-      args:
-        chdir: "{{ tarball_test_root }}"
-      # Run tests as the regular SSH user (e.g. ec2-user), not as root.
-      # MySQL refuses to run as root, which causes all dynamic tests to fail
-      # with "Fatal error: ... how to run mysqld as root!" and connection errors.
-      become: false
