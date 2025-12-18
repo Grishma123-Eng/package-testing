@@ -175,6 +175,14 @@
         owner: "{{ ansible_user_id }}"
         group: "{{ ansible_user_gid | default(ansible_user_id) }}"
 
+    - name: Ensure tarball test root is writable by test user (for report.xml, etc.)
+      file:
+        path: "{{ tarball_test_root }}"
+        state: directory
+        recurse: yes
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+
 
     - name: DEBUG — Find package-testing folder
       shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null

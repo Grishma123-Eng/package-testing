@@ -15,6 +15,7 @@ import pytest
 import subprocess
 import testinfra
 import time
+import getpass
 import mysql
 from packaging import version
 from settings import *
@@ -25,6 +26,11 @@ from settings import *
 def mysql_server(request, pro_fips_vars, host):
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
+
+    # Debug who/where is running the MySQL helper
+    print("DEBUG mysql_server fixture: user =", getpass.getuser())
+    print("DEBUG mysql_server fixture: cwd  =", os.getcwd())
+    print("DEBUG mysql_server fixture: base_dir =", base_dir)
 
     features = []
     if fips_supported:
@@ -41,7 +47,12 @@ def mysql_server(request, pro_fips_vars, host):
 
 def test_fips_md5(host, mysql_server, pro_fips_vars):
     if pro_fips_vars['fips_supported']:
-        output = mysql_server.run_query("SELECT MD5('foo');")
+        try:
+            output = mysql_server.run_query("SELECT MD5('foo');")
+            print("DEBUG test_fips_md5: query output:", output)
+        except Exception as e:
+            print("DEBUG test_fips_md5: run_query raised:", repr(e))
+            raise
         assert '00000000000000000000000000000000' in output
     else:
         pytest.skip("FIPS not supported")
