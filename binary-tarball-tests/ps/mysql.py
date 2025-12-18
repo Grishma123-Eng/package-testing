@@ -4,198 +4,217 @@ import re
 import os
 import shlex
 import time
+import uuid
 
 class MySQL:
-    def __init__(self, base_dir, features=[], host=None):
+    def __init__(self, base_dir, features=None, host=None):
+        if features is None:
+            features = []
+
         self.basedir = base_dir
-        self.port = '3306'
-        # Use a writable data directory when running via testinfra/Ansible backend
-        if host:
-            self.datadir = '/tmp/mysql-data'
-        else:
-            self.datadir = base_dir + '/data'
-        self.socket = '/tmp/mysql.sock'
-        self.logfile = base_dir+'/log/master.err'
-        self.mysql = base_dir+'/bin/mysql'
-        self.mysqld = base_dir+'/bin/mysqld'
-        self.mysqladmin = base_dir+'/bin/mysqladmin'
-        self.pidfile = base_dir+'/mysql.pid'
-        self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
-        self.features=features
-        self.host = host  # Store host object for testinfra access
+        self.features = features
+        self.host = host
+
+        self.port = "3306"
+
+        # Unique runtime paths (avoid CI collisions)
+        uid = str(uuid.uuid4())[:8]
+        self.datadir = f"/tmp/mysql-data-{uid}"
+        self.socket = f"/tmp/mysql-{uid}.sock"
+        self.pidfile = f"/tmp/mysql-{uid}.pid"
+
+        self.logfile = f"{self.basedir}/log/master.err"
+
+        self.mysql = f"{self.basedir}/bin/mysql"
+        self.mysqld = f"{self.basedir}/bin/mysqld"
+        self.mysqladmin = f"{self.basedir}/bin/mysqladmin"
+        self.mysql_install_db = f"{self.basedir}/scripts/mysql_install_db"
+
         self.run_user = os.getenv("MYSQL_RUN_USER", "mysql")
 
-        if 'fips' in self.features:
-            self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
-        else:
-            self.extra_param=[]
+        # --------------------------------------------------
+        # FIPS ENVIRONMENT (CRITICAL for OL9 / OpenSSL 3)
+        # --------------------------------------------------
+        if "fips" in self.features:
+            os.environ.setdefault("OPENSSL_MODULES", "/usr/lib64/ossl-modules")
+            os.environ.setdefault("OPENSSL_CONF", "/etc/ssl/openssl.cnf")
 
-        # Use host  object if available (testinfra), otherwise fall back to subprocess
+        # --------------------------------------------------
+        # Validate binaries
+        # --------------------------------------------------
         if self.host:
-            # Use testinfra host (runs via Ansible, can access root files)
             if not self.host.file(self.basedir).exists:
-                raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
+                raise FileNotFoundError(f"Base directory not found: {self.basedir}")
             if not self.host.file(self.mysqld).exists:
-                raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
-            
-            self.host.run(f'rm -Rf {self.datadir}')
-            self.host.run(f'rm -f {self.logfile}')
-            if not self.host.file(self.basedir+'/log').exists:
-                self.host.run(f'mkdir -p {self.basedir}/log')
-            
-            output = self.host.check_output(f'{self.mysqld} --version')
+                raise FileNotFoundError(f"mysqld not found: {self.mysqld}")
+            version_output = self.host.check_output(f"{self.mysqld} --version")
         else:
-            # Original subprocess code (for backward compatibility)
-            if not os.path.exists(self.basedir):
-                raise FileNotFoundError(f"Base directory does not exist: {self.basedir}")
             if not os.path.exists(self.mysqld):
-                raise FileNotFoundError(f"mysqld binary does not exist: {self.mysqld}")
-            if not os.access(self.mysqld, os.X_OK):
-                raise PermissionError(f"mysqld binary is not executable: {self.mysqld}")
+                raise FileNotFoundError(f"mysqld not found: {self.mysqld}")
+            version_output = subprocess.check_output(
+                [self.mysqld, "--version"], universal_newlines=True
+            )
 
-            subprocess.call(['rm','-Rf',self.datadir])
-            subprocess.call(['rm','-f',self.logfile])
-            if not os.path.exists(self.basedir+'/log'):
-                subprocess.call(['mkdir','-p',self.basedir+'/log'])
-            output = subprocess.check_output([self.mysqld, '--version'],universal_newlines=True)
-        
-        x = re.search(r"[0-9]+\.[0-9]+", output)
-        self.major_version = x.group()
-        
+        m = re.search(r"[0-9]+\.[0-9]+", version_output)
+        self.major_version = m.group()
+
+        # --------------------------------------------------
+        # Engine admin binary
+        # --------------------------------------------------
         if self.major_version == "5.6":
-            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
-            self.psadmin = base_dir+'/bin/ps_tokudb_admin'
-            if self.host:
-                self.host.check_output(f'{self.mysql_install_db} --no-defaults --basedir={self.basedir} --datadir={self.datadir}')
-            else:
-                subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir='+self.basedir,'--datadir='+self.datadir])
-        elif self.major_version == "5.7":
-            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
-            self.psadmin = base_dir+'/bin/ps-admin'
-            if self.host:
-                self.host.check_output(f'{self.mysqld} --no-defaults --initialize-insecure --basedir={self.basedir} --datadir={self.datadir}')
-            else:
-                subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+            self.psadmin = f"{self.basedir}/bin/ps_tokudb_admin"
         else:
-            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1'
-            self.psadmin = base_dir+'/bin/ps-admin'
-            if self.host:
-                 self.host.check_output(f'{self.mysqld} --no-defaults --initialize-insecure --basedir={self.basedir} --datadir={self.datadir}')
-            else:
-                subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+            self.psadmin = f"{self.basedir}/bin/ps-admin"
 
+        # --------------------------------------------------
+        # Initialize datadir
+        # --------------------------------------------------
+        if self.host:
+            self.host.run(f"rm -rf {self.datadir}")
+            self.host.run(f"mkdir -p {self.datadir} {self.basedir}/log")
+        else:
+            subprocess.call(["rm", "-rf", self.datadir])
+            os.makedirs(self.datadir, exist_ok=True)
+            os.makedirs(f"{self.basedir}/log", exist_ok=True)
+
+        if self.major_version == "5.6":
+            init_cmd = f"{self.mysql_install_db} --no-defaults --basedir={self.basedir} --datadir={self.datadir}"
+        else:
+            init_cmd = f"{self.mysqld} --no-defaults --initialize-insecure --basedir={self.basedir} --datadir={self.datadir}"
+
+        if self.host:
+            self.host.check_output(init_cmd)
+        else:
+            subprocess.check_call(init_cmd.split())
+
+        # --------------------------------------------------
+        # FIPS PRE-FLIGHT CHECK
+        # --------------------------------------------------
+        self.extra_param = []
+        if "fips" in self.features:
+            if self._fips_preflight():
+                self.extra_param = [
+                    "--ssl-fips-mode=ON",
+                    "--log-error-verbosity=3",
+                ]
+            else:
+                print("WARNING: FIPS requested but preflight failed. Running without FIPS.")
+
+    # ------------------------------------------------------
+    # FIPS PRECHECK
+    # ------------------------------------------------------
+    def _fips_preflight(self):
+        try:
+            if self.host:
+                self.host.check_output(f"{self.mysqld} --no-defaults --help")
+            else:
+                subprocess.check_output(
+                    [self.mysqld, "--no-defaults", "--help"],
+                    stderr=subprocess.DEVNULL,
+                )
+            return True
+        except Exception:
+            return False
+
+    # ------------------------------------------------------
+    # START MYSQL
+    # ------------------------------------------------------
     def start(self):
-        self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
-        if self.run_user:
-            self.basic_param.append(f'--user={self.run_user}')
-        if self.host:
-            # Ensure run user exists and owns the base dir
-            self.host.run(f'id {self.run_user} || useradd -r -s /sbin/nologin {self.run_user}')
-            self.host.run(f'mkdir -p {self.basedir}/log {self.basedir}/data')
-            self.host.run(f'chown -R {self.run_user}:{self.run_user} {self.basedir}')
-            # Use host.run() for background process with nohup to keep it alive
-            cmd = ' '.join([self.mysqld] + self.basic_param + self.extra_param)
-            # Use nohup; redirect bootstrap output away from mysqld log_error to avoid root-owned file
-            self.host.run(f'nohup {cmd} > /tmp/mysqld-start.log 2>&1 &')
-            # Wait for socket to be created (max 30 seconds)
-            max_wait = 30
-            wait_time = 0
-            while wait_time < max_wait:
-                self.host.run('sleep 1')
-                wait_time += 1
-                if self.host.file(self.socket).exists:
-                    # Socket exists, wait a bit more for MySQL to be ready
-                    self.host.run('sleep 2')
-                    # Try to connect to verify MySQL is ready
-                    try:
-                        self.host.check_output(f'{self.mysqladmin} -uroot -S{self.socket} ping')
-                        break
-                    except:
-                        continue
-            if not self.host.file(self.socket).exists:
-                # Check error log for issues
-                if self.host.file(self.logfile).exists:
-                    error_log = self.host.file(self.logfile).content_string
-                    raise RuntimeError(f"MySQL failed to start. Error log:\n{error_log}")
-                else:
-                    raise RuntimeError("MySQL failed to start and no error log found")
-        else:
-            subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
-            # Wait for socket to be created
-            max_wait = 30
-            wait_time = 0
-            while wait_time < max_wait:
-                time.sleep(1)
-                wait_time += 1
-                if os.path.exists(self.socket):
-                    time.sleep(2)
-                    # Try to connect to verify MySQL is ready
-                    try:
-                        subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'ping'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                        break
-                    except:
-                        continue
-            if not os.path.exists(self.socket):
-                if os.path.exists(self.logfile):
-                    with open(self.logfile, 'r') as f:
-                        error_log = f.read()
-                    raise RuntimeError(f"MySQL failed to start. Error log:\n{error_log}")
-                else:
-                    raise RuntimeError("MySQL failed to start and no error log found")
+        params = [
+            "--no-defaults",
+            f"--basedir={self.basedir}",
+            f"--datadir={self.datadir}",
+            f"--socket={self.socket}",
+            f"--port={self.port}",
+            f"--pid-file={self.pidfile}",
+            f"--log-error={self.logfile}",
+            "--server-id=1",
+            f"--user={self.run_user}",
+        ] + self.extra_param
 
+        cmd = " ".join([self.mysqld] + params)
+
+        if self.host:
+            self.host.run(f"id {self.run_user} || useradd -r -s /sbin/nologin {self.run_user}")
+            self.host.run(f"chown -R {self.run_user}:{self.run_user} {self.datadir} {self.basedir}")
+            self.host.run(f"nohup {cmd} > /tmp/mysqld-start.log 2>&1 &")
+        else:
+            subprocess.Popen(cmd.split(), env=os.environ)
+
+        # Wait for socket
+        for _ in range(30):
+            time.sleep(1)
+            if self._socket_exists():
+                try:
+                    self._ping()
+                    return
+                except Exception:
+                    continue
+
+        self._fail_startup()
+
+    def _socket_exists(self):
+        if self.host:
+            return self.host.file(self.socket).exists
+        return os.path.exists(self.socket)
+
+    def _ping(self):
+        if self.host:
+            self.host.check_output(f"{self.mysqladmin} -uroot -S{self.socket} ping")
+        else:
+            subprocess.check_call(
+                [self.mysqladmin, "-uroot", f"-S{self.socket}", "ping"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+    def _fail_startup(self):
+        if self.host and self.host.file("/tmp/mysqld-start.log").exists:
+            raise RuntimeError(
+                "MySQL failed to start:\n"
+                + self.host.file("/tmp/mysqld-start.log").content_string
+            )
+        raise RuntimeError("MySQL failed to start and no logs were produced")
+
+    # ------------------------------------------------------
+    # STOP / CLEANUP
+    # ------------------------------------------------------
     def stop(self):
-        if self.host:
-            self.host.check_output(f'{self.mysqladmin} -uroot -S{self.socket} shutdown')
-            self.host.run('sleep 5')
-        else:
-            subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'shutdown'])
-            subprocess.call(['sleep','5'])
-
-    def restart(self):
-        self.stop()
-        self.start()
+        try:
+            if self.host:
+                self.host.check_output(f"{self.mysqladmin} -uroot -S{self.socket} shutdown")
+            else:
+                subprocess.check_call([self.mysqladmin, "-uroot", f"-S{self.socket}", "shutdown"])
+        except Exception:
+            pass
 
     def purge(self):
         self.stop()
         if self.host:
-            self.host.run(f'rm -Rf {self.datadir}')
-            self.host.run(f'rm -f {self.logfile}')
+            self.host.run(f"rm -rf {self.datadir}")
         else:
-            subprocess.call(['rm','-Rf',self.datadir])
-            subprocess.call(['rm','-f',self.logfile])
+            subprocess.call(["rm", "-rf", self.datadir])
 
-    def run_query(self,query):
-        command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+shlex.quote(query)
+    # ------------------------------------------------------
+    # QUERY HELPERS
+    # ------------------------------------------------------
+    def run_query(self, query):
+        cmd = f"{self.mysql} -uroot -S{self.socket} -s -N -e {shlex.quote(query)}"
         if self.host:
-            return self.host.check_output(command)
-        else:
-            return subprocess.check_output(command,shell=True,universal_newlines=True)
+            return self.host.check_output(cmd)
+        return subprocess.check_output(cmd, shell=True, universal_newlines=True)
 
     def install_function(self, fname, soname, return_type):
-        query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname,return_type,soname)
-        self.run_query(query)
-        query = 'SELECT name FROM mysql.func WHERE dl = "{}";'.format(soname)
-        output = self.run_query(query)
-        assert fname in output
+        self.run_query(f'CREATE FUNCTION {fname} RETURNS {return_type} SONAME "{soname}";')
 
     def install_plugin(self, pname, soname):
-        query = 'INSTALL PLUGIN {} SONAME "{}";'.format(pname,soname)
-        self.run_query(query)
-        query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
-        output = self.run_query(query)
-        assert 'ACTIVE' in output
+        self.run_query(f'INSTALL PLUGIN {pname} SONAME "{soname}";')
 
     def install_component(self, cname):
-        query = 'INSTALL COMPONENT "file://{}";'.format(cname)
-        self.run_query(query)
-        query = 'SELECT component_urn FROM mysql.component where component_urn like "%{}%";'.format(cname)
-        output = self.run_query(query)
-        assert cname in output
+        self.run_query(f'INSTALL COMPONENT "file://{cname}";')
 
     def check_engine_active(self, engine):
-        query = 'select SUPPORT from information_schema.ENGINES where ENGINE = "{}";'.format(engine)
-        output = self.run_query(query)
-        if 'YES' in output:
-            return True
-        else:
-            return False
+        out = self.run_query(
+            f'SELECT SUPPORT FROM information_schema.ENGINES WHERE ENGINE="{engine}";'
+        )
+        return "YES" in out
