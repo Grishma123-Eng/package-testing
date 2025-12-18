@@ -167,6 +167,14 @@
       - 's,^[^/]*/,percona-server/,'
       creates: "{{ base_dir }}/bin/mysqld"
 
+  - name: Ensure percona-server directory is writable by test user
+    file:
+      path: "{{ base_dir }}"
+      state: directory
+      recurse: yes
+      owner: "{{ ansible_user_id }}"
+      group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+
 
   - name: DEBUG — Find package-testing folder
     shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
