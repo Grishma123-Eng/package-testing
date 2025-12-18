@@ -30,7 +30,9 @@ def mysql_server(request, pro_fips_vars, host):
     if fips_supported:
         features.append("fips")
 
-    mysql_server = mysql.MySQL(base_dir, features, host=host)
+    # The mysql.MySQL helper currently only takes (base_dir, features)
+    # and does not accept a 'host' keyword argument.
+    mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
