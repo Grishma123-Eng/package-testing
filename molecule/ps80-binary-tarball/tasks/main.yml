@@ -223,3 +223,4 @@
   - name: Run tests
     command: ./run.sh
     args:
+      chdir: "{{ tarball_test_root }}"
