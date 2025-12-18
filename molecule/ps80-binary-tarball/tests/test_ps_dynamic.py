@@ -28,19 +28,9 @@ def mysql_server(request, pro_fips_vars, host):
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
 
-    def os_fips_enabled(host):
-    try:
-        return host.check_output(
-            "cat /proc/sys/crypto/fips_enabled"
-        ).strip() == "1"
-    except Exception:
-        return False
     features = []
-
-    if pro_fips_vars["fips_supported"] and os_fips_enabled():
+    if fips_supported:
         features.append("fips")
-    elif pro_fips_vars["fips_supported"]:
-        pytest.skip("OS supports FIPS but kernel is not in FIPS mode")
 
     mysql_server = mysql.MySQL(base_dir, features, host=host)
     mysql_server.start()
@@ -66,7 +56,7 @@ def test_fips_value(host, mysql_server, pro_fips_vars):
 
 
 def test_fips_in_log(host, mysql_server, pro_fips_vars):
-    if not pro_fips_vars['fips_supported']:
+    if not pro_fips_vars['FIPS_SUPPORTED']:
         pytest.skip("FIPS not supported")
 
     with host.sudo():

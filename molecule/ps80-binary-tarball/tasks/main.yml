@@ -198,14 +198,24 @@
     - debug:
         var: tar_debug.stdout_lines
 
-    - name: Detect real FIPS mode
-      shell: cat /proc/sys/crypto/fips_enabled || echo 0
-      register: fips_state
-      changed_when: false
-
-    - name: Set FIPS_SUPPORTED fact
+    - name: Default FIPS_SUPPORTED fact to "no"
       set_fact:
-        FIPS_SUPPORTED: "{{ 'yes' if fips_state.stdout.strip() == '1' else 'no' }}"
+        FIPS_SUPPORTED: "no"
+
+    - name: Set FIPS_SUPPORTED fact for Debian 12 (Bookworm)
+      set_fact:
+        FIPS_SUPPORTED: "yes"
+      when: ansible_distribution == "Debian" and ansible_distribution_release == "bookworm"
+
+    - name: Set FIPS_SUPPORTED fact for Ubuntu 22.04 (Jammy)
+      set_fact:
+        FIPS_SUPPORTED: "no"
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
+
+    - name: Set FIPS_SUPPORTED fact for Oracle linux
+      set_fact:
+        FIPS_SUPPORTED: "yes"
+      when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "9"
 
     - name: Append values to /etc/environment file
       lineinfile:
