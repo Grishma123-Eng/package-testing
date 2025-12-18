@@ -81,6 +81,7 @@ def set_pro_fips_vars():
     return {
         'pro': pro,
         'debug': debug,
+        'fips_supported': fips_supported,
         'FIPS_SUPPORTED': fips_supported,
         'ps_revision': ps_revision,
         'ps_version': ps_version,
