@@ -167,6 +167,24 @@
         - 's,^[^/]*/,percona-server/,'
         creates: "{{ base_dir }}/bin/mysqld"
 
+    # Ensure both the extracted server tree and the test root (where report.xml lives)
+    # are writable by the SSH user (e.g. ec2-user), not only by root.
+    - name: Ensure percona-server directory is writable by test user
+      file:
+        path: "{{ base_dir }}"
+        state: directory
+        recurse: yes
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+
+    - name: Ensure tarball test root is writable by test user
+      file:
+        path: "{{ tarball_test_root }}"
+        state: directory
+        recurse: yes
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+
 
     - name: DEBUG — Find package-testing folder
       shell: find / -maxdepth 3 -type d -name "package-testing" 2>/dev/null
