@@ -1,229 +1,150 @@
----
-# tasks file for tarball tests
+- name: Display OS
+  debug:
+    msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
-  - name: Display OS Name
-    debug:
-      msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+# -------------------------------------------------
+# Base dependencies
+# -------------------------------------------------
 
-  - name: Add epel-release
-    package:
-      state: present
-      name: epel-release
-    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
-
-  - name: install needed packages for running tests with apt
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
+- name: Install packages (Debian)
+  apt:
+    name:
       - git
       - unzip
       - wget
+      - tar
       - python3
       - python3-pip
+      - libaio1
       - libnuma1
-      - tar
       - gawk
-    register: result
-    until: result is not failed
-    when: ansible_os_family == "Debian"
+    update_cache: yes
+    state: present
+  when: ansible_os_family == "Debian"
 
-  - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - libaio1 
-    register: result
-    until: result is not failed
-    when: >
-        ansible_os_family == "Debian" 
-        and ansible_distribution_version != "24.04"
-        and not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
-
-  - name: install needed packages for running tests with yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
+- name: Install packages (RHEL / OL / AL)
+  dnf:
+    name:
       - git
       - unzip
       - wget
       - tar
+      - python3
+      - python3-pip
       - libaio
       - numactl
       - gawk
-      - python3
-      - python3-pip
       - libtirpc
-      - lsb_release
-    when: 
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-    - ansible_facts['distribution_major_version'] | int <= 7
+    state: present
+  when: ansible_os_family == "RedHat"
 
-  - name: Install required packages using dnf
-    dnf:
-      name:
-        - git
-        - unzip
-        - wget
-        - tar
-        - libaio
-        - numactl
-        - gawk
-        - python3
-        - python3-pip
-        - libtirpc
-      state: present
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+# -------------------------------------------------
+# Compute tarball name
+# -------------------------------------------------
 
-#      - openldap // this package causes issue on OL-9
+- name: Set GLIBC version
+  set_fact:
+    GLIBC_VERSION: >-
+      {% if ansible_os_family == 'Debian' %}
+        2.35
+      {% else %}
+        2.34
+      {% endif %}
 
-#  - name: get GLIBC_VERSION
-#    set_fact:
-#      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+- name: Set tarball name
+  set_fact:
+    TARBALL_NAME: "Percona-Server-{{ lookup('env','PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
-  - name: get GLIBC_VERSION
-    set_fact:
-      GLIBC_VERSION: >-
-        {% if ansible_distribution == 'RedHat' and ansible_distribution_major_version == '10' %}
-          2.39
-        {% elif ansible_os_family == 'Debian' %}
-          2.35
-        {% else %}
-          2.34
-        {% endif %}
+- name: Set tarball URL
+  set_fact:
+    TARBALL_URL: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env','PS_VERSION') }}/{{ TARBALL_NAME }}"
 
-  - name: sanitize GLIBC_VERSION
-    set_fact:
-      GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
-      
-  - name: get TARBALL_NAME
-    set_fact:
-      TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+# -------------------------------------------------
+# Fetch package-testing (ALWAYS under /)
+# -------------------------------------------------
 
+- name: Remove any old package-testing
+  file:
+    path: /package-testing
+    state: absent
 
-  - name: get testing repo TARBALL_LINK
-    set_fact:
-      TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
-
-  # # - name: get main repo TARBALL_LINK
-  # #   set_fact:
-  # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
-  
-  - name: Ensure HOME directory exists for package-testing
-    file:
-      path: "{{ ansible_env.HOME }}"
-      state: directory
-      mode: '0755'
-
-  - name: download package-testing repo branch with wget
-    command: "{{ item }}"
-    args:
-      chdir: "{{ ansible_env.HOME }}"
-    with_items:
-    - rm -rf package-testing
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-    - unzip master.zip
-    - rm -f master.zip
-    - mv "package-testing-{{ branch }}" package-testing
-    vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
+- name: Download package-testing repo
+  command: "{{ item }}"
+  args:
+    chdir: /
+  loop:
+    - wget -O package-testing.zip https://github.com/{{ lookup('env','TESTING_GIT_ACCOUNT') | default('Percona-QA') }}/package-testing/archive/{{ lookup('env','TESTING_BRANCH') | default('tarball-fips') }}.zip
+    - unzip package-testing.zip
+    - rm -f package-testing.zip
+    - mv package-testing-* package-testing
+  vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-  - name: Download regular {{ TARBALL_NAME }}
-    get_url:
-      url: '{{ TARBALL_LINK }}'
-      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      mode: '0644'
+# -------------------------------------------------
+# Ensure test directory exists
+# -------------------------------------------------
 
-  - name: Unpack regular tarball
-    unarchive:
-      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: /
-      remote_src: yes
-      extra_opts:
-      - --transform
-      - 's,^/*[^/]*,/usr/percona-server,S'
+- name: Ensure PS tarball test directory exists
+  file:
+    path: /package-testing/binary-tarball-tests/ps
+    state: directory
+    mode: "0755"
 
-  - name: Ensure test directory exists
-    file:
-      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps"
-      state: directory
-      mode: '0755'
+# -------------------------------------------------
+# Download tarball INTO run.sh directory
+# -------------------------------------------------
 
-  - name: Get username from HOME directory path
-    set_fact:
-      test_user: "{{ ansible_env.HOME | basename }}"
+- name: Download PS tarball
+  get_url:
+    url: "{{ TARBALL_URL }}"
+    dest: "/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
+    mode: "0644"
 
-  - name: Verify source tarball exists before copying
-    stat:
-      path: "/usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
-    register: tarball_stat
+# -------------------------------------------------
+# DEBUG – final verification
+# -------------------------------------------------
 
-  - name: Fail if source tarball does not exist
-    fail:
-      msg: "Source tarball /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz not found"
-    when: not tarball_stat.stat.exists
+- name: Verify tarball presence
+  shell: ls -lh /package-testing/binary-tarball-tests/ps
+  register: tarball_debug
 
-  - name: Copy PS tarball into run.sh directory (preserve name)
-    copy:
-      src: "/usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
-      remote_src: yes
-      mode: "0644"
+- debug:
+    var: tarball_debug.stdout_lines
 
-  - name: Fix ownership of copied tarball to match HOME directory owner
-    file:
-      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
-      owner: "{{ test_user }}"
-      group: "{{ test_user }}"
-      mode: "0644"
+# -------------------------------------------------
+# FIPS flags for tests
+# -------------------------------------------------
 
-  - name: DEBUG — verify tarball presence
-    shell: |
-      echo "Listing tarballs in test directory:"
-      ls -lh {{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps
-    register: tarball_debug
-    ignore_errors: yes
+- name: Default FIPS_SUPPORTED
+  set_fact:
+    FIPS_SUPPORTED: "no"
 
-  - debug:
-      var: tarball_debug.stdout_lines
+- name: Enable FIPS for OL9
+  set_fact:
+    FIPS_SUPPORTED: "yes"
+  when:
+    - ansible_distribution == "OracleLinux"
+    - ansible_distribution_major_version == "9"
 
-  - name: Default FIPS_SUPPORTED fact to "no"
-    set_fact:
-      FIPS_SUPPORTED: "no"
+- name: Enable FIPS for Debian 12
+  set_fact:
+    FIPS_SUPPORTED: "yes"
+  when:
+    - ansible_distribution == "Debian"
+    - ansible_distribution_release == "bookworm"
 
-  - name: Set FIPS_SUPPORTED fact for Debian 12 (Bookworm)
-    set_fact:
-      FIPS_SUPPORTED: "yes"
-    when: ansible_distribution == "Debian" and ansible_distribution_release == "bookworm"
+# -------------------------------------------------
+# Export environment for run.sh
+# -------------------------------------------------
 
-  - name: Set FIPS_SUPPORTED fact for Ubuntu 22.04 (Jammy)
-    set_fact:
-      FIPS_SUPPORTED: "no"
-    when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
-
-  - name: Set FIPS_SUPPORTED fact for Oracle linux
-    set_fact:
-      FIPS_SUPPORTED: "yes"
-    when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "9"
-
-  - name: Append values to /etc/environment file
-    lineinfile:
-      path: /etc/environment
-      line: "{{ item }}"
-      state: present
-    with_items:
-      - "PS_REVISION={{ lookup('env', 'PS_REVISION') }}"
-      - "PS_VERSION={{ lookup('env', 'PS_VERSION') }}"
-      - "PRO={{ lookup('env', 'PRO') }}"
-      - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+- name: Export test environment
+  lineinfile:
+    path: /etc/environment
+    line: "{{ item }}"
+    state: present
+  loop:
+    - "PS_VERSION={{ lookup('env','PS_VERSION') }}"
+    - "PS_REVISION={{ lookup('env','PS_REVISION') }}"
+    - "PRO={{ lookup('env','PRO') }}"
+    - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
