@@ -162,7 +162,12 @@
   - name: DEBUG — verify tarball presence
     shell: |
       echo "Listing tarballs in test directory:"
-      ls -lh {{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/*.tar.gz
+      ls -lh {{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps
+    register: tarball_debug
+    ignore_errors: yes
+
+  - debug:
+      var: tarball_debug.stdout_lines
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
