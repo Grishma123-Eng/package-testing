@@ -159,6 +159,13 @@
       args:
         executable: /bin/bash
 
+    - name: Fix ownership so run.sh can extract tarball
+      file:
+        path: /package-testing
+        owner: "{{ ansible_env.HOME | basename }}"
+        group: "{{ ansible_env.HOME | basename }}"
+        recurse: yes
+
     - name: Verify package-testing structure
       shell: |
         echo "Checking package-testing layout:"
