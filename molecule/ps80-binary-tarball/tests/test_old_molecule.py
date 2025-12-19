@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-mport pytest
+import pytest
 import testinfra
 import os
 import testinfra.utils.ansible_runner
