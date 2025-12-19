@@ -40,6 +40,15 @@
       set_fact:
         subnet_dict: "{{ subnet_dict|default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
       with_items: "{{ subnet_facts.results }}"
+      when: item.subnets is defined and item.subnets | length > 0
+
+    - name: Validate subnet lookup results
+      fail:
+        msg: "Subnet lookup failed for subnet {{ item.vpc_subnet_id }} in region {{ item.region|default(default_region) }}. Subnet not found or empty result."
+      with_items: "{{ molecule_yml.platforms }}"
+      when: >
+        (subnet_dict is not defined) or
+        (subnet_dict[item.vpc_subnet_id] is not defined)
 
     - name: Create security group
       ec2_group:
@@ -50,6 +59,7 @@
         vpc_id: "{{ subnet_dict[item.vpc_subnet_id] }}"
         region: "{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"
+      when: subnet_dict[item.vpc_subnet_id] is defined
 
 #    - name: Delete remote keypair
 #      ec2_key:
@@ -192,7 +202,22 @@
         }
       with_items: "{{ ec2_jobs.results }}"
       register: instance_config_dict
-      when: server.changed | bool
+      when: 
+        - server.changed | bool
+        - item.tagged_instances is defined
+        - item.tagged_instances | length > 0
+        - item.tagged_instances[0].public_ip is defined
+        - item.tagged_instances[0].public_ip | length > 0
+
+    - name: Validate instance config has valid IP addresses
+      fail:
+        msg: "Instance {{ item.item.tagged_instances[0].tags.Name | default('unknown') }} does not have a valid public IP address. Instance may not have been created properly or subnet/security group configuration is incorrect."
+      with_items: "{{ ec2_jobs.results }}"
+      when:
+        - server.changed | bool
+        - item.tagged_instances is defined
+        - item.tagged_instances | length > 0
+        - item.tagged_instances[0].public_ip is not defined or item.tagged_instances[0].public_ip | length == 0
 
     - name: Convert instance config dict to a list
       set_fact:

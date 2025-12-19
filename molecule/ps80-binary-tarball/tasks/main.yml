@@ -167,7 +167,7 @@
 
   - name: Set FIPS_SUPPORTED fact for Oracle linux
     set_fact:
-        FIPS_SUPPORTED: "yes"
+      FIPS_SUPPORTED: "yes"
     when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "9"
 
   - name: Append values to /etc/environment file
