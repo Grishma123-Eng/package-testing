@@ -135,7 +135,7 @@
         path: /home/ec2-user/package-testing
         state: absent
       ignore_errors: yes
-   
+    
     - name: download package-testing repo branch with wget to /package-testing
       command: "{{ item }}"
       with_items:
@@ -164,14 +164,6 @@
         extra_opts:
         - --transform
         - 's,^/*[^/]*,/usr/percona-server,S'
-
-    - name: Debug contents of base_dir
-      command: ls -R "{{ base_dir }}"
-      register: base_dir_ls
-      failed_when: false
-
-    - debug:
-        var: base_dir_ls.stdout_lines
 
     - name: Copy tarball into run.sh directory
       copy:

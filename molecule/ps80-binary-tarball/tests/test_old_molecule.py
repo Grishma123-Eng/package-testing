@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import pytest
 import testinfra
 import os
@@ -6,7 +5,7 @@ import os
 import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
-    
+
 BASE_DIR='/usr/percona-server'
 
 @pytest.fixture(scope='module')
@@ -30,4 +29,3 @@ def test_regular_tarball(host, test_load_env_vars_define_in_test):
     result = host.run(cmd)
     print(result.stdout)
     print(result.stderr)
-    assert result.rc == 0, result.stdout

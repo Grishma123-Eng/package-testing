@@ -2,20 +2,11 @@
 import sys
 import os
 
-# Prefer the local repo copy of the PS tarball tests when running under
-# Jenkins/Molecule, and fall back to the remote /package-testing path when
-# executed directly on a test host.
-LOCAL_PS_TEST_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', '..', '..', 'binary-tarball-tests', 'ps')
-)
-REMOTE_PS_TEST_DIR = "/package-testing/binary-tarball-tests/ps"
+# Always use the remote path because Molecule places package-testing in /
+PS_TEST_DIR = "/package-testing/binary-tarball-tests/ps"
 
-if os.path.exists(LOCAL_PS_TEST_DIR):
-    if LOCAL_PS_TEST_DIR not in sys.path:
-        sys.path.insert(0, LOCAL_PS_TEST_DIR)
-else:
-    if REMOTE_PS_TEST_DIR not in sys.path:
-        sys.path.insert(0, REMOTE_PS_TEST_DIR)
+if PS_TEST_DIR not in sys.path:
+    sys.path.insert(0, PS_TEST_DIR)
 
 import pytest
 import subprocess
@@ -24,20 +15,6 @@ import time
 import mysql
 from packaging import version
 from settings import *
-
-# Under Molecule with the ansible backend, tests run on the Jenkins/controller
-# node while the tarball and mysqld live on a remote EC2 instance. The legacy
-# mysql.py helper executes local subprocesses, so dynamic tests cannot work
-# correctly in this layout (they look for mysqld on the wrong host).
-# We therefore skip this entire module when running inside Molecule, and rely
-# on the static tarball checks here; dynamic behavior is exercised in the
-# dedicated binary-tarball tests that run directly on the target host.
-if os.getenv("MOLECULE_SCENARIO_NAME"):
-    pytest.skip(
-        "Skipping dynamic tarball tests under Molecule (ansible backend); "
-        "mysqld runs on remote host and legacy mysql.py is local-only.",
-        allow_module_level=True,
-    )
 
 
 @pytest.fixture(scope='module')
@@ -49,8 +26,7 @@ def mysql_server(request, pro_fips_vars, host):
     if fips_supported:
         features.append("fips")
 
-    # mysql.MySQL helper only takes (base_dir, features)
-    mysql_server = mysql.MySQL(base_dir, features)
+    mysql_server = mysql.MySQL(base_dir, features, host=host)
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
