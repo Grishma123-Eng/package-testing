@@ -33,12 +33,12 @@ verifier:
     FIPS_SUPPORTED: "no"
 scenario:
   name: ubuntu-jammy
-  destroy_sequence:
-    - destroy
-  test_sequence:
-    - destroy
-    - create
-    - prepare
-    - converge
-    - verify
-    - destroy
+#  destroy_sequence:
+ #   - destroy
+  #test_sequence:
+   # - destroy
+    #- create
+    #- prepare
+    # converge
+    #- verify
+    #- destroy
