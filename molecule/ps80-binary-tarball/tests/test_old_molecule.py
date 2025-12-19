@@ -1,34 +1,24 @@
 #!/usr/bin/env python3
-import pytest
+mport pytest
 import testinfra
 import os
-
 import testinfra.utils.ansible_runner
+
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ['MOLECULE_INVENTORY_FILE']
+).get_hosts('all')
 
-BASE_DIR='/usr/percona-server'
 
-@pytest.fixture(scope='module')
-def test_load_env_vars_define_in_test(host):
-    with host.sudo():
-        vars={'BASE_DIR':BASE_DIR}
-        for var, value in vars.items():
-            cmd=f"echo {var}={value} >> /etc/environment"
-            host.run(cmd)
-    cmd="groups $USER| awk -F' ' '{print $1$2$3}'"
-    user_group=host.run(cmd).stdout.replace(" ", "").replace("\n","")
-    with host.sudo():
-        for dir in (f'./package-testing',BASE_DIR):
-            cmd=f"chown -R {user_group} {dir}"
-            host.check_output(cmd)
-            cmd=f"ls -l {dir}"
-            host.run(cmd)
-
-def test_regular_tarball(host, test_load_env_vars_define_in_test):
-    cmd = "cd ~/package-testing/binary-tarball-tests/ps/ && ./run.sh"
+def test_regular_tarball(host):
+    """
+    run.sh owns BASE_DIR and extraction logic.
+    This test only executes it.
+    """
+    cmd = "cd /package-testing/binary-tarball-tests/ps && ./run.sh"
     result = host.run(cmd)
-    print(result.stdout)
-    print(result.stderr)
-    assert result.rc == 0, result.stdout
+
+    print("STDOUT:\n", result.stdout)
+    print("STDERR:\n", result.stderr)
+
+    assert result.rc == 0
 

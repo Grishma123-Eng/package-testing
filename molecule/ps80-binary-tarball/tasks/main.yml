@@ -182,7 +182,7 @@
 
     - name: Download PS tarball
       get_url:
-        url: "{{ TARBALL_URL }}"
+        url: "{{ TARBALL_LINK }}"
         dest: "/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
         mode: "0644"
 
