@@ -2,11 +2,18 @@
 import sys
 import os
 
-# Always use the remote path because Molecule places package-testing in /
-PS_TEST_DIR = "/package-testing/binary-tarball-tests/ps"
 
-if PS_TEST_DIR not in sys.path:
-    sys.path.insert(0, PS_TEST_DIR)
+CANDIDATE_PATHS = [
+    "/package-testing/binary-tarball-tests/ps",
+    "/package-testing/package-testing/binary-tarball-tests/ps",
+]
+
+for p in CANDIDATE_PATHS:
+    if os.path.exists(os.path.join(p, "mysql.py")):
+        sys.path.insert(0, p)
+        break
+else:
+    raise RuntimeError("mysql.py not found in expected locations")
 
 import pytest
 import subprocess
