@@ -17,10 +17,11 @@ class MySQL:
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
         self.features=features
 
+        features = []
         if 'fips' in self.features:
-            self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
+            self.extra_param = ['--ssl-fips-mode=ON', '--log-error-verbosity=3']
         else:
-            self.extra_param=[]
+            self.extra_param = []
 
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])

@@ -10,49 +10,50 @@ from settings import *
 
 
 @pytest.fixture(scope='module')
-def mysql_server(request,pro_fips_vars):
-    pro = pro_fips_vars['pro']
-    fips_supported = pro_fips_vars['fips_supported']
-    features=[]
-    if pro and fips_supported:
+def mysql_server(request, pro_fips_vars):
+    features = []
+    if pro_fips_vars['fips_enabled']:
         features.append('fips')
-    mysql_server = mysql.MySQL(base_dir, features)
+    mysql_server = mysql.MySQL(
+        pro_fips_vars['base_dir'],
+        features
+    )
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
     mysql_server.purge()
 
+def test_fips_md5(mysql_server, pro_fips_vars):
+    if not pro_fips_vars['fips_enabled']:
+        pytest.skip("MySQL not running in FIPS mode")
 
-def test_fips_md5(host, mysql_server, pro_fips_vars):
-    pro = pro_fips_vars['pro']
-    fips_supported = pro_fips_vars['fips_supported']
-    debug = pro_fips_vars['debug']
-
-    if fips_supported:
-        query="SELECT MD5('foo');"
-        output = mysql_server.run_query(query)
-        assert '00000000000000000000000000000000' in output
-    else:
-        pytest.skip("This test is only for PRO tarballs. Skipping")
-
-
-def test_fips_value(host, mysql_server, pro_fips_vars):
-    if pro_fips_vars['fips_supported']:
-        output = mysql_server.run_query("select @@ssl_fips_mode;")
-        assert 'ON' in output
-    else:
-        pytest.skip("FIPS not supported")
+    output = mysql_server.run_query("SELECT MD5('foo');")
+    assert '00000000000000000000000000000000' in output
 
 
 def test_fips_in_log(host, mysql_server, pro_fips_vars):
-    if not pro_fips_vars['fips_supported']:
-        pytest.skip("FIPS not supported")
+    if not pro_fips_vars['fips_enabled']:
+        pytest.skip("MySQL not running in FIPS mode")
 
     with host.sudo():
         log_file = mysql_server.run_query("SELECT @@log_error;")
         logs = host.check_output(f"head -n30 {log_file}")
         assert "FIPS-approved version of the OpenSSL cryptographic library" in logs
 
+
+
+def test_fips_in_log(host, mysql_server, pro_fips_vars):
+    if not pro_fips_vars['fips_enabled']:
+        pytest.skip("MySQL is not running in FIPS mode")
+
+    with host.sudo():
+        error_log = mysql_server.run_query("SELECT @@log_error;")
+        logs = host.check_output(f"head -n30 {error_log}")
+
+        assert (
+            "FIPS-approved version of the OpenSSL cryptographic library"
+            in logs
+        )
 
 def test_rocksdb_install(host, mysql_server, pro_fips_vars):
     if pro_fips_vars['ps_version_major'] != '5.6':
