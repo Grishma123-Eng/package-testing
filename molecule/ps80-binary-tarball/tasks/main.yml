@@ -146,6 +146,18 @@
       - --transform
       - 's,^/*[^/]*,/usr/percona-server,S'
 
+  - name: Ensure test directory exists
+    file:
+      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps"
+      state: directory
+      mode: '0755'
+
+  - name: Copy tarball to test directory
+    copy:
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
+      remote_src: yes
+      mode: '0644'
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:

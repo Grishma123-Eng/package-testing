@@ -68,7 +68,12 @@ else
   fi
 
   sudo apt-get update -y
-  sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
+  # libldap-2.4-2 is replaced by libldap-common on newer Ubuntu versions
+  if apt-cache show libldap-2.4-2 >/dev/null 2>&1; then
+    sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
+  else
+    sudo apt install -y libaio1 libnuma1 libldap-common libaio-dev
+  fi
 
 fi
 fi  # closes AL2023 + RHEL + Debian logic
