@@ -118,8 +118,16 @@
   # #   set_fact:
   # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
   
+  - name: Ensure HOME directory exists for package-testing
+    file:
+      path: "{{ ansible_env.HOME }}"
+      state: directory
+      mode: '0755'
+
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
+    args:
+      chdir: "{{ ansible_env.HOME }}"
     with_items:
     - rm -rf package-testing
     - rm -f master.zip
@@ -152,11 +160,32 @@
       state: directory
       mode: '0755'
 
+  - name: Get username from HOME directory path
+    set_fact:
+      test_user: "{{ ansible_env.HOME | basename }}"
+
+  - name: Verify source tarball exists before copying
+    stat:
+      path: "/usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
+    register: tarball_stat
+
+  - name: Fail if source tarball does not exist
+    fail:
+      msg: "Source tarball /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz not found"
+    when: not tarball_stat.stat.exists
+
   - name: Copy PS tarball into run.sh directory (preserve name)
     copy:
       src: "/usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/"
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/percona-server-{{ lookup('env','PS_VERSION') }}.tar.gz"
       remote_src: yes
+      mode: "0644"
+
+  - name: Fix ownership of copied tarball to match HOME directory owner
+    file:
+      path: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
+      owner: "{{ test_user }}"
+      group: "{{ test_user }}"
       mode: "0644"
 
   - name: DEBUG — verify tarball presence
