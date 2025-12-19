@@ -73,13 +73,10 @@
   args:
     chdir: /
   loop:
-    - wget -O package-testing.zip https://github.com/{{ lookup('env','TESTING_GIT_ACCOUNT') | default('Percona-QA') }}/package-testing/archive/{{ lookup('env','TESTING_BRANCH') | default('tarball-fips') }}.zip
+    - wget -O package-testing.zip https://github.com/{{ lookup('env','TESTING_GIT_ACCOUNT') | default('grishma123-eng') }}/package-testing/archive/{{ lookup('env','TESTING_BRANCH') | default('tarball-fips') }}.zip
     - unzip package-testing.zip
     - rm -f package-testing.zip
     - mv package-testing-* package-testing
-  vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
 # -------------------------------------------------
 # Ensure test directory exists
