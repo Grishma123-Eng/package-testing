@@ -9,8 +9,8 @@ platforms:
     image:  ami-0dbd0b6509fe8f301
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.medium
-    ssh_user: ec2-user
-    root_device_name: /dev/sda1
+    ssh_user: admin
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
@@ -19,9 +19,9 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../playbooks/create.yml
-    destroy: ../../playbooks/destroy.yml
-    cleanup: ../../playbooks/cleanup.yml
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
@@ -31,7 +31,6 @@ verifier:
     s: true
   env:
     FIPS_SUPPORTED: "yes"
-    ANSIBLE_SSH_TRANSFER_METHOD: piped
 scenario:
   name: debian-12
   destroy_sequence:

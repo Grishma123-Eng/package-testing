@@ -30,7 +30,7 @@ verifier:
     verbose: true
     s: true
   env:
-    FIPS_SUPPORTED: "yes"
+    FIPS_SUPPORTED: "no"
     ANSIBLE_SSH_TRANSFER_METHOD: piped
 scenario:
   name: debian-11

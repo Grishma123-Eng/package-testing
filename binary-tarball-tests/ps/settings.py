@@ -244,7 +244,7 @@ ps8x_functions = (
 )
 
 ps8x_components = (
-  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault'
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault','component_js_lang'
 )
 
 ps8x_files = (

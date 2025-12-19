@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pytest
 import testinfra
 import os
@@ -25,7 +26,9 @@ def test_load_env_vars_define_in_test(host):
             host.run(cmd)
 
 def test_regular_tarball(host, test_load_env_vars_define_in_test):
-    cmd = "cd ~ /package-testing/binary-tarball-tests/ps/ && ./run.sh"
+    cmd = "cd ~/package-testing/binary-tarball-tests/ps/ && ./run.sh"
     result = host.run(cmd)
     print(result.stdout)
     print(result.stderr)
+    assert result.rc == 0, result.stdout
+

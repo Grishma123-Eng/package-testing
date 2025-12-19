@@ -10,15 +10,13 @@ from settings import *
 
 
 @pytest.fixture(scope='module')
-def mysql_server(request, pro_fips_vars, host):
+def mysql_server(request,pro_fips_vars):
+    pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
-    base_dir = pro_fips_vars['base_dir']
-
-    features = []
-    if fips_supported:
-        features.append("fips")
-
-    mysql_server = mysql.MySQL(base_dir, features, host=host)
+    features=[]
+    if pro and fips_supported:
+        features.append('fips')
+    mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
@@ -26,11 +24,16 @@ def mysql_server(request, pro_fips_vars, host):
 
 
 def test_fips_md5(host, mysql_server, pro_fips_vars):
-    if pro_fips_vars['fips_supported']:
-        output = mysql_server.run_query("SELECT MD5('foo');")
+    pro = pro_fips_vars['pro']
+    fips_supported = pro_fips_vars['fips_supported']
+    debug = pro_fips_vars['debug']
+
+    if fips_supported:
+        query="SELECT MD5('foo');"
+        output = mysql_server.run_query(query)
         assert '00000000000000000000000000000000' in output
     else:
-        pytest.skip("FIPS not supported")
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
 
 def test_fips_value(host, mysql_server, pro_fips_vars):
