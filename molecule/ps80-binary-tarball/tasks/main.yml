@@ -117,11 +117,7 @@
   # # - name: get main repo TARBALL_LINK
   # #   set_fact:
   # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
-
-  - name: get testing repo TARBALL_LINK
-    set_fact:
-      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/ps-gated-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
-
+  
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
