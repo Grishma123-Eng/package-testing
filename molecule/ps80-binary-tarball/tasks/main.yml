@@ -152,12 +152,17 @@
       state: directory
       mode: '0755'
 
-  - name: Copy tarball to test directory
+  - name: Copy PS tarball into run.sh directory (preserve name)
     copy:
-      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
-      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
+      src: "/usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz"
+      dest: "{{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/"
       remote_src: yes
-      mode: '0644'
+      mode: "0644"
+
+  - name: DEBUG — verify tarball presence
+    shell: |
+      echo "Listing tarballs in test directory:"
+      ls -lh {{ ansible_env.HOME }}/package-testing/binary-tarball-tests/ps/*.tar.gz
 
   - name: Default FIPS_SUPPORTED fact to "no"
     set_fact:
