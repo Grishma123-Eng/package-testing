@@ -56,42 +56,54 @@ def is_kernel_fips_enabled():
         return False
 
 def set_pro_fips_vars():
-    """
-    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
-    """
     source_environment_file()
-    pro = os.getenv('PRO', '').strip().lower() in {"yes", "true", "1"}
+    pro = os.getenv("PRO", "").strip().lower() in {"yes", "true", "1"}
+    distro = platform.platform().lower()
+
+    # OS allows MySQL to start in FIPS mode
+    fips_runtime_allowed = (
+        "oracle linux 9" in distro
+        or "red hat enterprise linux 9" in distro
+        or "rocky linux 9" in distro
+        or "alma linux 9" in distro
+    )
+
+    # Kernel-level FIPS
     kernel_fips = is_kernel_fips_enabled()
-    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {"yes", "true"}
-    fips_enabled = kernel_fips
-    debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
-    ps_revision = os.getenv('PS_REVISION')
-    ps_version = os.getenv('PS_VERSION')
+
+    # OS family supports FIPS testing
+    fips_supported = (
+        fips_runtime_allowed
+        or "debian 12" in distro
+        or "ubuntu 22.04" in distro
+    )
+
+    # FINAL decision: should MySQL run with --ssl-fips-mode
+    fips_enabled = fips_runtime_allowed and kernel_fips
+
+    debug = "-debug" if os.getenv("DEBUG") == "yes" else ""
+    ps_revision = os.getenv("PS_REVISION")
+    ps_version = os.getenv("PS_VERSION")
 
     base_dir = resolve_base_dir()
     print(f"BASE_DIR resolved to {base_dir}")
 
-# Debug print
-    if pro:
-        print("TRUE PRO VAR WORKING")
-    else:
-        print("FALSE PRO VAR NOT WORKING")
-
-    ps_version_upstream, ps_version_percona = ps_version.split('-')
-    ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+    ps_version_upstream, ps_version_percona = ps_version.split("-")
+    ps_version_major = ".".join(ps_version_upstream.split(".")[:2])
 
     return {
-        'pro': pro,
-        'debug': debug,
-        'fips_supported': fips_supported,
-        'fips_enabled': fips_enabled, 
-        'kernel_fips' : kernel_fips,
-        'ps_revision': ps_revision,
-        'ps_version': ps_version,
-        'base_dir': base_dir,
-        'ps_version_upstream': ps_version_upstream,
-        'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona
+        "pro": pro,
+        "debug": debug,
+        "fips_supported": fips_supported,
+        "fips_runtime_allowed": fips_runtime_allowed,
+        "kernel_fips": kernel_fips,
+        "fips_enabled": fips_enabled,
+        "ps_revision": ps_revision,
+        "ps_version": ps_version,
+        "base_dir": base_dir,
+        "ps_version_upstream": ps_version_upstream,
+        "ps_version_major": ps_version_major,
+        "ps_version_percona": ps_version_percona,
     }
 
 @pytest.fixture(scope="module")
