@@ -85,7 +85,7 @@ def set_pro_fips_vars():
         'debug': debug,
         'fips_supported': fips_supported,
         'fips_enabled': fips_enabled, 
-        'kernel_fips' : kernel_fips
+        'kernel_fips' : kernel_fips,
         'ps_revision': ps_revision,
         'ps_version': ps_version,
         'base_dir': base_dir,
