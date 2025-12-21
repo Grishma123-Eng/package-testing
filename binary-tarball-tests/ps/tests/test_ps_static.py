@@ -68,18 +68,19 @@ def test_binaries_linked_libraries(host,pro_fips_vars):
     for binary in ps_binaries:
         assert '=> not found' not in host.check_output('ldd ' + base_dir + '/' + binary)
 
-def test_pro_openssl_files_not_exist(host,pro_fips_vars):
+def test_pro_openssl_files_not_exist(host, pro_fips_vars):
     pro = pro_fips_vars['pro']
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
-    if pro:
-        # For PRO builds, openssl files should NOT exist (using system openssl)
-        for openssl_file in ps_openssl_files:
-            assert not host.file(base_dir+'/'+openssl_file).exists
-    else:
-        # For non-PRO builds, openssl files SHOULD exist (bundled openssl)
-        for openssl_file in ps_openssl_files:
-            assert host.file(base_dir+'/'+openssl_file).exists
+
+    for openssl_file in ps_openssl_files:
+        file_path = f"{base_dir}/{openssl_file}"
+        if pro or fips_supported:
+            # PRO builds OR FIPS-capable OS → no bundled OpenSSL
+            assert not host.file(file_path).exists
+        else:
+            # Non-PRO + non-FIPS OS → bundled OpenSSL
+            assert host.file(file_path).exists
 
 
 def test_pro_openssl_files_linked(host,pro_fips_vars):
