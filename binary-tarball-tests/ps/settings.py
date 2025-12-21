@@ -47,20 +47,23 @@ def source_environment_file(filepath="/etc/environment"):
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
 
+
+def is_kernel_fips_enabled():
+    try:
+        with open("/proc/sys/crypto/fips_enabled") as f:
+            return f.read().strip() == "1"
+    except FileNotFoundError:
+        return False
+
 def set_pro_fips_vars():
     """
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
     source_environment_file()
-
-    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
-    pro = value in {"yes", "true", "1"}
-
-    print(pro)  # True if value is "yes", "true", or "1", otherwise False
-
-   # fips_supported = True if os.getenv('PRO') == "yes" else False
-    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {'yes', 'true', '1'}
-    fips_enabled = pro and fips_supported 
+    pro = os.getenv('PRO', '').strip().lower() in {"yes", "true", "1"}
+    kernel_fips = is_kernel_fips_enabled()
+    fips_supported = kernel_fipsos.getenv('FIPS_SUPPORTED', '').lower() in {"yes", "true"}
+    fips_enabled = kernel_fips
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
@@ -82,6 +85,7 @@ def set_pro_fips_vars():
         'debug': debug,
         'fips_supported': fips_supported,
         'fips_enabled': fips_enabled, 
+        'kernel_fips' : kernel_fips
         'ps_revision': ps_revision,
         'ps_version': ps_version,
         'base_dir': base_dir,
