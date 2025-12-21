@@ -62,7 +62,7 @@ def set_pro_fips_vars():
     source_environment_file()
     pro = os.getenv('PRO', '').strip().lower() in {"yes", "true", "1"}
     kernel_fips = is_kernel_fips_enabled()
-    fips_supported = kernel_fipsos.getenv('FIPS_SUPPORTED', '').lower() in {"yes", "true"}
+    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {"yes", "true"}
     fips_enabled = kernel_fips
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
