@@ -14,7 +14,10 @@ def mysql_server(request, pro_fips_vars):
     features = []
     if pro_fips_vars['fips_enabled']:
         features.append('fips')
-    mysql_server = mysql.MySQL(pro_fips_vars['base_dir'],feature)
+    mysql_server = mysql.MySQL(
+        pro_fips_vars['base_dir'],
+        features
+    )
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
