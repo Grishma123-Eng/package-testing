@@ -9,10 +9,36 @@ from packaging import version
 from settings import *
 
 
+def is_oracle_linux_9(host):
+    """Check if the system is Oracle Linux 9"""
+    try:
+        os_release = host.check_output("cat /etc/os-release")
+        has_ol_id = 'ID="ol"' in os_release or 'ID=ol' in os_release
+        has_version_9 = 'VERSION_ID="9' in os_release or 'VERSION_ID=9' in os_release
+        return has_ol_id and has_version_9
+    except Exception:
+        return False
+
+
+def is_oracle_linux_9_direct():
+    """Check if the system is Oracle Linux 9 by reading /etc/os-release directly"""
+    try:
+        with open('/etc/os-release', 'r') as f:
+            os_release = f.read()
+        has_ol_id = 'ID="ol"' in os_release or 'ID=ol' in os_release
+        has_version_9 = 'VERSION_ID="9' in os_release or 'VERSION_ID=9' in os_release
+        return has_ol_id and has_version_9
+    except Exception:
+        return False
+
+
 @pytest.fixture(scope='module')
 def mysql_server(request, pro_fips_vars):
     features = []
-    if pro_fips_vars['fips_enabled']:
+    # For Oracle-9, enable FIPS if fips_supported is True
+    # Otherwise, enable FIPS only if fips_enabled is True
+    is_oracle9 = is_oracle_linux_9_direct()
+    if pro_fips_vars['fips_enabled'] or (is_oracle9 and pro_fips_vars['fips_supported']):
         features.append('fips')
     mysql_server = mysql.MySQL(
         pro_fips_vars['base_dir'],
@@ -23,15 +49,23 @@ def mysql_server(request, pro_fips_vars):
     yield mysql_server
     mysql_server.purge()
 
-def test_fips_md5(mysql_server, pro_fips_vars):
-    if not pro_fips_vars['fips_enabled']:
+def test_fips_md5(host, mysql_server, pro_fips_vars):
+    # For Oracle-9, FIPS is supported and tests should not be skipped
+    is_oracle9 = is_oracle_linux_9(host)
+    should_run = pro_fips_vars['fips_enabled'] or (is_oracle9 and pro_fips_vars['fips_supported'])
+    
+    if not should_run:
         pytest.skip("MySQL not running in FIPS mode")
 
     output = mysql_server.run_query("SELECT MD5('foo');")
     assert '00000000000000000000000000000000' in output
 
-def test_fips_value(mysql_server, pro_fips_vars):
-    if not pro_fips_vars['fips_enabled']:
+def test_fips_value(host, mysql_server, pro_fips_vars):
+    # For Oracle-9, FIPS is supported and tests should not be skipped
+    is_oracle9 = is_oracle_linux_9(host)
+    should_run = pro_fips_vars['fips_enabled'] or (is_oracle9 and pro_fips_vars['fips_supported'])
+    
+    if not should_run:
         pytest.skip("MySQL not running in FIPS mode")
 
     output = mysql_server.run_query("SELECT @@ssl_fips_mode;")
@@ -39,7 +73,11 @@ def test_fips_value(mysql_server, pro_fips_vars):
 
 
 def test_fips_in_log(host, mysql_server, pro_fips_vars):
-    if not pro_fips_vars['fips_enabled']:
+    # For Oracle-9, FIPS is supported and tests should not be skipped
+    is_oracle9 = is_oracle_linux_9(host)
+    should_run = pro_fips_vars['fips_enabled'] or (is_oracle9 and pro_fips_vars['fips_supported'])
+    
+    if not should_run:
         pytest.skip("MySQL not running in FIPS mode")
 
     with host.sudo():
