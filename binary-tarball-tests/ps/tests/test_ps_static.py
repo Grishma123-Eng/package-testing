@@ -73,13 +73,14 @@ def test_pro_openssl_files_not_exist(host, pro_fips_vars):
     fips_supported = pro_fips_vars['fips_supported']
     base_dir = pro_fips_vars['base_dir']
 
-     for openssl_file in ps_openssl_files:
+    for openssl_file in ps_openssl_files:
         file_path = f"{base_dir}/{openssl_file}"
-        if pro or fips_supported:
-            # PRO builds OR FIPS-capable OS → no bundled OpenSSL
+
+        if pro:
+            # PRO build → system OpenSSL only
             assert not host.file(file_path).exists
         else:
-            # Non-PRO + non-FIPS OS → bundled OpenSSL
+            # NON-PRO build → bundled OpenSSL always exists
             assert host.file(file_path).exists
 
 def test_pro_openssl_files_linked(host,pro_fips_vars):
