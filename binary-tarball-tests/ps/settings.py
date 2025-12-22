@@ -57,29 +57,14 @@ def is_kernel_fips_enabled():
 
 def set_pro_fips_vars():
     source_environment_file()
-    pro = os.getenv("PRO", "").strip().lower() in {"yes", "true", "1"}
-    distro = platform.platform().lower()
+    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
+    pro = value in {"yes", "true", "1"}
 
-    # OS allows MySQL to start in FIPS mode
-    fips_runtime_allowed = (
-        "oracle linux 9" in distro
-        or "red hat enterprise linux 9" in distro
-        or "rocky linux 9" in distro
-        or "alma linux 9" in distro
-    )
+    print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    # Kernel-level FIPS
-    kernel_fips = is_kernel_fips_enabled()
-
-    # OS family supports FIPS testing
-    fips_supported = (
-        fips_runtime_allowed
-        or "debian 12" in distro
-        or "ubuntu 22.04" in distro
-    )
-
-    # FINAL decision: should MySQL run with --ssl-fips-mode
-    fips_enabled = fips_runtime_allowed and kernel_fips
+   # fips_supported = True if os.getenv('PRO') == "yes" else False
+    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {'yes', 'true', '1'}
+    fips_enabled = pro and fips_supported
 
     debug = "-debug" if os.getenv("DEBUG") == "yes" else ""
     ps_revision = os.getenv("PS_REVISION")
@@ -94,10 +79,8 @@ def set_pro_fips_vars():
     return {
         "pro": pro,
         "debug": debug,
-        "fips_supported": fips_supported,
-        "fips_runtime_allowed": fips_runtime_allowed,
-        "kernel_fips": kernel_fips,
-        "fips_enabled": fips_enabled,
+        'fips_supported': fips_supported,
+        'fips_enabled': fips_enabled, 
         "ps_revision": ps_revision,
         "ps_version": ps_version,
         "base_dir": base_dir,
