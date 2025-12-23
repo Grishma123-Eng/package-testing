@@ -134,7 +134,7 @@
     - name: Define package-testing variables
       set_fact:
         pkg_testing_root: "/package-testing"
-        pkg_testing_branch: "{{ lookup('env', 'TESTING_BRANCH') | default('tarball-fips', true) }}"
+        pkg_testing_branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
         pkg_testing_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
 
