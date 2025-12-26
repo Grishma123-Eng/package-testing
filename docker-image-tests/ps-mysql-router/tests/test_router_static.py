@@ -200,7 +200,9 @@ class TestRouterEnvironment:
         """Test mysqlrouter version matches expected version"""
         command = "mysqlrouter --version"
         output = host.check_output(command)
-        assert docker_tag in output or docker_tag.replace('-amd64', '') in output
+        # Router version tag is major.minor (e.g., 8.4), but output may contain full version like 8.4.7
+        # Check if major.minor version is in the output
+        assert docker_tag in output, f"Expected router version {docker_tag} not found in output: {output}"
 
     def test_mysqlsh_version(self, host):
         """Test mysqlsh version matches PS version"""

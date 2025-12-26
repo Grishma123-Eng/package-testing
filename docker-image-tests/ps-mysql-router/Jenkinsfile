@@ -30,10 +30,17 @@ pipeline {
                 script: '''cd package-testing && grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                 returnStdout: true
                 ).trim()
+            
+            // Extract major.minor version for router (e.g., 8.4.7-7 -> 8.4)
+            def ROUTER_TAG = sh(
+                script: '''echo '${VERSION}' | awk -F. '{print \$1"."\$2}' ''',
+                returnStdout: true
+                ).trim()
                     
-            // Router version uses the same version as PS
+            // PS version uses full version with -amd64 suffix
             env.PS_VERSION = "${VERSION}-amd64"
-            env.ROUTER_VERSION = "${VERSION}-amd64"
+            // Router version uses major.minor format (e.g., 8.4)
+            env.ROUTER_VERSION = "${ROUTER_TAG}"
             env.PS_REVISION = "${REVISION}"
             env.DOCKER_ACC = "${DOCKER_ACC}"
 
