@@ -31,15 +31,13 @@ pipeline {
                 returnStdout: true
                 ).trim()
             
-            // Extract major.minor version for router (e.g., 8.4.7-7 -> 8.4)
-            def ROUTER_TAG = sh(
-                script: '''echo '${VERSION}' | awk -F. '{print \$1"."\$2}' ''',
-                returnStdout: true
-                ).trim()
+            // Extract upstream version for router (e.g., 8.4.7-7 -> 8.4.7)
+            // Router uses upstream version (everything before the dash)
+            def ROUTER_TAG = VERSION.split('-')[0]
                     
             // PS version uses full version with -amd64 suffix
             env.PS_VERSION = "${VERSION}-amd64"
-            // Router version uses major.minor format (e.g., 8.4)
+            // Router version uses upstream version format (e.g., 8.4.7)
             env.ROUTER_VERSION = "${ROUTER_TAG}"
             env.PS_REVISION = "${REVISION}"
             env.DOCKER_ACC = "${DOCKER_ACC}"
@@ -83,30 +81,21 @@ pipeline {
      
       stage('Run tests') {
         steps {
-            sh '''
+            sh """
               # disable THP on the host for TokuDB
               echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
               echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
               chmod +x disable_thp.sh
               sudo ./disable_thp.sh
               # run test
-              export PATH=${PATH}:~/.local/bin
-              export PS_VERSION=${PS_VERSION}
-              export ROUTER_VERSION=${ROUTER_VERSION}
-              export PS_REVISION=${PS_REVISION}
-              export DOCKER_ACC=${DOCKER_ACC}
-              sudo yum install -y python3 python3-pip
+              sudo yum install -y python3 python3-pip jq
               rm -rf package-testing
               git clone https://github.com/Percona-QA/package-testing.git --depth 1
               cd package-testing/docker-image-tests/ps-mysql-router
-              pip3 install --user -r requirements.txt
-              ./run.sh
-            '''
+              chmod +x router-docker_test.sh
+              ./router-docker_test.sh ${DOCKER_ACC}/percona-server:${PS_VERSION} ${DOCKER_ACC}/percona-mysql-router:${ROUTER_VERSION}
+            """
         } //end steps
-        post {
-          always {
-          junit 'package-testing/docker-image-tests/ps-mysql-router/report.xml'
-        }
        }
      } //end Run tests
     } //end parallel
