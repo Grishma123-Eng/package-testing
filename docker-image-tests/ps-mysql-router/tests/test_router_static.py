@@ -15,7 +15,11 @@ router_docker_image = f"{docker_acc}/percona-mysql-router:{docker_tag}"
 percona_docker_image = f"{docker_acc}/percona-server:{ps_version}"
 
 def create_network():
-    subprocess.run(['docker', 'network', 'create', network_name], check=True)
+    # Check if network already exists
+    result = subprocess.run(['docker', 'network', 'ls', '--filter', f'name={network_name}', '--format', '{{.Name}}'], 
+                           check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if network_name not in result.stdout.decode():
+        subprocess.run(['docker', 'network', 'create', network_name], check=True)
 
 def create_mysql_config():
     for N in range(1, 5):
@@ -35,30 +39,69 @@ def create_mysql_config():
                 f"transaction_write_set_extraction=XXHASH64\n"
             )
 
+def wait_for_mysql_ready(container_name, max_attempts=30):
+    """Wait for MySQL container to be ready"""
+    for attempt in range(max_attempts):
+        try:
+            result = subprocess.run([
+                'docker', 'exec', container_name,
+                'mysql', '-uroot', '-proot', '-e', 'SELECT 1'
+            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                return True
+        except Exception:
+            pass
+        time.sleep(2)
+    return False
+
+def check_container_running(container_name):
+    """Check if container is running"""
+    result = subprocess.run([
+        'docker', 'ps', '--filter', f'name={container_name}', '--format', '{{.Names}}'
+    ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return container_name in result.stdout.decode()
+
 def start_mysql_containers():
     for N in range(1, 5):
+        container_name = f'mysql{N}'
         subprocess.run([
             'docker', 'run', '-d',
-            f'--name=mysql{N}',
-            f'--hostname=mysql{N}',
+            f'--name={container_name}',
+            f'--hostname={container_name}',
             '--net=innodbnet',
             '-v', f"{os.getcwd()}/my{N}.cnf:/etc/my.cnf",
             '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
         ], check=True)
-    time.sleep(60)
+        # Wait for each container to be ready
+        if not wait_for_mysql_ready(container_name):
+            raise RuntimeError(f"Container {container_name} failed to become ready")
 
 def create_new_user():
     for N in range(1, 5):
+        container_name = f'mysql{N}'
+        # Check if container is running
+        if not check_container_running(container_name):
+            raise RuntimeError(f"Container {container_name} is not running")
+        # Wait for MySQL to be ready
+        if not wait_for_mysql_ready(container_name):
+            raise RuntimeError(f"MySQL in {container_name} is not ready")
         subprocess.run([
-            'docker', 'exec', f'mysql{N}',
+            'docker', 'exec', container_name,
             'mysql', '-uroot', '-proot',
             '-e', "CREATE USER 'inno'@'%' IDENTIFIED BY 'inno'; GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option; FLUSH PRIVILEGES;"
         ], check=True)
 
 def verify_new_user():
     for N in range(1, 5):
+        container_name = f'mysql{N}'
+        # Check if container is running
+        if not check_container_running(container_name):
+            raise RuntimeError(f"Container {container_name} is not running")
+        # Wait for MySQL to be ready
+        if not wait_for_mysql_ready(container_name):
+            raise RuntimeError(f"MySQL in {container_name} is not ready")
         subprocess.run([
-            'docker', 'exec', f'mysql{N}',
+            'docker', 'exec', container_name,
             'mysql', '-uinno', '-pinno',
             '-e', "SHOW VARIABLES WHERE Variable_name = 'hostname';",
             '-e', "SELECT user FROM mysql.user WHERE user = 'inno';"
@@ -140,7 +183,7 @@ def add_slave():
         print(f"STDERR: {e.stderr.decode() if e.stderr else 'No error output'}")
 
 @pytest.fixture(scope='module')
-def host():
+def host(setup_mysql_cluster):
     """ Simulates the `Router_Bootstrap` function """
     # Run mysql-router container
     docker_id = subprocess.check_output(
@@ -198,14 +241,27 @@ def host():
  #   ]
  #   docker_run(command)
 
-create_network()
-create_mysql_config()
-start_mysql_containers()
-create_new_user()
-verify_new_user()
-docker_restart()
-create_cluster()
-add_slave()
+@pytest.fixture(scope='module')
+def setup_mysql_cluster():
+    """Setup MySQL cluster for router tests"""
+    try:
+        create_network()
+        create_mysql_config()
+        start_mysql_containers()
+        create_new_user()
+        verify_new_user()
+        docker_restart()
+        create_cluster()
+        add_slave()
+        yield
+    finally:
+        # Cleanup
+        try:
+            subprocess.run(['docker', 'rm', '-f', 'mysql1', 'mysql2', 'mysql3', 'mysql4', container_name_mysql_router], check=False)
+            subprocess.run(['docker', 'network', 'rm', network_name], check=False)
+        except Exception:
+            pass
+
 #test_data_add()
 
 class TestRouterEnvironment:
@@ -219,24 +275,24 @@ class TestRouterEnvironment:
         output = host.check_output(command)
         assert ps_version in output
 
-    def test_mysqlrouter_directory_permissions(self, test_router_bootstrap):
+    def test_mysqlrouter_directory_permissions(self, host):
         assert host.file('/var/lib/mysqlrouter').user == 'mysql'
         assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
 
-    def test_mysql_user(self, test_router_bootstrap):
+    def test_mysql_user(self, host):
         mysql_user = host.user('mysql')
         print(f"Username: {mysql_user.name}, UID: {mysql_user.uid}")
         assert mysql_user.exists
         assert mysql_user.uid == 1001
 
-    def test_mysqlrouter_ports(self, test_router_bootstrap):
+    def test_mysqlrouter_ports(self, host):
         host.socket("tcp://6446").is_listening
         host.socket("tcp://6447").is_listening
         host.socket("tcp://64460").is_listening
         host.socket("tcp://64470").is_listening
 
-    def test_mysqlrouter_config(self, test_router_bootstrap):
+    def test_mysqlrouter_config(self, host):
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").user == "root"
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").group == "root"
