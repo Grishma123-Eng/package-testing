@@ -6,9 +6,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/grishma123-eng/jenkins-pipelines.git
+            url: https://github.com/kaushikpuneet07/jenkins-pipelines.git
             branches:
-            - 'mysql-router-docker'
+            - 'PS-8631'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps-mysql-router/Jenkinsfile
+      script-path: pdps/router_docker.groovy
