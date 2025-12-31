@@ -1,30 +1,14 @@
 - job:
-    name: ps-router-docker-image
+    name: router_docker
     project-type: pipeline
     description: |
         Do not edit this job through the web!
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/grishma123-eng/package-testing.git
+            url: https://github.com/grishma123-eng/jenkins-pipelines.git
             branches:
             - 'mysql-router-docker'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: docker-image-tests/ps-mysql-router/Jenkinsfile
-      parameters:
-        - choice:
-            name: DOCKER_ACC
-            choices:
-                - "percona"
-                - "perconalab"
-            description: "Docker repo to use: percona or perconalab"
-        - choice:
-            name: PRODUCT_TO_TEST
-            choices:
-                - "PS80"
-                - "PS84"
-                - "PS_INN_LTS"
-            description: "Choose the product version to test"
-
-

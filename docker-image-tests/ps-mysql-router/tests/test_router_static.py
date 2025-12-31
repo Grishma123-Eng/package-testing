@@ -15,15 +15,9 @@ router_docker_image = f"{docker_acc}/percona-mysql-router:{docker_tag}"
 percona_docker_image = f"{docker_acc}/percona-server:{ps_version}"
 
 def create_network():
-    """Create docker network for innodb cluster"""
-    try:
-        subprocess.run(['docker', 'network', 'create', network_name], check=True, capture_output=True)
-    except subprocess.CalledProcessError:
-        # Network might already exist, ignore
-        pass
+    subprocess.run(['docker', 'network', 'create', network_name], check=True)
 
 def create_mysql_config():
-    """Create MySQL configuration files for cluster nodes"""
     for N in range(1, 5):
         with open(f'my{N}.cnf', 'w') as file:
             file.write(
@@ -42,7 +36,6 @@ def create_mysql_config():
             )
 
 def start_mysql_containers():
-    """Start MySQL containers for innodb cluster"""
     for N in range(1, 5):
         subprocess.run([
             'docker', 'run', '-d',
@@ -55,7 +48,6 @@ def start_mysql_containers():
     time.sleep(60)
 
 def create_new_user():
-    """Create user for innodb cluster setup"""
     for N in range(1, 5):
         subprocess.run([
             'docker', 'exec', f'mysql{N}',
@@ -64,7 +56,6 @@ def create_new_user():
         ], check=True)
 
 def verify_new_user():
-    """Verify user creation"""
     for N in range(1, 5):
         subprocess.run([
             'docker', 'exec', f'mysql{N}',
@@ -75,25 +66,22 @@ def verify_new_user():
     time.sleep(30)
 
 def docker_restart():
-    """Restart MySQL containers"""
     subprocess.run(['docker', 'restart', 'mysql1', 'mysql2', 'mysql3', 'mysql4'], check=True)
     time.sleep(10)
 
 def create_cluster():
-    """Create innodb cluster"""
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--', 'dba', 'create-cluster', 'testCluster'
     ], check=True)
 
 def add_slave():
-    """Add instances to the cluster"""
     try:
         # Try adding the first slave with 'incremental' recovery method
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
+            'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         time.sleep(120)  # Wait for the first instance to finish
@@ -105,6 +93,8 @@ def add_slave():
         # Check for GTID error and handle it
         if "GTID state is not compatible" in result.stderr.decode():
             print("GTID compatibility issue detected. Trying to clean the GTID state before adding the instance.")
+            # Here, you may want to reset GTID or handle the error.
+            # You could issue a command to reset GTID sets (only if this is acceptable in your case)
             reset_gtid = subprocess.run([
                 'docker', 'exec', 'mysql2',
                 'mysqlsh', '-uinno', '-pinno', '--',
@@ -117,7 +107,7 @@ def add_slave():
             result = subprocess.run([
                 'docker', 'exec', 'mysql1',
                 'mysqlsh', '-uinno', '-pinno', '--',
-                'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
+                'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
             ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             time.sleep(120)
@@ -128,7 +118,7 @@ def add_slave():
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
+            'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=increamental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         time.sleep(120)
         print(f"STDOUT (mysql3): {result.stdout.decode()}")
@@ -138,7 +128,7 @@ def add_slave():
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
+            'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=increamental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         time.sleep(120)
         print(f"STDOUT (mysql4): {result.stdout.decode()}")
@@ -149,90 +139,104 @@ def add_slave():
         print(f"STDOUT: {e.stdout.decode() if e.stdout else 'No output'}")
         print(f"STDERR: {e.stderr.decode() if e.stderr else 'No error output'}")
 
-@pytest.fixture(scope='module', autouse=True)
-def setup_cluster():
-    """Setup innodb cluster before running router tests"""
-    create_network()
-    create_mysql_config()
-    start_mysql_containers()
-    create_new_user()
-    verify_new_user()
-    docker_restart()
-    create_cluster()
-    add_slave()
-    yield
-    # Cleanup MySQL containers and network
-    try:
-        subprocess.run(['docker', 'stop', 'mysql1', 'mysql2', 'mysql3', 'mysql4'], check=False, stderr=subprocess.DEVNULL)
-        subprocess.run(['docker', 'rm', 'mysql1', 'mysql2', 'mysql3', 'mysql4'], check=False, stderr=subprocess.DEVNULL)
-        subprocess.run(['docker', 'network', 'rm', network_name], check=False, stderr=subprocess.DEVNULL)
-        # Cleanup config files
-        for N in range(1, 5):
-            try:
-                os.remove(f'my{N}.cnf')
-            except OSError:
-                pass
-    except Exception as e:
-        print(f"Cleanup error (non-fatal): {e}")
-
 @pytest.fixture(scope='module')
 def host():
-    """Fixture to bootstrap and return router container host"""
+    """ Simulates the `Router_Bootstrap` function """
     # Run mysql-router container
     docker_id = subprocess.check_output(
         ['docker', 'run', '-d', '--name', container_name_mysql_router, '--net', network_name,
          '-e', 'MYSQL_HOST=mysql1', '-e', 'MYSQL_PORT=3306', '-e', 'MYSQL_USER=inno',
          '-e', 'MYSQL_PASSWORD=inno', '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4', router_docker_image]).decode().strip()
-    try:
-        subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','-y','net-tools'], stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        # Try with yum if microdnf fails
-        try:
-            subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'yum','install','-y','net-tools'], stderr=subprocess.DEVNULL)
-        except subprocess.CalledProcessError:
-            pass  # net-tools might already be installed
+    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
-    subprocess.check_call(['docker', 'rm', '-f', docker_id], stderr=subprocess.DEVNULL)
+    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+
+
+#def test_data_add():
+#    """ Simulates the `data_add` function """
+#    # Start mysql-client container
+#    command = [
+#        'docker', 'run', '-d', '--name', 'mysql-client', '--hostname', 'mysql-client', '--net', network_name,
+#        '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
+#    ]
+#    docker_run(command)
+
+    # Give time for the container to initialize
+#    time.sleep(10)
+
+    # Create sbtest user and schema
+#    command = [
+#        'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6446', '-uinno', '-pinno',
+#        '-e', "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED with mysql_native_password by  'password';",
+#        '-e', "GRANT ALL PRIVILEGES ON sbtest.* to sbtest@'%';"
+#    ]
+#    docker_run(command)
+
+    # Verify sbtest user
+ #   command = [
+ #       'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6447', '-uinno', '-pinno',
+ #       '-e', "select host , user from mysql.user where user='sbtest';"
+ #   ]
+ #   docker_run(command)
+
+    # Run sysbench for data insertion
+ #   command = [
+ #       'docker', 'run', '--rm', '--net', network_name, '--name', 'sb-prepare', 'severalnines/sysbench',
+ #       'sysbench', '--db-driver=mysql', '--table-size=10000', '--tables=1', '--threads=1', '--mysql-host=mysql-router',
+ #       '--mysql-port=6446', '--mysql-user=sbtest', '--mysql-password=password', '/usr/share/sysbench/oltp_insert.lua', 'prepare'
+ #   ]
+ #   docker_run(command)
+
+    # Wait for the data to insert
+ #   time.sleep(20)
+
+    # Verify if the data has been inserted
+ #   command = [
+ #       'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6447', '-uinno', '-pinno',
+ #       '-e', "SELECT count(*) from sbtest.sbtest1;"
+ #   ]
+ #   docker_run(command)
+
+create_network()
+create_mysql_config()
+start_mysql_containers()
+create_new_user()
+verify_new_user()
+docker_restart()
+create_cluster()
+add_slave()
+#test_data_add()
 
 class TestRouterEnvironment:
     def test_mysqlrouter_version(self, host):
-        """Test mysqlrouter version matches expected version"""
         command = "mysqlrouter --version"
         output = host.check_output(command)
-        # Router version tag is major.minor (e.g., 8.4), but output may contain full version like 8.4.7
-        # Check if major.minor version is in the output
-        assert docker_tag in output, f"Expected router version {docker_tag} not found in output: {output}"
+        assert docker_tag in output
 
     def test_mysqlsh_version(self, host):
-        """Test mysqlsh version matches PS version"""
         command = "mysqlsh --version"
         output = host.check_output(command)
-        # Extract version from output (format may vary)
-        assert ps_version.replace('-amd64', '') in output or any(part in output for part in ps_version.split('.')[:2])
+        assert ps_version in output
 
-    def test_mysqlrouter_directory_permissions(self, host):
-        """Test mysqlrouter directory permissions"""
+    def test_mysqlrouter_directory_permissions(self, test_router_bootstrap):
         assert host.file('/var/lib/mysqlrouter').user == 'mysql'
         assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
 
-    def test_mysql_user(self, host):
-        """Test mysql user exists with correct UID"""
+    def test_mysql_user(self, test_router_bootstrap):
         mysql_user = host.user('mysql')
         print(f"Username: {mysql_user.name}, UID: {mysql_user.uid}")
         assert mysql_user.exists
         assert mysql_user.uid == 1001
 
-    def test_mysqlrouter_ports(self, host):
-        """Test mysqlrouter ports are listening"""
-        assert host.socket("tcp://6446").is_listening
-        assert host.socket("tcp://6447").is_listening
-        assert host.socket("tcp://64460").is_listening
-        assert host.socket("tcp://64470").is_listening
+    def test_mysqlrouter_ports(self, test_router_bootstrap):
+        host.socket("tcp://6446").is_listening
+        host.socket("tcp://6447").is_listening
+        host.socket("tcp://64460").is_listening
+        host.socket("tcp://64470").is_listening
 
-    def test_mysqlrouter_config(self, host):
-        """Test mysqlrouter configuration file exists with correct permissions"""
+    def test_mysqlrouter_config(self, test_router_bootstrap):
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").user == "root"
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").group == "root"

@@ -18,9 +18,8 @@ def inspect_data():
 
 class TestContainerAttributes:
     def test_status(self, inspect_data):
-        # Router container might exit if cluster is not available, but we can still inspect it
-        # Check that container was created (status can be 'running' or 'exited')
-        assert inspect_data['State']['Status'] in ['running', 'exited', 'created']
+        assert inspect_data['State']['Status'] == 'running'
+        assert inspect_data['State']['Running'] == True
 
     def test_config(self, inspect_data):
         assert len(inspect_data['Config']['Cmd']) == 1
