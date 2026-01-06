@@ -28,6 +28,10 @@
     include_tasks: ../tasks/install_and_run_ps80.yml
     when: lookup('env', 'install_with') == "ps80"
 
+  - name: include tasks for installing and setup ps80
+    include_tasks: ../tasks/install_and_run_ps84.yml
+    when: lookup('env', 'install_with') == "ps84"
+
   - name: include tasks for installing and setup pxc57
     include_tasks: ../tasks/install_and_run_pxc57.yml
     when: lookup('env', 'install_with') == "pxc57"
@@ -35,6 +39,10 @@
   - name: include tasks for installing and setup pxc80
     include_tasks: ../tasks/install_and_run_pxc80.yml
     when: lookup('env', 'install_with') == "pxc80"
+  
+  - name: include tasks for installing and setup pxc80
+    include_tasks: ../tasks/install_and_run_pxc84.yml
+    when: lookup('env', 'install_with') == "pxc84"
 
   - name: include tasks for installing and setup upstream57
     include_tasks: ../tasks/install_and_run_upstream57.yml
