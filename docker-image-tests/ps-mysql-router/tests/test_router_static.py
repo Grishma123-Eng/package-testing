@@ -39,27 +39,42 @@ def create_mysql_config():
                 f"transaction_write_set_extraction=XXHASH64\n"
             )
 
+def get_container_logs(container_name, tail=100):
+    """Get container logs"""
+    try:
+        logs = subprocess.check_output(['docker', 'logs', '--tail', str(tail), container_name], 
+                                     stderr=subprocess.STDOUT).decode()
+        return logs
+    except Exception as e:
+        return f"Could not get logs for {container_name}: {e}"
+
 def wait_for_mysql_ready(container_name, max_attempts=120):
     """Wait for MySQL container to be ready"""
     # First, wait for container to be running
     for attempt in range(30):
         if check_container_running(container_name):
             break
+        # Check if container exited
+        result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name=^{container_name}$', '--format', '{{.Status}}'],
+                               check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        status = result.stdout.decode().strip()
+        if status and 'Exited' in status:
+            # Container exited, get logs immediately
+            print(f"Container {container_name} exited. Status: {status}")
+            logs = get_container_logs(container_name, tail=200)
+            print(f"Container {container_name} logs:\n{logs}")
+            return False
         time.sleep(1)
     else:
         # Container not running, check status
-        result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name={container_name}', '--format', '{{.Status}}'],
+        result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name=^{container_name}$', '--format', '{{.Status}}'],
                                check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         status = result.stdout.decode().strip()
         if status:
             print(f"Container {container_name} status: {status}")
         # Try to get logs
-        try:
-            logs = subprocess.check_output(['docker', 'logs', '--tail', '50', container_name], 
-                                         stderr=subprocess.STDOUT).decode()
-            print(f"Container {container_name} logs:\n{logs}")
-        except Exception as e:
-            print(f"Could not get logs for {container_name}: {e}")
+        logs = get_container_logs(container_name, tail=200)
+        print(f"Container {container_name} logs:\n{logs}")
         return False
     
     # Now wait for MySQL to be ready
@@ -68,6 +83,9 @@ def wait_for_mysql_ready(container_name, max_attempts=120):
             # Check if container is still running
             if not check_container_running(container_name):
                 print(f"Container {container_name} stopped running")
+                # Get logs to see why it stopped
+                logs = get_container_logs(container_name, tail=200)
+                print(f"Container {container_name} logs:\n{logs}")
                 return False
             
             result = subprocess.run([
@@ -87,12 +105,8 @@ def wait_for_mysql_ready(container_name, max_attempts=120):
     
     # If we get here, MySQL didn't become ready - get logs
     print(f"MySQL in {container_name} did not become ready after {max_attempts * 2} seconds")
-    try:
-        logs = subprocess.check_output(['docker', 'logs', '--tail', '100', container_name], 
-                                     stderr=subprocess.STDOUT).decode()
-        print(f"Container {container_name} logs:\n{logs}")
-    except Exception as e:
-        print(f"Could not get logs for {container_name}: {e}")
+    logs = get_container_logs(container_name, tail=200)
+    print(f"Container {container_name} logs:\n{logs}")
     return False
 
 def check_container_running(container_name):
@@ -117,19 +131,30 @@ def start_mysql_containers():
                 '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
             ], check=True)
             print(f"Container {container_name} started, waiting for MySQL to be ready...")
-            # Give container a moment to start
-            time.sleep(5)
+            # Give container a moment to start, then check if it's still running
+            time.sleep(3)
+            # Quick check if container exited immediately
+            if not check_container_running(container_name):
+                result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name=^{container_name}$', '--format', '{{.Status}}'],
+                                       check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                status = result.stdout.decode().strip()
+                if status and 'Exited' in status:
+                    logs = get_container_logs(container_name, tail=200)
+                    raise RuntimeError(f"Container {container_name} exited immediately after start. Status: {status}\nLogs:\n{logs}")
         except subprocess.CalledProcessError as e:
             print(f"Failed to start container {container_name}: {e}")
             raise
         
         # Wait for each container to be ready
         if not wait_for_mysql_ready(container_name):
-            # Get container status before raising error
-            result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name={container_name}', '--format', '{{.Status}}'],
+            # Get container status and logs before raising error
+            result = subprocess.run(['docker', 'ps', '-a', '--filter', f'name=^{container_name}$', '--format', '{{.Status}}'],
                                    check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             status = result.stdout.decode().strip()
-            raise RuntimeError(f"Container {container_name} failed to become ready. Status: {status}")
+            logs = get_container_logs(container_name, tail=200)
+            error_msg = f"Container {container_name} failed to become ready. Status: {status}\n"
+            error_msg += f"Container logs:\n{logs}"
+            raise RuntimeError(error_msg)
         print(f"Container {container_name} is ready!")
 
 def create_new_user():
