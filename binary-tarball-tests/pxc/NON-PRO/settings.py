@@ -254,6 +254,15 @@ if re.match(r'^8\.[1-9]$', pxc_version_major):
     pxc_files = pxc8x_files
     pxc_symlinks = pxc8x_symlinks
     pxc_components = pxc8x_components
+elif re.match(r'^9\.\d+$', pxc_version_major):
+    # PXC 9.0, 9.1, … (same tarball layout as 8.1+ innovation for now)
+    pxc_binaries = pxc8x_binaries
+    pxc_executables = pxc8x_executables
+    pxc_plugins = pxc8x_plugins
+    pxc_functions = pxc8x_functions
+    pxc_files = pxc8x_files
+    pxc_symlinks = pxc8x_symlinks
+    pxc_components = pxc8x_components
 elif pxc_version_major == '8.0':
     pxc_binaries = pxc80_binaries
     pxc_executables = pxc80_executables

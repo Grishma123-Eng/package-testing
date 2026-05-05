@@ -49,7 +49,9 @@ class MySQL:
         output = subprocess.check_output([self.mysqld, '--version'], universal_newlines=True)
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
-        if self.major_version != "8.0" and not re.match(r'^8\.[1-9]$', pxc_version_major):
+        if re.match(r'^9\.\d+$', pxc_version_major):
+            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
+        elif self.major_version != "8.0" and not re.match(r'^8\.[1-9]$', pxc_version_major):
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2", "--wsrep_sst_auth=root:"]
         else:
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
@@ -140,7 +142,9 @@ class MySQL:
         retry(_assert_plugin, times=5, wait=0.2)
 
     def test_install_component(self, cmpt):
-        if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
+        if (re.match(r'^9\.\d+$', pxc_version_major)
+                or pxc_version_major == '8.0'
+                or re.match(r'^8\.[1-9]$', pxc_version_major)):
             query = f'INSTALL COMPONENT \'{cmpt}\';'
             self.run_query(query)
             query = f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';'
