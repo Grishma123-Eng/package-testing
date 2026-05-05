@@ -34,7 +34,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -62,7 +62,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -90,7 +90,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -118,7 +118,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -146,7 +146,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -174,7 +174,7 @@ pipeline {
                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                rm -rf package-testing
                                sudo yum install -y git wget tar
-                               git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                               git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
                               ./run.sh || true
@@ -203,7 +203,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -231,7 +231,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -259,7 +259,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/grishma123-eng/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -285,7 +285,7 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "install"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'git_repo', value: "grishma123-eng/package-testing"),
                     string(name: 'BRANCH', value: "master")
                 ]
                 
@@ -294,7 +294,7 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "min_upgrade_pxc_${PXC_PRODUCT}"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'git_repo', value: "grishma123-eng/package-testing"),
                     string(name: 'BRANCH', value: "master")
                 ]
             }
