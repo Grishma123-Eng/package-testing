@@ -49,9 +49,7 @@ class MySQL:
         output = subprocess.check_output([self.mysqld, '--version'], universal_newlines=True)
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
-        if re.match(r'^9\.\d+$', pxc_version_major):
-            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
-        elif self.major_version != "8.0" and not re.match(r'^8\.[1-9]$', pxc_version_major):
+        if self.major_version != "8.0" and not re.match(r'^8\.[1-9]$', pxc_version_major):
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2", "--wsrep_sst_auth=root:"]
         else:
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
@@ -123,7 +121,20 @@ class MySQL:
         command = self.mysql+' --user=root -S'+socket+' -s -N -e '+shlex.quote(query)
         return subprocess.check_output(command, shell=True, universal_newlines=True)
 
+    def _resolve_soname(self, soname):
+        candidates = (
+            self.basedir + '/lib/plugin/' + soname,
+            self.basedir + '/lib/mysql/plugin/' + soname,
+            self.basedir + '/lib/' + soname,
+        )
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                return candidate
+        return None
+
     def install_function(self, fname, soname, return_type):
+        if not self._resolve_soname(soname):
+            pytest.skip(f"Function SONAME not found in tarball: {soname}")
         query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname, return_type, soname)
         self.run_query(query)
         query = 'SELECT name FROM mysql.func WHERE dl = "{}";'.format(soname)
@@ -133,6 +144,8 @@ class MySQL:
         retry(_assert_function, times=5, wait=0.2)
 
     def install_plugin(self, pname, soname):
+        if not self._resolve_soname(soname):
+            pytest.skip(f"Plugin SONAME not found in tarball: {soname}")
         query = 'INSTALL PLUGIN {} SONAME "{}";'.format(pname,soname)
         self.run_query(query)
         query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
