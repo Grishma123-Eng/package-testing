@@ -149,7 +149,7 @@ if glibc_version == '2.35':
     )
 else:
     pxc9x_symlinks = (
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.8'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.0'),
       ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
     )
 pxc9x_components = (
