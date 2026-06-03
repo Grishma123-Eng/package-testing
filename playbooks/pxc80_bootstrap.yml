@@ -14,6 +14,9 @@
       man_ip: "{{ item }}"
     with_items: "{{ ansible_all_ipv4_addresses }}"
     when: "item.startswith('192.168')"
+  - set_fact:
+      man_ip: "{{ ansible_default_ipv4.address }}"
+    when: man_ip is not defined
   - debug: var=man_ip
 
   - name: include tasks for test env setup
