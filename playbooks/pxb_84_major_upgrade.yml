@@ -78,6 +78,9 @@
 
 # ---------- INSTALL PXB 8.4 (release) ----------
 
+  - name: install percona-release package
+    include_tasks: ../tasks/install_percona-release.yml
+
   - name: Enable PXB 8.4 release repo
     command: percona-release enable pxb-84-lts release
 
