@@ -33,8 +33,6 @@
 
   - name: include tasks for enabling PS 8.4 main (release) repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
-    when:
-      - lookup('env', 'server_to_test') == "ps-97"
 
   - name: install Percona Server 8.4 packages
     include_tasks:
@@ -43,12 +41,12 @@
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
-      - lookup('env', 'server_to_test') == "ps-97"
+      - lookup('env', 'server_to_test') == "ps-84"
 
-  - name: Install percona release if ms-97 is selected
+  - name: Install percona release if ms-84 is selected
     include_tasks: ../tasks/install_percona-release.yml
     when:
-      - lookup('env', 'server_to_test') == "ms-97"
+      - lookup('env', 'server_to_test') == "ms-84"
 
 # ---------- INSTALL MS 8.4 (release) ----------
 
@@ -74,7 +72,7 @@
       pxb_version_major: "{{ pxb84_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb84_version_major_minor_reg }}"
     when:
-      - lookup('env', 'server_to_test') == "ms-97"
+      - lookup('env', 'server_to_test') == "ms-84"
 
 # ---------- INSTALL PXB 8.4 (release) ----------
 
@@ -160,8 +158,6 @@
 
   - name: include tasks for enabling PS 97 Testing repo
     include_tasks: ../tasks/enable_ps97_testing_repo.yml
-    when:
-      - lookup('env', 'server_to_test') == "ps-97"
 
   - name: install Percona Server 9.7 packages (upgrade PS 8.4 -> 9.7)
     include_tasks:
@@ -170,7 +166,7 @@
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
-      - lookup('env', 'server_to_test') == "ps-97"
+      - lookup('env', 'server_to_test') == "ps-84"
 
   - name: Extract PS97 major and minor version number using shell commands
     shell: cat /package-testing/VERSIONS | grep 'PS97_VER' | cut -d'=' -f2 | sed 's/"//g' | cut -d'-' -f1
@@ -194,7 +190,7 @@
       pxb_version_major: "{{ ps97_version_major_reg }}"
       pxb_version_major_minor: "{{ ps97_version_major_minor_reg }}"
     when:
-      - lookup('env', 'server_to_test') == "ms-97"
+      - lookup('env', 'server_to_test') == "ms-84"
 
 # ---------- INSTALL PXB 9.7 FROM TESTING ----------
 
@@ -268,7 +264,7 @@
       - percona-xtrabackup-97
     when:
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') != "ms-97"
+      - lookup('env', 'server_to_test') != "ms-84"
 
   - name: remove Percona Server rpm packages
     dnf:
@@ -280,4 +276,4 @@
       - percona-xtrabackup-97
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
-      - lookup('env', 'server_to_test') != "ms-97"
+      - lookup('env', 'server_to_test') != "ms-84"
