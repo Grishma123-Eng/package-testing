@@ -39,6 +39,9 @@
     when:
     - lookup('env', 'install_repo') == "experimental"
 
+  - name: stop bootstrapped PXC 8.4 node before major upgrade
+    command: systemctl stop mysql@bootstrap.service
+
   - name: upgrade PXC to 9.7 deb packages
     apt:
       name: "{{ packages }}"
@@ -66,10 +69,13 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: restart mysql service
-    service: name=mysql state=restarted
-    when:
-      - ansible_distribution != "Amazon"
+  # package scripts may have started the regular mysql unit, which can't form a cluster on a single node
+  - name: stop regular mysql service if started by package upgrade
+    command: systemctl stop mysql
+    ignore_errors: true
+
+  - name: bootstrap upgraded PXC 9.7 node
+    command: systemctl restart mysql@bootstrap.service
 
   - name: Sleep for 60 seconds
     shell: sleep 60

@@ -4,6 +4,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  # rolling upgrade: one node at a time so the cluster keeps a primary component
+  serial: 1
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -39,6 +41,9 @@
     when:
     - lookup('env', 'install_repo') == "experimental"
 
+  - name: stop PXC 8.4 node before major upgrade
+    service: name=mysql state=stopped
+
   - name: upgrade PXC to 9.7 deb packages
     apt:
       name: "{{ packages }}"
@@ -68,8 +73,6 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
-    when:
-      - ansible_distribution != "Amazon"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
