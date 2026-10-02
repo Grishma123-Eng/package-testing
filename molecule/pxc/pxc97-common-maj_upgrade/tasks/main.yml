@@ -28,17 +28,17 @@
   - name: include tasks for enabling test repo pxc84
     include_tasks: ../../../../tasks/enable_pxc84_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing"
+    - false  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "testing"
 
   - name: include tasks for enabling main repo pxc84
     include_tasks: ../../../../tasks/enable_pxc84_main_repo.yml
     when:
-    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - true  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../../../../tasks/enable_pxc84_experimental_repo.yml
     when:
-    - lookup('env', 'install_repo') == "experimental"
+    - false  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "experimental"
 
   - name: allow all users to connect to mysql
     shell: setsebool -P mysql_connect_any 1

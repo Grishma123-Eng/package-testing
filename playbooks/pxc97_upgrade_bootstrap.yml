@@ -27,17 +27,17 @@
   - name: include tasks for enabling test repo pxc97
     include_tasks: ../tasks/enable_pxc97_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing"
+    - false  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "testing"
 
   - name: include tasks for enabling main repo pxc97
     include_tasks: ../tasks/enable_pxc97_main_repo.yml
     when:
-    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - true  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling experimental repo pxc97
     include_tasks: ../tasks/enable_pxc97_experimental_repo.yml
     when:
-    - lookup('env', 'install_repo') == "experimental"
+    - false  # TEMP: force main repo for testing, revert to: lookup('env', 'install_repo') == "experimental"
 
   - name: stop bootstrapped PXC 8.4 node before major upgrade
     command: systemctl stop mysql@bootstrap.service
