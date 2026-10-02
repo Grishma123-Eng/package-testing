@@ -74,8 +74,34 @@
     command: systemctl stop mysql
     ignore_errors: true
 
+  # a start attempt by the package scripts can leave safe_to_bootstrap: 0, which makes the bootstrap refuse to start
+  - name: mark node as safe to bootstrap
+    replace:
+      path: /var/lib/mysql/grastate.dat
+      regexp: '^safe_to_bootstrap:\s*0'
+      replace: 'safe_to_bootstrap: 1'
+    failed_when: false
+
   - name: bootstrap upgraded PXC 9.7 node
-    command: systemctl restart mysql@bootstrap.service
+    block:
+      - name: start mysql@bootstrap
+        command: systemctl restart mysql@bootstrap.service
+    rescue:
+      - name: collect bootstrap failure diagnostics
+        shell: |
+          echo "=== systemctl status ==="; systemctl status mysql@bootstrap.service --no-pager -l
+          echo "=== journalctl ==="; journalctl -xeu mysql@bootstrap.service --no-pager | tail -n 60
+          echo "=== error log ==="; tail -n 80 /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null
+          echo "=== grastate.dat ==="; cat /var/lib/mysql/grastate.dat
+        register: bootstrap_diag
+        failed_when: false
+
+      - name: print bootstrap failure diagnostics
+        debug: var=bootstrap_diag.stdout_lines
+
+      - name: fail after printing diagnostics
+        fail:
+          msg: "mysql@bootstrap failed to start after upgrade to PXC 9.7, see diagnostics above"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
