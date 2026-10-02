@@ -42,6 +42,15 @@
   - name: stop bootstrapped PXC 8.4 node before major upgrade
     command: systemctl stop mysql@bootstrap.service
 
+  # keep deb postinst from starting mysql mid-upgrade; it is started explicitly below
+  - name: prevent deb package scripts from starting mysql during upgrade
+    copy:
+      dest: /usr/sbin/policy-rc.d
+      content: "#!/bin/sh\nexit 101\n"
+      mode: '0755'
+    when:
+      - ansible_os_family == "Debian"
+
   - name: upgrade PXC to 9.7 deb packages
     apt:
       name: "{{ packages }}"
@@ -56,6 +65,13 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
+  - name: allow deb package scripts to start services again
+    file:
+      path: /usr/sbin/policy-rc.d
+      state: absent
+    when:
+      - ansible_os_family == "Debian"
+
   - name: upgrade PXC to 9.7 rpm packages
     yum:
       name: "{{ packages }}"
@@ -69,28 +85,17 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  # package scripts may have started the regular mysql unit, which can't form a cluster on a single node
-  - name: stop regular mysql service if started by package upgrade
-    command: systemctl stop mysql
-    ignore_errors: true
-
-  # a start attempt by the package scripts can leave safe_to_bootstrap: 0, which makes the bootstrap refuse to start
-  - name: mark node as safe to bootstrap
-    replace:
-      path: /var/lib/mysql/grastate.dat
-      regexp: '^safe_to_bootstrap:\s*0'
-      replace: 'safe_to_bootstrap: 1'
-    failed_when: false
-
-  - name: bootstrap upgraded PXC 9.7 node
+  # the common nodes joined this node and are still running on 8.4, so it must rejoin
+  # their cluster as a regular node; bootstrapping again would split the cluster
+  - name: rejoin upgraded PXC 9.7 node to the running cluster
     block:
-      - name: start mysql@bootstrap
-        command: systemctl restart mysql@bootstrap.service
+      - name: start mysql
+        service: name=mysql state=restarted
     rescue:
       - name: collect bootstrap failure diagnostics
         shell: |
-          echo "=== systemctl status ==="; systemctl status mysql@bootstrap.service --no-pager -l
-          echo "=== journalctl ==="; journalctl -xeu mysql@bootstrap.service --no-pager | tail -n 60
+          echo "=== systemctl status ==="; systemctl status mysql.service --no-pager -l
+          echo "=== journalctl ==="; journalctl -xeu mysql.service --no-pager | tail -n 60
           echo "=== error log ==="; tail -n 80 /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null
           echo "=== grastate.dat ==="; cat /var/lib/mysql/grastate.dat
         register: bootstrap_diag
@@ -101,7 +106,7 @@
 
       - name: fail after printing diagnostics
         fail:
-          msg: "mysql@bootstrap failed to start after upgrade to PXC 9.7, see diagnostics above"
+          msg: "mysql failed to rejoin the cluster after upgrade to PXC 9.7, see diagnostics above"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
