@@ -109,8 +109,8 @@ def test_pro_openssl_files_linked(host,pro_fips_vars):
 def test_pgo_flags_present(host, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
 
-    if not (v.startswith("8.4") or v.startswith("9.")):
-        pytest.skip("PGO is only supported/tested for PS 8.7 and 9.x")
+    if not (v.startswith("8.4") or v.startswith(("9.", "26."))):
+        pytest.skip("PGO is only supported/tested for PS 8.4, 9.x and 26.x")
 
     base_dir = pro_fips_vars['base_dir']
 

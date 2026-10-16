@@ -8,7 +8,7 @@ from settings import *
 
 container_name = 'ps-docker-test-opentelemetry-plugin'
 # telemetry_client (OpenTelemetry client plugin for the mysql CLI) ships from PS 9.7 onwards
-otel_supported = bool(re.match(r'^9\.[7-9]$', ps_version_major))
+otel_supported = bool(re.match(r'^(9\.[7-9]|26\.[0-9]+)$', ps_version_major))
 
 pytestmark = pytest.mark.skipif(not otel_supported, reason='OpenTelemetry client plugin is available from 9.7 onwards')
 

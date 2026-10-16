@@ -8,7 +8,7 @@ from settings import *
 
 container_name = 'ps-docker-test-opentelemetry'
 # component_telemetry (native OpenTelemetry exporter) ships from PS 9.7 onwards
-otel_supported = bool(re.match(r'^9\.[7-9]$', ps_version_major))
+otel_supported = bool(re.match(r'^(9\.[7-9]|26\.[0-9]+)$', ps_version_major))
 
 pytestmark = pytest.mark.skipif(not otel_supported, reason='OpenTelemetry component is available from 9.7 onwards')
 
