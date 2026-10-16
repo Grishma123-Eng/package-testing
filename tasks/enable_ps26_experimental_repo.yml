@@ -43,9 +43,9 @@
     shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
-  # Repo name for 26.7 is not final yet: defaults to ps-26-lts, override with the PS26_REPO env var.
-  - name: enable the PS-26-LTS experimental repo
-    command: percona-release enable-only {{ lookup('env', 'PS26_REPO') | default('ps-26-lts', true) }} experimental
+  # Defaults to ps-26x-innovation, override with the PS26_REPO env var if the repo name changes.
+  - name: enable the PS-26x-innovation experimental repo
+    command: percona-release enable-only {{ lookup('env', 'PS26_REPO') | default('ps-26x-innovation', true) }} experimental
 
  # - name: enable the pxb-26 release repo
   #  command: percona-release enable pxb-26-lts release

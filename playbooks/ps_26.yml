@@ -20,9 +20,6 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
-  - set_fact:
-      pro: "{{ 'pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
-
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -54,29 +51,24 @@
     include_tasks: ../tasks/enable_ps26_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
-      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 26 test repo
     include_tasks: ../tasks/enable_ps26_testing_repo.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 26 experimental repo
     include_tasks: ../tasks/enable_ps26_experimental_repo.yml
     when:
       - lookup('env', 'install_repo') == "experimental"
-      - lookup('env', 'pro_test') != "yes"
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server{{ pro_suf }} 26 packages
+  - name: install Percona Server 26 packages
     include_tasks: ../tasks/install_ps26.yml
-    vars:
-      pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
   - name: enable pt testing repo
     command: percona-release enable pt testing
@@ -153,8 +145,8 @@
 
   - name: Handle check that Percona Server version is correct
     block:
-      - name: Run the version_check.sh script {{ pro }}
-        shell: /package-testing/version_check.sh ps26 {{ pro }} > version-check.log 2>&1
+      - name: Run the version_check.sh script
+        shell: /package-testing/version_check.sh ps26 > version-check.log 2>&1
 
       - name: Log check for warnings in the previous stage
         command: /package-testing/scripts/log-warning-check.sh version-check.log
@@ -174,8 +166,8 @@
           msg: Failing the further tasks due to issues in the previous task.
     when: not (ansible_os_family == "Debian" and ansible_architecture in ["aarch64", "arm64"])
 
-  - name: check that Percona Server {{ pro }} package versions are correct
-    command: /package-testing/package_check.sh ps26 {{ pro }}
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps26
     when: not (ansible_os_family == "RedHat" and ansible_distribution_major_version == "8" and ansible_architecture in ["aarch64", "arm64"])
 
   - name: include PGO flags check for INFO_BIN

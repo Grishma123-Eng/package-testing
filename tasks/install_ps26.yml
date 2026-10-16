@@ -10,32 +10,25 @@
     apt:
       name: "{{ packages }}"
       update_cache: yes
-      state: latest 
+      state: latest
     vars:
-      packages_base:
-      - percona-client{{ pro_suf | default('') }}
-      - percona-testsuite{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-  #    - percona-server-test-dbgsym{{ pro_suf | default('') }}
-      - percona-server-source{{ pro_suf | default('') }}
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-server-server-core{{ pro_suf | default('') }}
-   #   - percona-server-server-core-dbgsym{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-    #  - percona-server-rocksdb-dbgsym{{ pro_suf | default('') }}
-      - percona-server-common{{ pro_suf | default('') }}
-     # - percona-server-client-core-dbgsym{{ pro_suf | default('') }}
-      - percona-server-client-core{{ pro_suf | default('') }}
-      #- percona-server-client-dbgsym{{ pro_suf | default('') }}
-      - percona-server-client-plugins{{ pro_suf | default('') }}
-     # - percona-server-client-plugins-dbgsym{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-rocksdb
+      packages:
       - percona-server
-      #- percona-mysql-router-dbgsym{{ pro_suf | default('') }}
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
-      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
+      - percona-client
+      - percona-testsuite
+      - percona-server-server
+      - percona-server-server-core
+      - percona-server-client
+      - percona-server-client-core
+      - percona-server-client-plugins
+      - percona-server-common
+      - percona-server-rocksdb
+      - percona-server-test
+      - percona-server-source
+      - percona-server-js
+      - percona-mysql-router
+      - libperconaserverclient24
+      - libperconaserverclient24-dev
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -58,34 +51,31 @@
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  # RPMs for 26.7 are not published yet, this list follows PS 9.7 and needs to be verified
   - name: install Percona Server rpm packages
     yum:
-      allowerasing: "{{ allowerasing_value | default (false) }}"
       name: "{{ packages }}"
       state: latest
       disablerepo: "epel"
       update_cache: yes
     vars:
       packages_base:
-      - percona-icu-data-files{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-mysql-router-debuginfo{{ pro_suf | default('') }}
-   #   - percona-mysql-router-plugins{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-client-debuginfo{{ pro_suf | default('') }}
-      - percona-server-client-plugins-debuginfo{{ pro_suf | default('') }}
-      - percona-server-debugsource{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-shared{{ pro_suf | default('') }}
-      - percona-server-shared-debuginfo{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-      - percona-server-rocksdb-debuginfo{{ pro_suf | default('') }}
-      shared_compat_pkg: "{{ (ansible_architecture not in ['aarch64', 'arm64'] and ansible_distribution_major_version | int == 8) | ternary(['percona-server-shared-compat' ~ (pro_suf | default(''))], []) }}"
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
-      packages: "{{ packages_base + shared_compat_pkg + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
+      - percona-icu-data-files
+      - percona-mysql-router
+      - percona-mysql-router-debuginfo
+      - percona-server-client
+      - percona-server-client-debuginfo
+      - percona-server-client-plugins-debuginfo
+      - percona-server-debugsource
+      - percona-server-test
+      - percona-server-devel
+      - percona-server-shared
+      - percona-server-shared-debuginfo
+      - percona-server-rocksdb
+      - percona-server-rocksdb-debuginfo
+      - percona-server-js
+      shared_compat_pkg: "{{ (ansible_architecture not in ['aarch64', 'arm64'] and ansible_distribution_major_version | int == 8) | ternary(['percona-server-shared-compat'], []) }}"
+      packages: "{{ packages_base + shared_compat_pkg }}"
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-

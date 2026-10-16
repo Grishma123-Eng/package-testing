@@ -56,15 +56,9 @@ elif [ "$1" = "ps80" ]; then
     revision=${PS97_REV}
   fi
 elif [ "$1" = "ps26" ]; then
-  if [ "$2" = "pro" ]; then
-    version=${PS26_PRO_VER}
-    release=${PS26_PRO_VER#*-}
-    revision=${PS26_PRO_REV}
-  else
-    version=${PS26_VER}
-    release=${PS26_VER#*-}
-    revision=${PS26_REV}
-  fi
+  version=${PS26_VER}
+  release=${PS26_VER#*-}
+  revision=${PS26_REV}
 elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
