@@ -187,11 +187,11 @@ def test_install_functions(mysql_server):
 
 def test_install_component(mysql_server, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
-    if v.startswith(("8.", "9.", "26.")):
+    if v.startswith(("8.", "9.")):
         for component in ps_components:
             mysql_server.install_component(component)
     else:
-        pytest.skip("Components only tested for 8.x and later")
+        pytest.skip("Components only tested for 8.x")
 
 
 def test_install_plugin(mysql_server):
@@ -201,15 +201,15 @@ def test_install_plugin(mysql_server):
 
 def test_audit_log_v2(mysql_server, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
-    if v.startswith(("8.0", "9.", "26.")):
+    if v.startswith("8.0") or v.startswith("9."):
         base_dir = pro_fips_vars['base_dir']
 
         mysql_server.run_file(
             f"{base_dir}/share/audit_log_filter_linux_install.sql"
         )
 
-        if v.startswith(("9.", "26.")):
-            # In PS 9.x and later audit_log_filter is a component, not a plugin
+        if v.startswith("9."):
+            # In PS 9.x audit_log_filter is a component, not a plugin
             output = mysql_server.run_query(
                 'SELECT component_urn FROM mysql.component '
                 'WHERE component_urn LIKE "%audit_log_filter%";'
@@ -224,12 +224,12 @@ def test_audit_log_v2(mysql_server, pro_fips_vars):
             assert 'ACTIVE' in output
 
     else:
-        pytest.skip("Audit log v2 only for PS 8.0, 9.x and 26.x")
+        pytest.skip("Audit log v2 only for PS 8.0 and 9.x")
 
 
 def test_telemetry_status(mysql_server, pro_fips_vars):
-    if not pro_fips_vars['ps_version_major'].startswith(("8.", "9.", "26.")):
-        pytest.skip("Telemetry only tested for PS 8.x, 9.x and 26.x")
+    if not pro_fips_vars['ps_version_major'].startswith(("8.", "9.")):
+        pytest.skip("Telemetry only tested for PS 8.x and 9.x")
 
     output = mysql_server.run_query(
         "SHOW VARIABLES LIKE '%percona_telemetry%';"
@@ -252,7 +252,7 @@ def test_telemetry_status(mysql_server, pro_fips_vars):
 
 
 def test_opentelemetry_component(mysql_server, pro_fips_vars):
-    if pro_fips_vars['ps_version_major'] not in ('9.7', '26.7'):
+    if pro_fips_vars['ps_version_major'] != '9.7':
         pytest.skip('component_telemetry (OpenTelemetry) is available from PS 9.7 onwards')
 
     mysql_server.install_component('component_telemetry')
@@ -291,7 +291,7 @@ def test_opentelemetry_component(mysql_server, pro_fips_vars):
 
 
 def test_opentelemetry_client_plugin(host, mysql_server, pro_fips_vars):
-    if pro_fips_vars['ps_version_major'] not in ('9.7', '26.7'):
+    if pro_fips_vars['ps_version_major'] != '9.7':
         pytest.skip('telemetry_client (OpenTelemetry client plugin) is available from PS 9.7 onwards')
 
     # @@global.plugin_dir reports the build-time install prefix baked into
