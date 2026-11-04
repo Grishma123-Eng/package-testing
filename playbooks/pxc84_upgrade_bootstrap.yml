@@ -12,6 +12,14 @@
   - name: disable old repos
     command: percona-release disable all
 
+  - name: remove PXC 8.0 EOL repo added for major upgrade
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+    - /etc/apt/sources.list.d/post-eol.list
+    - /etc/yum.repos.d/post-eol.repo
+
   - name: update deb cache
     command: apt update
     when:
