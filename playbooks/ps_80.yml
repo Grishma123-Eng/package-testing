@@ -168,6 +168,13 @@
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps80 {{ pro }}
 
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
+
 # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
 #  - name: include tasks for checking FIPS mode
 #    include_tasks: ../tasks/check_ps80_fips.yml

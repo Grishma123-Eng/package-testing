@@ -195,6 +195,13 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps57
 
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
+
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
 
