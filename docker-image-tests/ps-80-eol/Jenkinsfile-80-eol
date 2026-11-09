@@ -129,9 +129,7 @@ pipeline {
 
                                     rm -rf package-testing
 
-                                    git clone https://github.com/grishma123-eng/package-testing.git --depth 1
-
-                                    git checkout cve-release
+                                    git clone -b cve-release https://github.com/grishma123-eng/package-testing.git --depth 1
 
                                     cd package-testing/docker-image-tests/ps-80-eol
 
@@ -255,9 +253,7 @@ pipeline {
 
                                     rm -rf package-testing
 
-                                    git clone https://github.com/grishma123-eng/package-testing.git --depth 1
-
-                                    git checkout cve-release
+                                    git clone -b cve-release https://github.com/grishma123-eng/package-testing.git --depth 1
 
                                     cd package-testing/docker-image-tests/ps-80-eol
 
