@@ -345,6 +345,17 @@
     when:
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
+  
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    environment:
+      MYSQL_ARGS: "--user=root --password=U?fY)9s7|3gxUm"
+      MYSQLDUMP_EXTRA_ARGS: "--single-transaction --skip-add-locks --set-gtid-purged=OFF"
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
 
   - name: Sleep 60 seconds
     command: sleep 60

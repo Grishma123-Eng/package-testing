@@ -222,6 +222,16 @@
     command: /package-testing/version_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    environment:
+      MYSQLDUMP_EXTRA_ARGS: "--single-transaction --skip-add-locks --set-gtid-purged=OFF"
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
+
 
 
 
