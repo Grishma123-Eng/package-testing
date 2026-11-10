@@ -186,14 +186,22 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').exists
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
-   
-   def test_telemetry_enabled(self, cluster):
-        ...                                    ← existing lines, don't touch
 
     def test_mysqldump_compressed_columns(self, cluster):
-        ...                                    ← new block
+        """PS-11950: run the common mysqldump compressed-columns check on the
+        first node (changes replicate to the other nodes)."""
+        import os
+        script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                              '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+        subprocess.check_call(['docker', 'cp', script, cluster[0].docker_id + ':/tmp/mysqldump_compressed_check.sh'])
+        args = '--user=root --password=' + pxc_pwd + ' -S/tmp/mysql.sock'
+        extra = '--single-transaction --skip-add-locks --set-gtid-purged=OFF'
+        cmd = cluster[0].ti_host.run('MYSQL_ARGS=' + shlex.quote(args) +
+                                     ' MYSQLDUMP_EXTRA_ARGS=' + shlex.quote(extra) +
+                                     ' bash /tmp/mysqldump_compressed_check.sh')
+        print(cmd.stdout)
+        assert cmd.rc == 0, cmd.stdout[-3000:] + cmd.stderr[-1000:]
 
-class TestGardb:
 
 class TestGardb:
     def test_cluster_size_at_startup(self, cluster, garbd):

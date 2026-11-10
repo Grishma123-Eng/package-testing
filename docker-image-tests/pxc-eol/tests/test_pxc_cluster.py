@@ -108,7 +108,7 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
-     def test_mysqldump_compressed_columns(self, cluster):
+    def test_mysqldump_compressed_columns(self, cluster):
         """PS-11950: run the common mysqldump compressed-columns check on the
         first node (changes replicate to the other nodes)."""
         import os
