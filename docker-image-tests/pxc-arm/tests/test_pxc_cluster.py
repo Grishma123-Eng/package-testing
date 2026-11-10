@@ -186,6 +186,14 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').exists
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+   
+   def test_telemetry_enabled(self, cluster):
+        ...                                    ← existing lines, don't touch
+
+    def test_mysqldump_compressed_columns(self, cluster):
+        ...                                    ← new block
+
+class TestGardb:
 
 class TestGardb:
     def test_cluster_size_at_startup(self, cluster, garbd):
