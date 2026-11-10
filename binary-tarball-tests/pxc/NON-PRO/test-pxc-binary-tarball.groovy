@@ -46,7 +46,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -83,7 +83,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -123,7 +123,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -159,7 +159,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -199,7 +199,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -235,7 +235,7 @@ pipeline {
                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                elif [ "${EOL}" = "yes" ]; then
-                                 TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                 TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                else
                                  TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                fi
@@ -272,7 +272,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -308,7 +308,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
@@ -344,7 +344,7 @@ pipeline {
                                   PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
                                 elif [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION%.*}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 fi
